@@ -1,0 +1,5 @@
+I want you to do a git diff master and thoroughly review the changes.
+This is a last review before we merge to master.
+Don't be nitpicky, but make sure to point out potential scaling issues, bad code quality or other issues.
+
+If you find anything; then I don't want you to make any code changes but instead we do this as a plan session.

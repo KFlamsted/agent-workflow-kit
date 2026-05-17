@@ -1,0 +1,13 @@
+This is a plan session. Do not touch any of the actual code.
+Here's what I want to implement
+
+< Describe the task as detailed as possible >
+
+I want you to analyze this and outline a concrete implementation plan in PLAN.md. Be very specific.
+It shouldn't necessarily be line for line of code, but still concrete enough so the implementation will be done consistently.
+Imagine a very good software engineer joins the project to do this task, but that engineer doesn't have any context about the codebase before starting.
+The plan needs to be sufficient enough for him/her.
+
+Furthermore I want you to ask any questions that you might have regarding the implementation or behavior. Before creating the plan. Be thorough.
+Do not hesitate to ask if there's something that you cannot clarify by looking in the code.
+Do not do any code changes in this session only create the PLAN.md.
