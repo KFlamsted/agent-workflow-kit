@@ -1,6 +1,3 @@
-This is a plan session. Do not touch any of the actual code.
-Here's what I want to implement
-
 < Describe the task as detailed as possible >
 
 I want you to analyze this and outline a concrete implementation plan in PLAN.md. Be very specific.
