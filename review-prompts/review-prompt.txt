@@ -1,7 +1,6 @@
 I want you to do a git diff master and thoroughly review the changes.
-This is a last review before we merge to master.
 
-Here's the goals of the review
+The goals of the review is the following
 1. Catch bugs and edge cases
 2. Ensure code maintainability
 3. Ensure code quality is sufficient
