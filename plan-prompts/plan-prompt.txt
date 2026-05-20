@@ -7,4 +7,4 @@ The plan needs to be sufficient enough for him/her.
 
 Furthermore I want you to ask any questions that you might have regarding the implementation or behavior. Before creating the plan. Be thorough.
 Do not hesitate to ask if there's something that you cannot clarify by looking in the code.
-Do not do any code changes in this session only create the PLAN.md.
+Do not make any code changes in this session. We only create the PLAN.md.
