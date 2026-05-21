@@ -1,0 +1,12 @@
+I want you to do a git diff master and reivew the changes.
+However I don't want you to review for everything that is involved in a typical pull request.
+
+I want you to specifically look for the following:
+1. Methods / functions that you think should be moved into a utility file instead.
+2. Analyze and look into if there's a possibile method/function elsewhere that has very similar logic and they should be merged.
+2b. Only look at the code from this branch - not the entire project, I'm sure there exist alot of possible mergeable logic.
+3. Thoroughly review variable-, method/function-, const names and analyze if the name make sense or if these should be renamed.
+4. For tests specifically - Look for reusable test values.
+
+I only want you to review in this session and not change any code at all.
+Please make sure you review thoroughly, but don't be nitpicky.
