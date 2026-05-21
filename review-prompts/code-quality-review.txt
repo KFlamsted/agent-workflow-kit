@@ -7,6 +7,8 @@ I want you to specifically look for the following:
 2b. Only look at the code from this branch - not the entire project, I'm sure there exist alot of possible mergeable logic.
 3. Thoroughly review variable-, method/function-, const names and analyze if the name make sense or if these should be renamed.
 4. For tests specifically - Look for reusable test values.
+5. Look for variables/consts that isn't used
+6. Look for potential places that could use a comment describing why something is done if it isn't very clear why. However, we need to be very careful with adding comments as we'd rather have selfdocumenting code.
 
 I only want you to review in this session and not change any code at all.
 Please make sure you review thoroughly, but don't be nitpicky.
