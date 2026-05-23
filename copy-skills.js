@@ -96,7 +96,7 @@ function main() {
   const envDir = path.dirname(envPath);
   const skills = fs
     .readdirSync(skillsDir, { withFileTypes: true })
-    .filter((entry) => !entry.name.startsWith('.'))
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
     .map((entry) => path.join(skillsDir, entry.name));
 
   if (skills.length === 0) {
