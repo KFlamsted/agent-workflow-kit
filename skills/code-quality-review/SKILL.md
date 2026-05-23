@@ -12,7 +12,7 @@ Review changes only. Do not modify code.
 2. Review only changed code and directly related context.
 3. Focus on:
    - Functions that should be moved to utilities.
-   - Similar logic within this branch that should be merged.
+   - Similar logic within this branch that should be merged or if similar logic exists elsewhere in the codebase that should be reused.
    - Poor or misleading names for variables, constants, functions, or methods.
    - Reusable test values.
    - Unused variables or constants.
