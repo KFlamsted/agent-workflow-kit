@@ -7,6 +7,10 @@ description: Explicitly invoked workflow for thoroughly reviewing the current br
 
 Review `git diff master` thoroughly. Do not modify code.
 
+## Input
+The main input is the current branch's code changes compared to master.  
+The original implementation plan might be included, but not necessarily. 
+
 ## Process
 1. Compare the current branch against `master` unless the user specifies another base.
 2. Review only changed code and directly related context.
