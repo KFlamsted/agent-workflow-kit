@@ -14,6 +14,17 @@ Configure the target folders in `.env`:
 SKILL_TARGET_FOLDERS=["/path/to/folder1", "/path/to/folder2"]
 ```
 
+JSON arrays are preferred. Relative paths are resolved from the `.env` file's folder, `~` resolves to your home directory, and Windows drive paths are supported. In JSON strings, escape backslashes:
+
+```env
+SKILL_TARGET_FOLDERS=["C:\\Users\\me\\.codex\\skills"]
+SKILL_TARGET_FOLDERS=["C:/Users/me/.codex/skills"]
+SKILL_TARGET_FOLDERS=["%USERPROFILE%\\.codex\\skills"]
+```
+
+`%USERPROFILE%` is supported at the beginning of a target path.
+Unescaped Windows backslashes in bracketed `.env` values are also tolerated for convenience, for example `SKILL_TARGET_FOLDERS=["C:\Users\me\.codex\skills"]`.
+
 Then run:
 
 ```bash

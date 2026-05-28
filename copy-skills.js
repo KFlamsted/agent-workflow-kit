@@ -53,19 +53,67 @@ function parseTargetFolders(value) {
     // Fall back to comma/newline/semicolon separated values below.
   }
 
-  return value
+  let fallbackValue = value.trim();
+  if (fallbackValue.startsWith('[') && fallbackValue.endsWith(']')) {
+    fallbackValue = fallbackValue.slice(1, -1);
+  }
+
+  // This also accepts Windows paths written as ["C:\Users\me\.codex\skills"],
+  // which is common in .env files but is not valid JSON because backslashes
+  // are not escaped.
+  const unquote = (item) => {
+    if (
+      (item.startsWith('"') && item.endsWith('"')) ||
+      (item.startsWith("'") && item.endsWith("'"))
+    ) {
+      return item.slice(1, -1);
+    }
+
+    return item;
+  };
+
+  return fallbackValue
     .split(/[;,\n]/)
     .map((item) => item.trim())
+    .map(unquote)
     .filter(Boolean);
 }
 
+function getUserProfile() {
+  if (process.env.USERPROFILE) {
+    return process.env.USERPROFILE;
+  }
+
+  if (process.env.HOMEDRIVE && process.env.HOMEPATH) {
+    return `${process.env.HOMEDRIVE}${process.env.HOMEPATH}`;
+  }
+
+  throw new Error('%USERPROFILE% is used in SKILL_TARGET_FOLDERS but USERPROFILE is not set');
+}
+
+function expandWindowsEnvironmentVariables(folder) {
+  if (/^%USERPROFILE%($|[\\/])/.test(folder.toUpperCase())) {
+    return `${getUserProfile()}${folder.slice('%USERPROFILE%'.length)}`;
+  }
+
+  return folder;
+}
+
+function isWindowsDriveAbsolute(folder) {
+  return /^[A-Za-z]:[\\/]/.test(folder);
+}
+
 function resolveTargetFolder(folder, baseDir) {
-  let resolved = folder;
+  let resolved = expandWindowsEnvironmentVariables(folder);
 
   if (resolved === '~') {
     resolved = os.homedir();
-  } else if (resolved.startsWith(`~${path.sep}`) || resolved.startsWith('~/')) {
+  } else if (resolved.startsWith('~/') || resolved.startsWith('~\\')) {
     resolved = path.join(os.homedir(), resolved.slice(2));
+  }
+
+  if (isWindowsDriveAbsolute(resolved)) {
+    return path.win32.normalize(resolved);
   }
 
   return path.resolve(baseDir, resolved);
