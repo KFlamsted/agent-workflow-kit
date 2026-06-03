@@ -1,0 +1,4 @@
+I'm a new software engineer on this project. On this branch I want an overview of what has been done.
+However, I don't want everything on the branch, so don't just do a git diff master.
+I want everything related to <INSERT_RELATED_FILEPATH> .
+I only want high level, don't be too specific, however I still need enough details so I can get started. Can you create an OVERVIEW.md file in this folder with your findings?
