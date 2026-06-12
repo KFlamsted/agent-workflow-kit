@@ -17,7 +17,7 @@ Create a detailed implementation plan only. Do not change code.
 4. Create a concrete plan for an engineer with no prior repository context.
 
 ## Output
-- Write the plan to `PLAN.md`.
+- Write the plan to `PLAN.md` unless project rules determine something else. Then go by project rules.
 - If `PLAN.md` already exists, use a non-overwriting name such as `IMPLEMENTATION_PLAN.md` or `<TASK_NAME>_PLAN.md`.
 - Include relevant files, implementation steps, tests, risks, and assumptions.
 - Make sure the plan is detailed enough so it will be implemented with consistency and quality without further questions.
