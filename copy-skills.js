@@ -6,8 +6,63 @@ const path = require('path');
 const os = require('os');
 
 const scriptDir = __dirname;
-const envPath = path.resolve(process.argv[2] || path.join(scriptDir, '.env'));
-const skillsDir = path.join(scriptDir, 'skills');
+
+const copyModes = {
+  skills: {
+    sourceFolderName: 'skills',
+    targetEnvKey: 'SKILL_TARGET_FOLDERS',
+    label: 'skills',
+  },
+  agents: {
+    sourceFolderName: 'agents',
+    targetEnvKey: 'AGENTS_TARGET_FOLDER',
+    label: 'agents',
+  },
+};
+
+function parseArgs(args) {
+  let mode = 'skills';
+  let envFile;
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === '--skills' || arg === 'skills') {
+      mode = 'skills';
+      continue;
+    }
+
+    if (arg === '--agents' || arg === 'agents') {
+      mode = 'agents';
+      continue;
+    }
+
+    if (arg === '--env') {
+      index += 1;
+      if (!args[index]) {
+        throw new Error('Missing value for --env');
+      }
+      envFile = args[index];
+      continue;
+    }
+
+    if (arg.startsWith('--env=')) {
+      envFile = arg.slice('--env='.length);
+      continue;
+    }
+
+    if (arg.startsWith('--')) {
+      throw new Error(`Unknown option: ${arg}`);
+    }
+
+    if (envFile) {
+      throw new Error(`Unexpected extra argument: ${arg}`);
+    }
+    envFile = arg;
+  }
+
+  return { mode, envFile };
+}
 
 function readEnvFile(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -43,7 +98,7 @@ function readEnvFile(filePath) {
 function parseTargetFolders(value) {
   if (!value) return [];
 
-  // Preferred format: SKILL_TARGET_FOLDERS=["/path/one", "/path/two"]
+  // Preferred format: TARGET_ENV_KEY=["/path/one", "/path/two"]
   try {
     const parsed = JSON.parse(value);
     if (Array.isArray(parsed)) {
@@ -88,7 +143,7 @@ function getUserProfile() {
     return `${process.env.HOMEDRIVE}${process.env.HOMEPATH}`;
   }
 
-  throw new Error('%USERPROFILE% is used in SKILL_TARGET_FOLDERS but USERPROFILE is not set');
+  throw new Error('%USERPROFILE% is used in a target folder list but USERPROFILE is not set');
 }
 
 function expandWindowsEnvironmentVariables(folder) {
@@ -119,36 +174,43 @@ function resolveTargetFolder(folder, baseDir) {
   return path.resolve(baseDir, resolved);
 }
 
-function copySkill(skillPath, targetRoot) {
-  const skillName = path.basename(skillPath);
-  const destination = path.join(targetRoot, skillName);
+function copyFolder(folderPath, targetRoot) {
+  const folderName = path.basename(folderPath);
+  const destination = path.join(targetRoot, folderName);
 
   fs.rmSync(destination, { recursive: true, force: true });
-  fs.cpSync(skillPath, destination, { recursive: true, force: true });
+  fs.cpSync(folderPath, destination, { recursive: true, force: true });
 
   return destination;
 }
 
 function main() {
-  if (!fs.existsSync(skillsDir) || !fs.statSync(skillsDir).isDirectory()) {
-    throw new Error(`Skills folder not found: ${skillsDir}`);
+  const options = parseArgs(process.argv.slice(2));
+  const envPath = path.resolve(options.envFile || path.join(scriptDir, '.env'));
+  const copyMode = copyModes[options.mode];
+  const sourceDir = path.join(scriptDir, copyMode.sourceFolderName);
+
+  if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
+    throw new Error(`${copyMode.label} folder not found: ${sourceDir}`);
   }
 
   const env = readEnvFile(envPath);
-  const targetFolders = parseTargetFolders(env.SKILL_TARGET_FOLDERS);
+  const targetFolders = parseTargetFolders(env[copyMode.targetEnvKey]);
 
   if (targetFolders.length === 0) {
-    throw new Error('No target folders configured. Set SKILL_TARGET_FOLDERS in the .env file.');
+    throw new Error(
+      `No target folders configured. Set ${copyMode.targetEnvKey} in the .env file.`
+    );
   }
 
   const envDir = path.dirname(envPath);
-  const skills = fs
-    .readdirSync(skillsDir, { withFileTypes: true })
+  const folders = fs
+    .readdirSync(sourceDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
-    .map((entry) => path.join(skillsDir, entry.name));
+    .map((entry) => path.join(sourceDir, entry.name));
 
-  if (skills.length === 0) {
-    console.log(`No skills found in ${skillsDir}`);
+  if (folders.length === 0) {
+    console.log(`No ${copyMode.label} found in ${sourceDir}`);
     return;
   }
 
@@ -156,10 +218,10 @@ function main() {
     const targetRoot = resolveTargetFolder(configuredTarget, envDir);
     fs.mkdirSync(targetRoot, { recursive: true });
 
-    console.log(`\nCopying skills to: ${targetRoot}`);
-    for (const skillPath of skills) {
-      const destination = copySkill(skillPath, targetRoot);
-      console.log(`  copied ${path.basename(skillPath)} -> ${destination}`);
+    console.log(`\nCopying ${copyMode.label} to: ${targetRoot}`);
+    for (const folderPath of folders) {
+      const destination = copyFolder(folderPath, targetRoot);
+      console.log(`  copied ${path.basename(folderPath)} -> ${destination}`);
     }
   }
 

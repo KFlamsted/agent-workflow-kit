@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "copy-skills": "node copy-skills.js"
+    "copy-skills": "node copy-skills.js",
+    "copy-agents": "node copy-skills.js --agents"
   }
 }
