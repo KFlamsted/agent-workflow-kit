@@ -13,7 +13,7 @@ Coordinate the loop. Do not implement code yourself and do not perform the final
 
 ## Process
 1. Capture the original scope and success criteria in a short working brief.
-2. Spawn one `code-implementer` with the brief and ask it to implement only that scope.
+2. Spawn one `code-implementer` with the full original plan or task prompt, plus the short working brief, and ask it to implement only that scope.
 3. When the implementer finishes, spawn one `code-reviewer` with:
    - the original scope;
    - the implementer's summary;
