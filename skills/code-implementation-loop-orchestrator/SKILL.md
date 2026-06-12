@@ -13,13 +13,13 @@ Coordinate the loop. Do not implement code yourself and do not perform the final
 
 ## Process
 1. Capture the original scope and success criteria in a short working brief.
-2. Spawn one `code-implementation-loop-code-implementer` with the full original plan or task prompt, plus the short working brief, and ask it to implement only that scope.
-3. When the implementer finishes, spawn one `code-implementation-loop-code-reviewer` with:
+2. Spawn one `code-implementation-loop.code-implementer` agent with the full original plan or task prompt, plus the short working brief, and ask it to implement only that scope.
+3. When the implementer finishes, spawn one `code-implementation-loop.code-reviewer` agent with:
    - the original scope;
    - the implementer's summary;
    - the current diff or branch state to review.
 4. If the reviewer returns `APPROVED`, stop the loop and summarize the result.
-5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementation-loop-code-implementer`.
+5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementation-loop.code-implementer` agent.
 6. Repeat implementer -> reviewer until approval.
 
 ## Rules
