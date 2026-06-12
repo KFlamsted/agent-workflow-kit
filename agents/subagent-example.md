@@ -1,25 +1,26 @@
 ---
-name: <INSERT AGENT_NAME>
-# Optional: registers this as code-analysis.scout while preserving name: scout
-package: code-analysis
+name: <INSERT_AGENT_NAME>
+# Optional: registers this as <PACKAGE_NAME>.<INSERT_AGENT_NAME> while preserving name: <INSERT_AGENT_NAME>
+package: <PACKAGE_NAME>
 description: Fast codebase recon
-tools: read, grep, find, ls, bash
+tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: claude-haiku-4-5
-fallbackModels: openai/gpt-5-mini, anthropic/claude-sonnet-4
-thinking: high
+model: gpt-5.5
+fallbackModels: gpt-5.5-mini
+thinking: medium
 systemPromptMode: append
 inheritProjectContext: true
 inheritSkills: true
-skills: safe-bash, chrome-devtools
+skills: 
 output: context.md
 defaultReads: context.md
 defaultProgress: true
 completionGuard: false
 interactive: true
 maxSubagentDepth: 1
-maxExecutionTimeMs: 600000
-maxTokens: 150000
+# 30 minutes
+maxExecutionTimeMs: 1800000
+maxTokens: 270000
 ---
 
 Your system prompt goes here.
