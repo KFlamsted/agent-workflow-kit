@@ -14,8 +14,8 @@ Use this as the entrypoint for looped implementation. The orchestrator owns the 
 1. If the user provides a plan file path, read the full plan.
 2. If the user provides a freeform prompt, treat it as the implementation scope.
 3. Ask clarification questions only when the scope is too ambiguous or risky to start.
-4. Read `skills/code-implementation-loop/orchestrator.md`.
-5. Start the orchestrator with:
+4. Read `skills/code-implementation-loop-orchestrator/SKILL.md`.
+5. Start `code-implementation-loop-orchestrator` with:
    - the full original scope;
    - relevant user constraints;
    - expected validation, if known;
