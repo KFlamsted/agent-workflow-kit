@@ -4,8 +4,8 @@ package: code-implementation-loop
 description: Reviews loop-produced implementation work and either approves it or returns required fixes.
 tools: read, grep, find, ls, bash
 extensions:
-model: openai/gpt-5.5
-fallbackModels: openai/gpt-5-mini
+model: gpt-5.5
+fallbackModels: gpt-5.5
 thinking: high
 systemPromptMode: append
 inheritProjectContext: true

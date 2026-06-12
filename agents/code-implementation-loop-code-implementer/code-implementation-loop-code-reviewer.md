@@ -4,8 +4,8 @@ package: code-implementation-loop
 description: Implements an assigned scope or reviewer-requested fixes as one step in an implementation loop.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: openai/gpt-5.5
-fallbackModels: openai/gpt-5-mini
+model: gpt-5.5
+fallbackModels: gpt-5.5
 thinking: medium
 systemPromptMode: append
 inheritProjectContext: true
