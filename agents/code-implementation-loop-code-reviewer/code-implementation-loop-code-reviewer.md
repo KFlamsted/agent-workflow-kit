@@ -11,8 +11,8 @@ systemPromptMode: append
 inheritProjectContext: true
 inheritSkills: true
 skills:
-output: context.md
-defaultReads: context.md
+output:
+defaultReads:
 defaultProgress: true
 completionGuard: false
 interactive: true
