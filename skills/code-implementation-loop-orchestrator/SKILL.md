@@ -9,7 +9,7 @@ Coordinate the loop. Do not implement code yourself and do not perform the final
 
 ## Input
 - The original implementation plan, task prompt, or approved scope.
-- Any user constraints, validation requirements, base branch, or stopping rules.
+- Any user constraints, validation requirements, or stopping rules.
 
 ## Process
 1. Capture the original scope and success criteria in a short working brief.
@@ -17,7 +17,7 @@ Coordinate the loop. Do not implement code yourself and do not perform the final
 3. When the implementer finishes, spawn one `code-implementation-loop.code-reviewer` agent with:
    - the original scope;
    - the implementer's summary;
-   - the current diff or branch state to review.
+   - the changes made by the implementer, using the current diff or changed files as evidence.
 4. If the reviewer returns `APPROVED`, stop the loop and summarize the result.
 5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementation-loop.code-implementer` agent.
 6. Repeat implementer -> reviewer until approval.

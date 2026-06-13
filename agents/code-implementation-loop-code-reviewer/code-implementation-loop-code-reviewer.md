@@ -31,7 +31,7 @@ Review only. Do not modify files and do not spawn subagents.
 - The current branch diff or changed files.
 
 ## Process
-1. Compare the implementation against the requested scope and base branch, usually `master` or `main` unless specified.
+1. Review the changes made by the implementer against the requested scope.
 2. Inspect changed files and directly related context.
 3. Focus on:
    - correctness, bugs, and edge cases;
