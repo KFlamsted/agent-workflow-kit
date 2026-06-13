@@ -1,8 +1,0 @@
-I want you to go through each issue one by one.
-I want you to present your the issue a tiny bit more detailed if you can and how you recommend to solve it.
-
-Then we find a solution together (hopefully I will just accept your suggestion).
-When we've been through all of your findings and discussed them, I want you to create a PLAN.md outlining a concrete implementation plan.
-The plan should be detailed enough so a very good software engineer without any context of the repo can solve the issues properly.
-
-No code changes in this session.
