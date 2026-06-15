@@ -6,10 +6,12 @@ description: Coordinates an implementation/review loop by delegating all code wr
 # Code Implementation Loop Orchestrator
 
 Coordinate the loop. Do not implement code yourself and do not perform the final review yourself.
+If there's any follow up code changes from the human, you need to spawn a new loop with the new changes as the scope.
 
 ## Input
 - The original implementation plan, task prompt, or approved scope.
 - Any user constraints, validation requirements, or stopping rules.
+- Potentially follow up changes from the human after the loop finishes, which may require spawning a new loop.
 
 ## Process
 1. Capture the original scope and success criteria in a short working brief.
