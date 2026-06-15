@@ -12,28 +12,46 @@ const copyModes = {
     sourceFolderName: 'skills',
     targetEnvKey: 'SKILL_TARGET_FOLDERS',
     label: 'skills',
+    entryType: 'directory',
   },
   agents: {
     sourceFolderName: 'agents',
     targetEnvKey: 'AGENTS_TARGET_FOLDER',
     label: 'agents',
+    entryType: 'directory',
+  },
+  codexAgents: {
+    sourceFolderName: 'codex-agents',
+    targetEnvKey: 'CODEX_AGENTS_TARGET_FOLDER',
+    label: 'codex agents',
+    entryType: 'file',
   },
 };
 
 function parseArgs(args) {
-  let mode = 'skills';
+  const modes = [];
   let envFile;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
 
     if (arg === '--skills' || arg === 'skills') {
-      mode = 'skills';
+      modes.push('skills');
       continue;
     }
 
     if (arg === '--agents' || arg === 'agents') {
-      mode = 'agents';
+      modes.push('agents');
+      continue;
+    }
+
+    if (
+      arg === '--codex-agents' ||
+      arg === 'codex-agents' ||
+      arg === '--codexAgents' ||
+      arg === 'codexAgents'
+    ) {
+      modes.push('codexAgents');
       continue;
     }
 
@@ -61,7 +79,11 @@ function parseArgs(args) {
     envFile = arg;
   }
 
-  return { mode, envFile };
+  if (modes.length === 0) {
+    modes.push('skills');
+  }
+
+  return { modes, envFile };
 }
 
 function readEnvFile(filePath) {
@@ -184,17 +206,49 @@ function copyFolder(folderPath, targetRoot) {
   return destination;
 }
 
-function main() {
-  const options = parseArgs(process.argv.slice(2));
-  const envPath = path.resolve(options.envFile || path.join(scriptDir, '.env'));
-  const copyMode = copyModes[options.mode];
+function copyFile(filePath, targetRoot) {
+  const fileName = path.basename(filePath);
+  const destination = path.join(targetRoot, fileName);
+
+  fs.rmSync(destination, { recursive: true, force: true });
+  fs.copyFileSync(filePath, destination);
+
+  return destination;
+}
+
+function getCopyEntries(sourceDir, entryType) {
+  return fs
+    .readdirSync(sourceDir, { withFileTypes: true })
+    .filter((entry) => {
+      if (entry.name.startsWith('.')) return false;
+      if (entryType === 'directory') return entry.isDirectory();
+      if (entryType === 'file') return entry.isFile();
+
+      throw new Error(`Unsupported copy entry type: ${entryType}`);
+    })
+    .map((entry) => path.join(sourceDir, entry.name));
+}
+
+function copyEntry(entryPath, targetRoot, entryType) {
+  if (entryType === 'directory') {
+    return copyFolder(entryPath, targetRoot);
+  }
+
+  if (entryType === 'file') {
+    return copyFile(entryPath, targetRoot);
+  }
+
+  throw new Error(`Unsupported copy entry type: ${entryType}`);
+}
+
+function runCopyMode(mode, env, envDir) {
+  const copyMode = copyModes[mode];
   const sourceDir = path.join(scriptDir, copyMode.sourceFolderName);
 
   if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
     throw new Error(`${copyMode.label} folder not found: ${sourceDir}`);
   }
 
-  const env = readEnvFile(envPath);
   const targetFolders = parseTargetFolders(env[copyMode.targetEnvKey]);
 
   if (targetFolders.length === 0) {
@@ -203,13 +257,9 @@ function main() {
     );
   }
 
-  const envDir = path.dirname(envPath);
-  const folders = fs
-    .readdirSync(sourceDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
-    .map((entry) => path.join(sourceDir, entry.name));
+  const entries = getCopyEntries(sourceDir, copyMode.entryType);
 
-  if (folders.length === 0) {
+  if (entries.length === 0) {
     console.log(`No ${copyMode.label} found in ${sourceDir}`);
     return;
   }
@@ -219,10 +269,21 @@ function main() {
     fs.mkdirSync(targetRoot, { recursive: true });
 
     console.log(`\nCopying ${copyMode.label} to: ${targetRoot}`);
-    for (const folderPath of folders) {
-      const destination = copyFolder(folderPath, targetRoot);
-      console.log(`  copied ${path.basename(folderPath)} -> ${destination}`);
+    for (const entryPath of entries) {
+      const destination = copyEntry(entryPath, targetRoot, copyMode.entryType);
+      console.log(`  copied ${path.basename(entryPath)} -> ${destination}`);
     }
+  }
+}
+
+function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const envPath = path.resolve(options.envFile || path.join(scriptDir, '.env'));
+  const env = readEnvFile(envPath);
+  const envDir = path.dirname(envPath);
+
+  for (const mode of options.modes) {
+    runCopyMode(mode, env, envDir);
   }
 
   console.log('\nDone.');
