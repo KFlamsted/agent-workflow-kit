@@ -39,3 +39,4 @@ When the loop finishes, report:
 - changed files;
 - validation performed;
 - unresolved blockers or intentionally deferred items, if any.
+- A potential git commit message summarizing the final changes, if applicable. Use the `commit-message-generate` skill if available.
