@@ -15,13 +15,13 @@ If there's any follow up code changes from the human, you need to spawn a new lo
 
 ## Process
 1. Capture the original scope and success criteria in a short working brief.
-2. Spawn one `code-implementation-loop.code-implementer` agent with the full original plan or task prompt, plus the short working brief, and ask it to implement only that scope.
-3. When the implementer finishes, spawn one `code-implementation-loop.code-reviewer` agent with:
+2. Spawn one `code-implementation-loop.code-implementer` (might be called `code-implementer`) agent with the full original plan or task prompt, plus the short working brief, and ask it to implement only that scope.
+3. When the implementer finishes, spawn one `code-implementation-loop.code-reviewer` (might be called `code-reviewer`) agent with:
    - the original scope;
    - the implementer's summary;
    - the changes made by the implementer, using the current diff or changed files as evidence.
 4. If the reviewer returns `APPROVED`, stop the loop and summarize the result.
-5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementation-loop.code-implementer` agent.
+5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementation-loop.code-implementer` (might be called `code-implementer`) agent.
 6. Repeat implementer -> reviewer until approval.
 
 ## Rules
