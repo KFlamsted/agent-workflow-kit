@@ -18,5 +18,5 @@ Implement the referenced plan.
 5. Run appropriate checks or tests when practical.
 
 ## Output
-- Code changes that follow the plan.
+- Changes through code or tool calls that follow the given implementation plan.
 - A concise final summary with changed files and validation performed.
