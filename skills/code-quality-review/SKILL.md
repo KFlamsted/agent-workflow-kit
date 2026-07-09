@@ -8,7 +8,7 @@ description: Explicitly invoked workflow for reviewing branch changes for target
 Review changes only. Do not modify code.
 
 ## Process
-1. Compare the current branch against `master` unless the user specifies another base.
+1. Compare the current branch against `master` or `main` unless the user specifies another base.
 2. Review only changed code and directly related context.
 3. Focus on:
    - Functions that should be moved to utilities.
