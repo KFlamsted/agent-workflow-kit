@@ -4,7 +4,7 @@ package: code-implementation-loop
 description: Implements an assigned scope or reviewer-requested fixes as one step in an implementation loop.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: gpt-5.5
+model: gpt-5.6-sol
 fallbackModels: gpt-5.5
 thinking: medium
 systemPromptMode: append

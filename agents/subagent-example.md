@@ -5,7 +5,7 @@ package: <PACKAGE_NAME>
 description: Fast codebase recon
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: gpt-5.5
+model: gpt-5.6-sol
 fallbackModels: gpt-5.5-mini
 thinking: medium
 systemPromptMode: append

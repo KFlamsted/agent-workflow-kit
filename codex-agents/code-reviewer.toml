@@ -1,6 +1,6 @@
 name = "code-reviewer"
 description = "Reviews loop-produced implementation work and either approves it or returns required fixes."
-model = "gpt-5.5"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 
