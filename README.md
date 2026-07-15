@@ -14,6 +14,7 @@ Configure the target folders in `.env`:
 SKILL_TARGET_FOLDERS=["/path/to/skills-folder1", "/path/to/skills-folder2"]
 AGENTS_TARGET_FOLDER=["/path/to/agents-folder1", "/path/to/agents-folder2"]
 CODEX_AGENTS_TARGET_FOLDER=["/path/to/codex-agents-folder1", "/path/to/codex-agents-folder2"]
+CLAUDE_AGENTS_TARGET_FOLDER=["/path/to/claude-agents-folder1", "/path/to/claude-agents-folder2"]
 ```
 
 JSON arrays are preferred. Relative paths are resolved from the `.env` file's folder, `~` resolves to your home directory, and Windows drive paths are supported. In JSON strings, escape backslashes:
@@ -40,7 +41,8 @@ You can also run the script directly:
 node copy-skills.js
 node copy-skills.js --agents
 node copy-skills.js --codex-agents
-node copy-skills.js --agents --codex-agents
+node copy-skills.js --claude-agents
+node copy-skills.js --agents --codex-agents --claude-agents
 ```
 
 On Linux/WSL, the executable form also works:
@@ -58,12 +60,14 @@ npm run copy-agents -- /path/to/.env
 node copy-skills.js /path/to/.env
 node copy-skills.js --agents /path/to/.env
 node copy-skills.js --codex-agents /path/to/.env
-node copy-skills.js --agents --codex-agents /path/to/.env
+node copy-skills.js --claude-agents /path/to/.env
+node copy-skills.js --agents --codex-agents --claude-agents /path/to/.env
 ```
 
-The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every agent folder from `./agents` into each configured `AGENTS_TARGET_FOLDER` folder, and every Codex agent file from `./codex-agents` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
+The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every agent folder from `./agents` into each configured `AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./codex-agents` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, and every Claude agent `.md` file from `./claude-agents` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
 
-`npm run copy-agents` runs both agent copy modes: `--agents --codex-agents`.
+`npm run copy-agents` runs all agent copy modes: `--agents --codex-agents --claude-agents`.
+When running multiple copy modes, modes without configured target folders are skipped.
 
 ## Status
 

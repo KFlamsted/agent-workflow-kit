@@ -26,6 +26,13 @@ const copyModes = {
     label: 'codex agents',
     entryType: 'file',
   },
+  claudeAgents: {
+    sourceFolderName: 'claude-agents',
+    targetEnvKey: 'CLAUDE_AGENTS_TARGET_FOLDER',
+    label: 'claude agents',
+    entryType: 'file',
+    fileExtension: '.md',
+  },
 };
 
 function parseArgs(args) {
@@ -52,6 +59,16 @@ function parseArgs(args) {
       arg === 'codexAgents'
     ) {
       modes.push('codexAgents');
+      continue;
+    }
+
+    if (
+      arg === '--claude-agents' ||
+      arg === 'claude-agents' ||
+      arg === '--claudeAgents' ||
+      arg === 'claudeAgents'
+    ) {
+      modes.push('claudeAgents');
       continue;
     }
 
@@ -216,13 +233,18 @@ function copyFile(filePath, targetRoot) {
   return destination;
 }
 
-function getCopyEntries(sourceDir, entryType) {
+function getCopyEntries(sourceDir, entryType, fileExtension) {
   return fs
     .readdirSync(sourceDir, { withFileTypes: true })
     .filter((entry) => {
       if (entry.name.startsWith('.')) return false;
       if (entryType === 'directory') return entry.isDirectory();
-      if (entryType === 'file') return entry.isFile();
+      if (entryType === 'file') {
+        return (
+          entry.isFile() &&
+          (!fileExtension || path.extname(entry.name) === fileExtension)
+        );
+      }
 
       throw new Error(`Unsupported copy entry type: ${entryType}`);
     })
@@ -241,7 +263,7 @@ function copyEntry(entryPath, targetRoot, entryType) {
   throw new Error(`Unsupported copy entry type: ${entryType}`);
 }
 
-function runCopyMode(mode, env, envDir) {
+function runCopyMode(mode, env, envDir, allowMissingTarget) {
   const copyMode = copyModes[mode];
   const sourceDir = path.join(scriptDir, copyMode.sourceFolderName);
 
@@ -252,12 +274,17 @@ function runCopyMode(mode, env, envDir) {
   const targetFolders = parseTargetFolders(env[copyMode.targetEnvKey]);
 
   if (targetFolders.length === 0) {
+    if (allowMissingTarget) {
+      console.log(`Skipping ${copyMode.label}: ${copyMode.targetEnvKey} is not configured.`);
+      return;
+    }
+
     throw new Error(
       `No target folders configured. Set ${copyMode.targetEnvKey} in the .env file.`
     );
   }
 
-  const entries = getCopyEntries(sourceDir, copyMode.entryType);
+  const entries = getCopyEntries(sourceDir, copyMode.entryType, copyMode.fileExtension);
 
   if (entries.length === 0) {
     console.log(`No ${copyMode.label} found in ${sourceDir}`);
@@ -281,9 +308,10 @@ function main() {
   const envPath = path.resolve(options.envFile || path.join(scriptDir, '.env'));
   const env = readEnvFile(envPath);
   const envDir = path.dirname(envPath);
+  const allowMissingTarget = options.modes.length > 1;
 
   for (const mode of options.modes) {
-    runCopyMode(mode, env, envDir);
+    runCopyMode(mode, env, envDir, allowMissingTarget);
   }
 
   console.log('\nDone.');
