@@ -1,6 +1,6 @@
 ---
 name: code-implementer
-package: code-implementation-loop
+package:
 description: Implements an assigned scope or reviewer-requested fixes as one step in an implementation loop.
 tools: read, write, edit, grep, find, ls, bash
 extensions:

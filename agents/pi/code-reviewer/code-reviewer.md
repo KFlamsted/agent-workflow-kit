@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-package: code-implementation-loop
+package:
 description: Reviews loop-produced implementation work and either approves it or returns required fixes.
 tools: read, grep, find, ls, bash
 extensions:
