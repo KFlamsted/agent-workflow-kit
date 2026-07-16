@@ -17,8 +17,8 @@ defaultProgress: true
 completionGuard: false
 interactive: true
 maxSubagentDepth: 1
-# 30 minutes
-maxExecutionTimeMs: 1800000
+# 1 hour
+maxExecutionTimeMs: 3600000
 maxTokens: 270000
 ---
 # Code Reviewer
