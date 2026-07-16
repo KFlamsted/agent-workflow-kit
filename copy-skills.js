@@ -15,30 +15,34 @@ const copyModes = {
     entryType: 'directory',
   },
   piAgents: {
-    sourceFolderName: 'pi-agents',
+    sourcePath: ['agents', 'pi'],
     targetEnvKey: 'PI_AGENTS_TARGET_FOLDER',
     label: 'Pi agents',
     entryType: 'directory',
+    injectPrompts: true,
   },
   codexAgents: {
-    sourceFolderName: 'codex-agents',
+    sourcePath: ['agents', 'codex'],
     targetEnvKey: 'CODEX_AGENTS_TARGET_FOLDER',
     label: 'codex agents',
     entryType: 'file',
+    injectPrompts: true,
   },
   claudeAgents: {
-    sourceFolderName: 'claude-agents',
+    sourcePath: ['agents', 'claude'],
     targetEnvKey: 'CLAUDE_AGENTS_TARGET_FOLDER',
     label: 'claude agents',
     entryType: 'file',
     fileExtension: '.md',
+    injectPrompts: true,
   },
   opencodeAgents: {
-    sourceFolderName: 'opencode-agents',
+    sourcePath: ['agents', 'opencode'],
     targetEnvKey: 'OPENCODE_AGENTS_TARGET_FOLDER',
     label: 'OpenCode agents',
     entryType: 'file',
     fileExtension: '.md',
+    injectPrompts: true,
   },
 };
 
@@ -285,9 +289,82 @@ function copyEntry(entryPath, targetRoot, entryType) {
   throw new Error(`Unsupported copy entry type: ${entryType}`);
 }
 
-function runCopyMode(mode, env, envDir, allowMissingTarget) {
+function loadSharedPrompts() {
+  const promptsDir = path.join(scriptDir, 'agents');
+
+  if (!fs.existsSync(promptsDir) || !fs.statSync(promptsDir).isDirectory()) {
+    throw new Error(`Shared prompts folder not found: ${promptsDir}`);
+  }
+
+  const prompts = new Map();
+  for (const entry of fs.readdirSync(promptsDir, { withFileTypes: true })) {
+    if (
+      entry.name.startsWith('.') ||
+      !entry.isFile() ||
+      path.extname(entry.name) !== '.txt'
+    ) {
+      continue;
+    }
+
+    const promptPath = path.join(promptsDir, entry.name);
+    prompts.set(path.basename(entry.name, '.txt'), fs.readFileSync(promptPath, 'utf8'));
+  }
+
+  return prompts;
+}
+
+function renderPromptedFile(filePath, prompts) {
+  const extension = path.extname(filePath);
+  const prompt = prompts.get(path.basename(filePath, extension));
+
+  if (prompt === undefined || (extension !== '.md' && extension !== '.toml')) {
+    return;
+  }
+
+  const content = fs.readFileSync(filePath, 'utf8');
+  const separator = content.endsWith('\n') ? '\n' : '\n\n';
+
+  if (extension === '.md') {
+    fs.writeFileSync(filePath, `${content}${separator}${prompt}`);
+    return;
+  }
+
+  if (prompt.includes("'''")) {
+    throw new Error(
+      `Cannot render TOML developer_instructions for ${path.basename(filePath)}: prompt contains '''`
+    );
+  }
+
+  const promptWithNewline = prompt.endsWith('\n') ? prompt : `${prompt}\n`;
+  fs.writeFileSync(
+    filePath,
+    `${content}${separator}developer_instructions = '''\n${promptWithNewline}'''\n`
+  );
+}
+
+function injectPrompts(destination, prompts) {
+  const stat = fs.statSync(destination);
+
+  if (stat.isFile()) {
+    renderPromptedFile(destination, prompts);
+    return;
+  }
+
+  if (!stat.isDirectory()) return;
+
+  for (const entry of fs.readdirSync(destination, { withFileTypes: true })) {
+    const entryPath = path.join(destination, entry.name);
+    if (entry.isDirectory() || entry.isFile()) {
+      injectPrompts(entryPath, prompts);
+    }
+  }
+}
+
+function runCopyMode(mode, env, envDir, allowMissingTarget, prompts) {
   const copyMode = copyModes[mode];
-  const sourceDir = path.join(scriptDir, copyMode.sourceFolderName);
+  const sourceDir = copyMode.sourcePath
+    ? path.join(scriptDir, ...copyMode.sourcePath)
+    : path.join(scriptDir, copyMode.sourceFolderName);
 
   if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
     throw new Error(`${copyMode.label} folder not found: ${sourceDir}`);
@@ -320,6 +397,9 @@ function runCopyMode(mode, env, envDir, allowMissingTarget) {
     console.log(`\nCopying ${copyMode.label} to: ${targetRoot}`);
     for (const entryPath of entries) {
       const destination = copyEntry(entryPath, targetRoot, copyMode.entryType);
+      if (copyMode.injectPrompts) {
+        injectPrompts(destination, prompts);
+      }
       console.log(`  copied ${path.basename(entryPath)} -> ${destination}`);
     }
   }
@@ -331,9 +411,12 @@ function main() {
   const env = readEnvFile(envPath);
   const envDir = path.dirname(envPath);
   const allowMissingTarget = options.modes.length > 1;
+  const prompts = options.modes.some((mode) => copyModes[mode].injectPrompts)
+    ? loadSharedPrompts()
+    : undefined;
 
   for (const mode of options.modes) {
-    runCopyMode(mode, env, envDir, allowMissingTarget);
+    runCopyMode(mode, env, envDir, allowMissingTarget, prompts);
   }
 
   console.log('\nDone.');

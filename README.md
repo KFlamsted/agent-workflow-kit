@@ -67,7 +67,9 @@ node copy-skills.js --opencode-agents /path/to/.env
 node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents /path/to/.env
 ```
 
-The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every Pi agent folder from `./pi-agents` into each configured `PI_AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./codex-agents` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./claude-agents` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, and every OpenCode agent `.md` file from `./opencode-agents` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
+The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every Pi agent folder from `./agents/pi` into each configured `PI_AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./agents/codex` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./agents/claude` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, and every OpenCode agent `.md` file from `./agents/opencode` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
+
+Direct `.txt` files in `./agents` are shared raw Markdown prompt bodies. When copying agent configurations, the script matches each configuration's filename stem to a prompt filename stem using exact, case-sensitive matching. Checked-in harness configuration files contain metadata only; matching copied Markdown files receive the raw prompt body, while matching copied TOML files receive it as a `developer_instructions` multiline value. Shared `.txt` files are not copied to agent targets.
 
 `npm run copy-agents` runs all agent copy modes: `--pi-agents --codex-agents --claude-agents --opencode-agents`.
 When running multiple copy modes, modes without configured target folders are skipped.
