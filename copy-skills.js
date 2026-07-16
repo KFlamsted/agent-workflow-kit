@@ -33,6 +33,13 @@ const copyModes = {
     entryType: 'file',
     fileExtension: '.md',
   },
+  opencodeAgents: {
+    sourceFolderName: 'opencode-agents',
+    targetEnvKey: 'OPENCODE_AGENTS_TARGET_FOLDER',
+    label: 'OpenCode agents',
+    entryType: 'file',
+    fileExtension: '.md',
+  },
 };
 
 function parseArgs(args) {
@@ -69,6 +76,16 @@ function parseArgs(args) {
       arg === 'claudeAgents'
     ) {
       modes.push('claudeAgents');
+      continue;
+    }
+
+    if (
+      arg === '--opencode-agents' ||
+      arg === 'opencode-agents' ||
+      arg === '--opencodeAgents' ||
+      arg === 'opencodeAgents'
+    ) {
+      modes.push('opencodeAgents');
       continue;
     }
 
