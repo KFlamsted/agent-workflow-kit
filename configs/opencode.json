@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build-pi",
   "agent": {
     "build": {
       "mode": "primary",
