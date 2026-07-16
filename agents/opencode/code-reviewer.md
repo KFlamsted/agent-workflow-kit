@@ -7,12 +7,7 @@ permission:
   read: allow
   glob: allow
   grep: allow
-  bash:
-    "*": ask
-    "git status*": allow
-    "git diff*": allow
-    "git log*": allow
-    "git show*": allow
+  bash: allow
   edit: deny
   task: deny
 ---
