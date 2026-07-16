@@ -14,10 +14,10 @@ const copyModes = {
     label: 'skills',
     entryType: 'directory',
   },
-  agents: {
-    sourceFolderName: 'agents',
-    targetEnvKey: 'AGENTS_TARGET_FOLDER',
-    label: 'agents',
+  piAgents: {
+    sourceFolderName: 'pi-agents',
+    targetEnvKey: 'PI_AGENTS_TARGET_FOLDER',
+    label: 'Pi agents',
     entryType: 'directory',
   },
   codexAgents: {
@@ -54,8 +54,13 @@ function parseArgs(args) {
       continue;
     }
 
-    if (arg === '--agents' || arg === 'agents') {
-      modes.push('agents');
+    if (
+      arg === '--pi-agents' ||
+      arg === 'pi-agents' ||
+      arg === '--piAgents' ||
+      arg === 'piAgents'
+    ) {
+      modes.push('piAgents');
       continue;
     }
 

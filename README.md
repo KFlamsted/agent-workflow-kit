@@ -12,7 +12,7 @@ Configure the target folders in `.env`:
 
 ```env
 SKILL_TARGET_FOLDERS=["/path/to/skills-folder1", "/path/to/skills-folder2"]
-AGENTS_TARGET_FOLDER=["/path/to/agents-folder1", "/path/to/agents-folder2"]
+PI_AGENTS_TARGET_FOLDER=["/path/to/pi-agents-folder1", "/path/to/pi-agents-folder2"]
 CODEX_AGENTS_TARGET_FOLDER=["/path/to/codex-agents-folder1", "/path/to/codex-agents-folder2"]
 CLAUDE_AGENTS_TARGET_FOLDER=["/path/to/claude-agents-folder1", "/path/to/claude-agents-folder2"]
 OPENCODE_AGENTS_TARGET_FOLDER=["/path/to/opencode-agents-folder1", "/path/to/opencode-agents-folder2"]
@@ -40,11 +40,11 @@ You can also run the script directly:
 
 ```bash
 node copy-skills.js
-node copy-skills.js --agents
+node copy-skills.js --pi-agents
 node copy-skills.js --codex-agents
 node copy-skills.js --claude-agents
 node copy-skills.js --opencode-agents
-node copy-skills.js --agents --codex-agents --claude-agents --opencode-agents
+node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents
 ```
 
 On Linux/WSL, the executable form also works:
@@ -60,16 +60,16 @@ npm run copy-skills -- /path/to/.env
 npm run copy-agents -- /path/to/.env
 # or
 node copy-skills.js /path/to/.env
-node copy-skills.js --agents /path/to/.env
+node copy-skills.js --pi-agents /path/to/.env
 node copy-skills.js --codex-agents /path/to/.env
 node copy-skills.js --claude-agents /path/to/.env
 node copy-skills.js --opencode-agents /path/to/.env
-node copy-skills.js --agents --codex-agents --claude-agents --opencode-agents /path/to/.env
+node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents /path/to/.env
 ```
 
-The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every agent folder from `./agents` into each configured `AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./codex-agents` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./claude-agents` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, and every OpenCode agent `.md` file from `./opencode-agents` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
+The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every Pi agent folder from `./pi-agents` into each configured `PI_AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./codex-agents` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./claude-agents` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, and every OpenCode agent `.md` file from `./opencode-agents` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
 
-`npm run copy-agents` runs all agent copy modes: `--agents --codex-agents --claude-agents --opencode-agents`.
+`npm run copy-agents` runs all agent copy modes: `--pi-agents --codex-agents --claude-agents --opencode-agents`.
 When running multiple copy modes, modes without configured target folders are skipped.
 
 ## Status
