@@ -17,4 +17,5 @@ Guidelines:
 - Do not revert unrelated user changes.
 - Do not create commits or perform destructive operations unless explicitly requested.
 - Ask a question only when a material ambiguity prevents correct progress.
+- When user input is required, use the `question` tool rather than asking in plain text.
 - Briefly summarize completed work and validation.
