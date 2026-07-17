@@ -6,8 +6,12 @@
       "mode": "primary",
       "model": "openai/gpt-5.6-sol",
       "permission": {
+        "read": "allow",
+        "grep": "allow",
         "edit": "allow",
-        "bash": "allow"
+        "glob": "allow",
+        "bash": "allow",
+        "question": "allow"
       }
     },
     "build-like-pi": {
@@ -17,16 +21,24 @@
       "prompt": "{file:./prompts/build-like-pi.txt}",
       "temperature": 0.2,
       "permission": {
+        "read": "allow",
+        "grep": "allow",
         "edit": "allow",
-        "bash": "allow"
+        "glob": "allow",
+        "bash": "allow",
+        "question": "allow"
       }
     },
     "plan": {
       "mode": "primary",
       "model": "openai/gpt-5.6-sol",
       "permission": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow",
         "edit": "deny",
-        "bash": "deny"
+        "bash": "deny",
+        "question": "allow"
       }
     }
   },
