@@ -10,7 +10,7 @@ You are the coordinator/orchestrator in this end to end process.
 
 The end-to-end process consists of the following steps:
 1. Create an implementation plan for the task. (See [Create Implementation Plan](#create-implementation-plan))
-2. Implement and review the code in a implementer to reviewer loop. (See [Implement and Review Code](#implement-and-review-code))
+2. Implement and review the code in a implementer to reviewer loop. (See [Implement and Review Code loop](#implement-and-review-code-loop))
 3. Conduct a final summary of the entire process. (See [Final Summary](#final-summary))
 
 Each step is described in detail in the referenced subsections.
@@ -26,9 +26,14 @@ It is very important that you hand the given task/prompt to the `task-planner` s
 Clarification questions from the `task-planner` agent should be presented to the human by the `question` tool if such exist.  
 Do not answer any clarifying questions yourself.  
 
-Once the plan has been created you can move on to the `Implement and Review Code` section.
+Once the plan has been created you can proceed to the `Implement and Review Code loop` section.
 
-## Implement and Review Code
+## Implement and Review Code loop
+Make sure that the implementation plan is complete and written to a file in the project.  
+Analyze the implementation plan to determine if the full plan can be implemented in a single implementer to reviewer loop, or if it needs to be broken down into multiple loops.  
+If the plan has multiple phases, each `phase` in the implementation plan corresponds to a single implementer to reviewer loop.  
+It is recommended to show each phase to the human in a todo list - use `todowrite` tool (or similar) if such is available.  
+Once the amount of loops
 TODO: Describe how the implement and review code section works
 
 ## Final Summary
@@ -38,7 +43,3 @@ Invoke the `generate-commit-message` skill if you have this available.
 
 ## Final notes
 It is a very good idea to read the details of each of the specific steps in the process when you are orchestrating that specific step, instead of reading them all at once in the beginning. 
-
-
-
-
