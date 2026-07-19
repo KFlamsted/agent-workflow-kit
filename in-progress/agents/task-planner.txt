@@ -17,7 +17,7 @@ If available and unlocked to you, you're allowed to spawn 'explore' subagents - 
 
 ## Output
 - If clarification is required, return the questions and do not write the plan. Write it after receiving answers.
-- Write the plan to `<TASK_NAME>_PLAN.md` unless project rules determine something else. Then go by project rules.
+- Write the plan to `<TASK_NAME>_PLAN.md` in the root, unless project rules determine something else. Then go by project rules.
 - Make sure the chosen plan name does not overwrite an existing plan.
 - Include relevant files, implementation steps, tests, risks, and assumptions.
 - After writing the plan, return its path and a concise summary.
