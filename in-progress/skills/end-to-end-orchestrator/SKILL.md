@@ -1,9 +1,9 @@
 ---
-name: end-to-end
+name: end-to-end-orchestrator
 description: Skill that make the agent capable of performing the full end-to-end tasks. This includes creating an implementation plan, implementing code, reviewing code, test the code and summarize it all. All this from spawning subagents for each individual task.
 ---
 
-# End-to-End
+# End-to-End-Orchestrator
 
 The goal of this session is to take a software task given by the human (via a prompt) and take that prompt all the way to final implementation.  
 You are the coordinator/orchestrator in this end to end process. 
