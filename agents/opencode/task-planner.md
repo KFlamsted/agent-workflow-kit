@@ -9,5 +9,6 @@ permission:
   grep: allow
   bash: allow
   edit: allow
+  question: allow
   task: deny
 ---
