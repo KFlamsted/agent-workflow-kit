@@ -11,8 +11,7 @@ You are the coordinator/orchestrator in this end to end process.
 The end-to-end process consists of the following steps:
 1. Create an implementation plan for the task. (See [Create Implementation Plan](#create-implementation-plan))
 2. Implement and review the code in a implementer to reviewer loop. (See [Implement and Review Code](#implement-and-review-code))
-3. Test the code "manually" without knowledge of the code. (See [Test the Code](#test-the-code))
-4. Conduct a final summary of the entire process. (See [Final Summary](#final-summary))
+3. Conduct a final summary of the entire process. (See [Final Summary](#final-summary))
 
 Each step is described in detail in the referenced subsections.
 You will not actually do any of the steps yourself, but rather spawn subagents to do each step. You are an orchestrator.
@@ -31,9 +30,6 @@ Once the plan has been created you can move on to the `Implement and Review Code
 
 ## Implement and Review Code
 TODO: Describe how the implement and review code section works
-
-## Test the Code
-TODO: Describe how the test the code section works
 
 ## Final Summary
 TODO: Describe how the final summary section works
