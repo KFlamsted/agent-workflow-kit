@@ -1,6 +1,6 @@
 ---
 name: end-to-end-orchestrator
-description: Skill that make the agent capable of performing the full end-to-end tasks. This includes creating an implementation plan, implementing code, reviewing code, test the code and summarize it all. All this from spawning subagents for each individual task.
+description: Orchestrates software tasks end to end by delegating planning, phased implementation, review, and final reporting to specialized subagents.
 ---
 
 # End-to-End-Orchestrator
@@ -26,20 +26,39 @@ It is very important that you hand the given task/prompt to the `task-planner` s
 Clarification questions from the `task-planner` agent should be presented to the human by the `question` tool if such exist.  
 Do not answer any clarifying questions yourself.  
 
-Once the plan has been created you can proceed to the `Implement and Review Code loop` section.
+Before proceeding, ensure the plan is divided into practical implementation phases. If a phase is too large, resume the `task-planner` and ask it to divide the phase without changing the plan's scope.
+
+Once the plan is ready, proceed to the [Implement and Review Code loop](#implement-and-review-code-loop).
 
 ## Implement and Review Code loop
-Make sure that the implementation plan is complete and written to a file in the project.  
-Analyze the implementation plan to determine if the full plan can be implemented in a single implementer to reviewer loop, or if it needs to be broken down into multiple loops.  
-If the plan has multiple phases, each `phase` in the implementation plan corresponds to a single implementer to reviewer loop.  
-It is recommended to show each phase to the human in a todo list - use `todowrite` tool (or similar) if such is available.  
-Once the amount of loops
-TODO: Describe how the implement and review code section works
+Ensure the implementation plan exists in the project. Treat each plan phase as one implementation unit; if the plan has no phases, treat the full plan as one unit. Optionally track these units with `todowrite`.
+
+For each unit, in order:
+
+1. Spawn a new `code-implementer` to implement it.
+2. Spawn a new `code-reviewer` to review the result.
+3. If the result is `CHANGES_REQUESTED`, resume the same implementer with only the required fixes, then resume the same reviewer to review the changes.
+4. Repeat until the reviewer returns `APPROVED`, then continue to the next unit.
+
+Use new implementer and reviewer sessions for each unit. After all units are approved, proceed to [Final Summary](#final-summary).
 
 ## Final Summary
-TODO: Describe how the final summary section works
+After all implementation units are approved, report:
 
-Invoke the `generate-commit-message` skill if you have this available.
+- the original task and implementation plan;
+- the units completed and implementation/review rounds for each;
+- the final approval status;
+- the changed files and a brief summary of the changes;
+- validation performed and its results;
+- unresolved blockers or intentionally deferred items, if any;
+- a suggested commit message, if applicable - use the `commit-message-generate` skill for this if available.
 
-## Final notes
-It is a very good idea to read the details of each of the specific steps in the process when you are orchestrating that specific step, instead of reading them all at once in the beginning. 
+Do not claim validation was performed unless it was reported by a subagent.
+
+## Extra Rules and Guidelines
+- Remain the orchestrator; do not implement or review code yourself.
+- Use only one writing implementer at a time against the active worktree.
+- Do not ask implementers or reviewers to create a new implementation plan.
+- Forward only changes required for approval, not optional reviewer suggestions.
+- Ask the human if a finding requires a product, scope, or architecture decision not covered by the plan.
+- If an issue repeats or the loop becomes stuck, stop and report the blocker instead of continuing indefinitely.
