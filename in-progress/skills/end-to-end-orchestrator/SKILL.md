@@ -22,7 +22,7 @@ Do not plan, implement, or review code yourself. Delegate those tasks to subagen
 ## Create Implementation Plan
 The goal of this section is to create an implementation plan.  
 Invoke the `task-planner` with the user's task description as its complete prompt, reproduced verbatim. Do not summarize, rewrite, interpret, annotate, or supplement it. Do not add output-format or workflow instructions; rely on the `task-planner`'s own instructions.  
-Clarification questions from the `task-planner` agent should be presented to the human by the `question` tool, if any.  
+Clarification questions, if any, from the `task-planner` agent should be presented to the human by the `question`-tool if this (or similar) tool is available. Otherwise present the question by plain text.  
 Do not answer any clarifying questions yourself.  
 
 Before proceeding, ensure the plan is divided into practical implementation phases. If a phase is too large, resume the `task-planner` and ask it to divide the phase without changing the plan's scope.
