@@ -4,5 +4,5 @@ description: Reviews loop-produced implementation work and either approves it or
 model: claude-opus-4.8
 tools: [read, search, execute]
 user-invocable: false
-disable-model-invocation: true
+disable-model-invocation: false
 ---
