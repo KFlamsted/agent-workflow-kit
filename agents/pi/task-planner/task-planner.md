@@ -1,13 +1,13 @@
 ---
-name: code-implementer
+name: task-planner
 package:
-description: Implements an assigned scope or reviewer-requested fixes as one step in an implementation loop.
+description: Analyzes coding tasks and creates actionable implementation plans with clear steps, affected files, and validation guidance.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
 model: gpt-5.6-sol
-fallbackModels: gpt-5.5
-thinking: low
-systemPromptMode: append
+fallbackModels: gpt-5.6-sol
+thinking: high
+systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: true
 skills:
@@ -18,6 +18,6 @@ completionGuard: false
 interactive: true
 maxSubagentDepth: 1
 # 1 hour
-maxExecutionTimeMs: 3600000 
+maxExecutionTimeMs: 3600000
 maxTokens: 270000
 ---

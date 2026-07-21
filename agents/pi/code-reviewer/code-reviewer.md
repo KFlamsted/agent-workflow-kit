@@ -6,9 +6,9 @@ tools: read, grep, find, ls, bash
 extensions:
 model: gpt-5.6-sol
 fallbackModels: gpt-5.6-sol
-thinking: high
+thinking: medium
 systemPromptMode: append
-inheritProjectContext: true
+inheritProjectContext: false
 inheritSkills: true
 skills:
 output:
