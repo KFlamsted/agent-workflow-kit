@@ -19,18 +19,19 @@ Do not plan, implement, or review code yourself. Delegate those tasks to subagen
 ## Input
 - A task description from the user.
 
-## Required Subagents
+## Required Subagents - IMPORTANT!
 This workflow requires the following subagent types:
 
 - `task-planner` — creates the phased implementation plan and raises clarification questions.
 - `code-implementer` — implements and validates an assigned implementation unit.
 - `code-reviewer` — reviews an implementation unit and returns `APPROVED` or `CHANGES_REQUESTED`.
 
-Before starting the workflow, ensure all required subagent types are available. If any are unavailable, stop and report the missing dependency rather than substituting another agent or performing its responsibilities yourself.
+It is very important before starting the workflow, to ensure all required subagent types are available. They have to have the same exact name and maybe not be substituted with any similar agent.  
+If any are unavailable, stop and report the missing dependency rather than substituting another agent or performing its responsibilities yourself.
 
 ## Create Implementation Plan
 The goal of this section is to create an implementation plan.  
-Invoke the `task-planner` with the user's task description as its complete prompt, reproduced verbatim. Do not summarize, rewrite, interpret, annotate, or supplement it. Do not add output-format or workflow instructions; rely on the `task-planner`'s own instructions.  
+Spawn the `task-planner` subagent with the user's task description as its complete prompt, reproduced verbatim. Do not summarize, rewrite, interpret, annotate, or supplement it. Do not add output-format or workflow instructions; rely on the `task-planner`'s own instructions.  
 Clarification questions, if any, from the `task-planner` agent should be presented to the human by the `question`-tool if this (or similar) tool is available. Otherwise present the question by plain text.  
 Do not answer any clarifying questions yourself.  
 
