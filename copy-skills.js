@@ -333,7 +333,11 @@ function loadSharedPrompts() {
 
 function renderPromptedFile(filePath, prompts) {
   const extension = path.extname(filePath);
-  const prompt = prompts.get(path.basename(filePath, extension));
+  const promptName = path.basename(
+    filePath,
+    filePath.endsWith('.agent.md') ? '.agent.md' : extension
+  );
+  const prompt = prompts.get(promptName);
 
   if (prompt === undefined || (extension !== '.md' && extension !== '.toml')) {
     return;
@@ -342,7 +346,7 @@ function renderPromptedFile(filePath, prompts) {
   const content = fs.readFileSync(filePath, 'utf8');
   const separator = content.endsWith('\n') ? '\n' : '\n\n';
 
-  if (extension === '.md') {
+  if (extension === '.md' || extension === '.agent.md') {
     fs.writeFileSync(filePath, `${content}${separator}${prompt}`);
     return;
   }

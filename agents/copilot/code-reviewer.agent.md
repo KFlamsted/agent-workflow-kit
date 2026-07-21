@@ -1,6 +1,6 @@
 ---
+name: code-reviewer
 description: Reviews loop-produced implementation work and either approves it or returns required fixes. Use after an implementation round.
-target: github-copilot
 model: claude-opus-4.8
 tools: [read, search, execute]
 user-invocable: false

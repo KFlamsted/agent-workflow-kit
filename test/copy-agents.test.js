@@ -39,6 +39,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     codex: path.join(sandbox, 'targets', 'codex'),
     claude: path.join(sandbox, 'targets', 'claude'),
     opencode: path.join(sandbox, 'targets', 'opencode'),
+    copilot: path.join(sandbox, 'targets', 'copilot'),
   };
   const envPath = path.join(sandbox, '.env');
   fs.writeFileSync(
@@ -48,6 +49,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
       `CODEX_AGENTS_TARGET_FOLDER=${JSON.stringify([targets.codex])}`,
       `CLAUDE_AGENTS_TARGET_FOLDER=${JSON.stringify([targets.claude])}`,
       `OPENCODE_AGENTS_TARGET_FOLDER=${JSON.stringify([targets.opencode])}`,
+      `COPILOT_AGENTS_FOLDER=${JSON.stringify([targets.copilot])}`,
       '',
     ].join('\n')
   );
@@ -60,6 +62,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
       '--codex-agents',
       '--claude-agents',
       '--opencode-agents',
+      '--copilot-agents',
       '--env',
       envPath,
     ],
@@ -85,6 +88,21 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   assert.ok(opencodeOutput.startsWith(opencodeSource));
   assert.ok(opencodeOutput.endsWith(implementerPrompt));
   assert.equal(countOccurrences(opencodeOutput, implementerPrompt), 1);
+
+  const copilotSourcePath = path.join(
+    sandbox,
+    'agents',
+    'copilot',
+    'code-implementer.agent.md'
+  );
+  const copilotSource = fs.readFileSync(copilotSourcePath, 'utf8');
+  const copilotOutput = fs.readFileSync(
+    path.join(targets.copilot, 'code-implementer.agent.md'),
+    'utf8'
+  );
+  assert.ok(copilotOutput.startsWith(copilotSource));
+  assert.ok(copilotOutput.endsWith(implementerPrompt));
+  assert.equal(countOccurrences(copilotOutput, implementerPrompt), 1);
 
   const codexOutput = fs.readFileSync(
     path.join(targets.codex, 'code-implementer.toml'),
@@ -136,6 +154,8 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     path.join(sandbox, 'agents', 'claude', 'code-reviewer.md'),
     path.join(sandbox, 'agents', 'opencode', 'code-implementer.md'),
     path.join(sandbox, 'agents', 'opencode', 'code-reviewer.md'),
+    path.join(sandbox, 'agents', 'copilot', 'code-implementer.agent.md'),
+    path.join(sandbox, 'agents', 'copilot', 'code-reviewer.agent.md'),
     path.join(sandbox, 'agents', 'pi', 'code-implementer', 'code-implementer.md'),
     path.join(sandbox, 'agents', 'pi', 'code-reviewer', 'code-reviewer.md'),
     path.join(sandbox, 'agents', 'codex', 'code-implementer.toml'),
