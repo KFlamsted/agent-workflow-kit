@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "copy-skills": "node copy-skills.js",
-    "copy-agents": "node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents",
+    "copy-agents": "node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents",
     "test": "node --test"
   }
 }

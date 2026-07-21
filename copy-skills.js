@@ -44,6 +44,14 @@ const copyModes = {
     fileExtension: '.md',
     injectPrompts: true,
   },
+  copilotAgents: {
+    sourcePath: ['agents', 'copilot'],
+    targetEnvKey: 'COPILOT_AGENTS_FOLDER',
+    label: 'Copilot agents',
+    entryType: 'file',
+    fileExtension: '.md',
+    injectPrompts: true,
+  },
 };
 
 function parseArgs(args) {
@@ -95,6 +103,16 @@ function parseArgs(args) {
       arg === 'opencodeAgents'
     ) {
       modes.push('opencodeAgents');
+      continue;
+    }
+
+    if (
+      arg === '--copilot-agents' ||
+      arg === 'copilot-agents' ||
+      arg === '--copilotAgents' ||
+      arg === 'copilotAgents'
+    ) {
+      modes.push('copilotAgents');
       continue;
     }
 

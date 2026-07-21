@@ -16,6 +16,7 @@ PI_AGENTS_TARGET_FOLDER=["/path/to/pi-agents-folder1", "/path/to/pi-agents-folde
 CODEX_AGENTS_TARGET_FOLDER=["/path/to/codex-agents-folder1", "/path/to/codex-agents-folder2"]
 CLAUDE_AGENTS_TARGET_FOLDER=["/path/to/claude-agents-folder1", "/path/to/claude-agents-folder2"]
 OPENCODE_AGENTS_TARGET_FOLDER=["/path/to/opencode-agents-folder1", "/path/to/opencode-agents-folder2"]
+COPILOT_AGENTS_FOLDER=["/path/to/copilot-agents-folder1", "/path/to/copilot-agents-folder2"]
 ```
 
 JSON arrays are preferred. Relative paths are resolved from the `.env` file's folder, `~` resolves to your home directory, and Windows drive paths are supported. In JSON strings, escape backslashes:
@@ -44,7 +45,8 @@ node copy-skills.js --pi-agents
 node copy-skills.js --codex-agents
 node copy-skills.js --claude-agents
 node copy-skills.js --opencode-agents
-node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents
+node copy-skills.js --copilot-agents
+node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents
 ```
 
 On Linux/WSL, the executable form also works:
@@ -64,14 +66,15 @@ node copy-skills.js --pi-agents /path/to/.env
 node copy-skills.js --codex-agents /path/to/.env
 node copy-skills.js --claude-agents /path/to/.env
 node copy-skills.js --opencode-agents /path/to/.env
-node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents /path/to/.env
+node copy-skills.js --copilot-agents /path/to/.env
+node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents /path/to/.env
 ```
 
-The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every Pi agent folder from `./agents/pi` into each configured `PI_AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./agents/codex` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./agents/claude` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, and every OpenCode agent `.md` file from `./agents/opencode` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder. Existing entries with the same name are overwritten.
+The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every Pi agent folder from `./agents/pi` into each configured `PI_AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./agents/codex` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./agents/claude` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, every OpenCode agent `.md` file from `./agents/opencode` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder, and every Copilot agent `.md` file from `./agents/copilot` into each configured `COPILOT_AGENTS_FOLDER` folder. Existing entries with the same name are overwritten.
 
 Direct `.txt` files in `./agents` are shared raw Markdown prompt bodies. When copying agent configurations, the script matches each configuration's filename stem to a prompt filename stem using exact, case-sensitive matching. Checked-in harness configuration files contain metadata only; matching copied Markdown files receive the raw prompt body, while matching copied TOML files receive it as a `developer_instructions` multiline value. Shared `.txt` files are not copied to agent targets.
 
-`npm run copy-agents` runs all agent copy modes: `--pi-agents --codex-agents --claude-agents --opencode-agents`.
+`npm run copy-agents` runs all agent copy modes: `--pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents`.
 When running multiple copy modes, modes without configured target folders are skipped.
 
 ## Status
