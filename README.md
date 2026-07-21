@@ -6,6 +6,13 @@ The current files should be reviewed, refined, and reworked into proper skills s
 
 The project is expected to be migrated into actual AI skills rather than using copy+paste .txt files.
 
+## CLI support and notes
+The agents and skills are mostly tested in OpenCode (see `base-prompts` and `configs` for same setup) however I test most of the skills/agents in other agent harness.  
+Here are notes regarding the differet agents  usage:
+- Codex CLI does not support spawning custom agents (per 21-07-2026) even though their docs claim that they do.
+- In Copilot CLI if running auto mode the orchestrator agent will answer questions it self (when using `end-to-end-orchestrator` and similar)
+- For subagents in Pi: It is the [pi-subagents extension by Nico Bailon](https://github.com/nicobailon/pi-subagents) that is supported
+
 ## Copy skills and agents
 
 Configure the target folders in `.env`:
