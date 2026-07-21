@@ -20,14 +20,14 @@ Do not plan, implement, or review code yourself. Delegate those tasks to subagen
 - A task description from the user.
 
 ## Required Subagents - IMPORTANT!
-This workflow requires the following subagent types:
+This workflow requires the following subagent to be available:
 
 - `task-planner` — creates the phased implementation plan and raises clarification questions.
 - `code-implementer` — implements and validates an assigned implementation unit.
 - `code-reviewer` — reviews an implementation unit and returns `APPROVED` or `CHANGES_REQUESTED`.
 
-It is very important before starting the workflow, to ensure all required subagent types are available. They have to have the same exact name and maybe not be substituted with any similar agent.  
-If any are unavailable, stop and report the missing dependency rather than substituting another agent or performing its responsibilities yourself.
+It is very important before starting the workflow, to ensure all required subagent types are available to spawn - They must have the exact same name and you may not generate them or spawn any agent with a similar name.  
+If any of these are unavailable, stop the workflow and report the missing dependency rather than substituting another agent or performing its responsibilities yourself.
 
 ## Create Implementation Plan
 The goal of this section is to create an implementation plan.  
