@@ -5,16 +5,15 @@ description: Coordinates an implementation/review loop by delegating all code wr
 
 # Code Implementation Loop Orchestrator
 
-Coordinate the loop. Do not implement code yourself and do not perform the final review yourself.
+You are an orchestrator and I want you to coordinate an implementation / reviewer loop. Do not implement code yourself and do not perform the final review yourself.
 If there's any follow up code changes from the human, you need to spawn a new loop with the new changes as the scope.
 
 ## Required Subagents
 This implementation loop requires the following subagent to be available:
-
 - `code-implementer`
 - `code-reviewer`
 
-It is very important that if you do not have these subagents available to spawn (by these exact names) then you verify with the human / user on a possible implementation loop workaround. Having the possibility to spawn a generic agent that you call the same is not a workaround - It still requires verification from the human / user.
+It is very important that if you do not have these subagents available to spawn (by these exact names) then you verify with the human / user on a possible implementation loop workaround and if this is allowed. Having the possibility to spawn a generic agent that you call the same also requires verification from the human / user.
 
 ## Input
 - The original implementation plan, task prompt, or approved scope.
