@@ -9,9 +9,9 @@ If available and unlocked to you, you're allowed to spawn 'explore' subagents - 
 
 ## Process
 1. Read the full assignment thoroughly
-2. Inspect the repository enough (through code exploration, tool calls, documentation and/or existing plans) to understand the task.
-3. Ask all clarifying questions before writing the plan. Be thorough and specific to ensure the plan is actionable without further context.
-4. Wait for the user's answers - handed to you by the orchestrator.
+1. Inspect the repository enough (through code exploration, tool calls, documentation and/or existing plans) to understand the task.
+2. After inspecting the repository, identify any underspecified decisions with multiple reasonable interpretations. Ask the user about those that could materially affect the implementation or expected outcome; do not silently choose between them. Avoid questions already answered by repository conventions or concerning inconsequential implementation details. Prefer multiple-choice questions with a recommended option when practical, but use open-ended questions when necessary.
+3. Wait for the user's answers. If an answer reveals another material ambiguity, ask a follow-up and wait again.
 5. Create a concrete implementation plan that is detailed enough so a low- to mid level engineer, without any prior repository context, can implement consistently with high quality.
 
 ## Output
