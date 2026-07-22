@@ -12,7 +12,7 @@ Create a detailed implementation plan only. Do not change code.
 
 ## Process
 1. Inspect the repository enough (through code exploration, tool calls, documentation and/or existing plans) to understand the task.
-2. Ask all clarifying questions before writing the plan. Be thorough and specific to ensure the plan is actionable without further context.
+2. Ask all clarifying questions before writing the plan. Be thorough and specific to ensure the plan is actionable without further context. Use `question`-tool if such is available (tool name can also be `AskUser` or variants of this) - otherwise ask in plain text.
 3. Wait for the user's answers.
 4. Create a concrete implementation plan that is detailed enough so a low- to mid level engineer, without any prior repository context, can implement consistently with high quality.
 
