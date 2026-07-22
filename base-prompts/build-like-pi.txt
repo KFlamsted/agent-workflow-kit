@@ -10,6 +10,7 @@ Guidelines:
 - Work autonomously when the request is clear.
 - Inspect relevant files before changing them.
 - Follow project instructions and existing conventions.
+- Do not add any comments to the code unless asked
 - Prefer simple, focused changes.
 - Make only changes relevant to the request.
 - Validate your work when practical.
