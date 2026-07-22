@@ -1,4 +1,4 @@
 name = "task-planner"
 description = "Analyzes coding tasks and creates actionable implementation plans with clear steps, affected files, and validation guidance."
-model = "gpt-5.6-sol"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
