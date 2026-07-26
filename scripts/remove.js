@@ -142,18 +142,23 @@ function askToRemoveTargets() {
 async function removeSkill(name, options) {
   validateEntryName(name);
   const source = path.join(repositoryDir, 'skills', name);
-  if (!fs.existsSync(source) || !fs.lstatSync(source).isDirectory()) {
+  const sourceExists = fs.existsSync(source);
+  if (sourceExists && !fs.lstatSync(source).isDirectory()) {
     throw new Error(`Local skill folder not found: ${source}`);
   }
 
-  const legacyRoot = path.join(repositoryDir, '.legacy-skills');
-  const destination = path.join(legacyRoot, name);
-  if (fs.existsSync(destination)) {
-    throw new Error(`Legacy destination already exists: ${destination}`);
+  if (sourceExists) {
+    const legacyRoot = path.join(repositoryDir, '.legacy-skills');
+    const destination = path.join(legacyRoot, name);
+    if (fs.existsSync(destination)) {
+      throw new Error(`Legacy destination already exists: ${destination}`);
+    }
+    fs.mkdirSync(legacyRoot, { recursive: true });
+    moveDirectory(source, destination);
+    console.log(`Moved local skill to ${destination}`);
+  } else {
+    console.log(`Local skill folder not found; continuing with configured targets: ${source}`);
   }
-  fs.mkdirSync(legacyRoot, { recursive: true });
-  moveDirectory(source, destination);
-  console.log(`Moved local skill to ${destination}`);
 
   if (!(await askToRemoveTargets())) {
     console.log('Skipped configured skill target folders.');

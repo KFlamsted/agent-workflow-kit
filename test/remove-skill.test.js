@@ -48,6 +48,39 @@ test('removes installed copies from sandbox targets on Y', (t) => {
   assert.equal(fs.existsSync(absentTarget), false);
 });
 
+test('removes installed copies on Y when the local skill is absent', (t) => {
+  const sandbox = makeSandbox(t);
+  fs.rmSync(path.join(sandbox, 'skills', 'sample'), { recursive: true });
+  const target = path.join(sandbox, 'targets', 'one');
+  fs.mkdirSync(path.join(target, 'sample'), { recursive: true });
+  fs.writeFileSync(path.join(target, 'sample', 'installed.txt'), 'installed');
+  const envPath = path.join(sandbox, 'test.env');
+  fs.writeFileSync(envPath, `SKILL_TARGET_FOLDERS=${JSON.stringify([target])}\n`);
+
+  const result = spawnSync(process.execPath, [path.join(sandbox, 'scripts', 'remove.js'), 'skill', 'sample', '--env', envPath], {
+    encoding: 'utf8', input: 'Y\n',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Do you want to remove the skills from all of your skill folder\? \[Y\/N\]/);
+  assert.equal(fs.existsSync(path.join(target, 'sample')), false);
+});
+
+test('preserves installed copies on N when the local skill is absent', (t) => {
+  const sandbox = makeSandbox(t);
+  fs.rmSync(path.join(sandbox, 'skills', 'sample'), { recursive: true });
+  const target = path.join(sandbox, 'targets', 'one');
+  fs.mkdirSync(path.join(target, 'sample'), { recursive: true });
+  const envPath = path.join(sandbox, 'test.env');
+  fs.writeFileSync(envPath, `SKILL_TARGET_FOLDERS=${JSON.stringify([target])}\n`);
+
+  const result = spawnSync(process.execPath, [path.join(sandbox, 'scripts', 'remove.js'), 'skill', 'sample', '--env', envPath], {
+    encoding: 'utf8', input: 'N\n',
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Skipped configured skill target folders/);
+  assert.equal(fs.existsSync(path.join(target, 'sample')), true);
+});
+
 test('does not overwrite an existing legacy folder', (t) => {
   const sandbox = makeSandbox(t);
   fs.mkdirSync(path.join(sandbox, '.legacy-skills', 'sample'), { recursive: true });

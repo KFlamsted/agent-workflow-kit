@@ -56,7 +56,8 @@ The skill folder is moved from `skills/<SKILL_NAME>` to
 `.legacy-skills/<SKILL_NAME>`. The command stops rather than overwriting an
 existing archive. It then asks whether the same named folder should be removed
 from every `SKILL_TARGET_FOLDERS` location; answer `Y` and Enter to remove them,
-or `N` and Enter to leave target folders unchanged.
+or `N` and Enter to leave target folders unchanged. If the local skill folder
+does not exist, the command still prompts and can remove its installed copies.
 
 You can also run the script directly:
 
