@@ -146,7 +146,7 @@ async function removeSkill(name, options) {
     throw new Error(`Local skill folder not found: ${source}`);
   }
 
-  const legacyRoot = path.join(repositoryDir, '.legacy-skill');
+  const legacyRoot = path.join(repositoryDir, '.legacy-skills');
   const destination = path.join(legacyRoot, name);
   if (fs.existsSync(destination)) {
     throw new Error(`Legacy destination already exists: ${destination}`);

@@ -27,7 +27,7 @@ test('archives a skill and skips targets on N', (t) => {
   });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(fs.existsSync(path.join(sandbox, 'skills', 'sample')), false);
-  assert.equal(fs.readFileSync(path.join(sandbox, '.legacy-skill', 'sample', 'extra.txt'), 'utf8'), 'extra\n');
+  assert.equal(fs.readFileSync(path.join(sandbox, '.legacy-skills', 'sample', 'extra.txt'), 'utf8'), 'extra\n');
   assert.match(result.stdout, /Do you want to remove the skills from all of your skill folder\? \[Y\/N\]/);
 });
 
@@ -50,7 +50,7 @@ test('removes installed copies from sandbox targets on Y', (t) => {
 
 test('does not overwrite an existing legacy folder', (t) => {
   const sandbox = makeSandbox(t);
-  fs.mkdirSync(path.join(sandbox, '.legacy-skill', 'sample'), { recursive: true });
+  fs.mkdirSync(path.join(sandbox, '.legacy-skills', 'sample'), { recursive: true });
   const result = spawnSync(process.execPath, [path.join(sandbox, 'scripts', 'remove.js'), 'skill', 'sample'], {
     encoding: 'utf8', input: 'N\n',
   });
