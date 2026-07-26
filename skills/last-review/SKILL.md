@@ -5,7 +5,7 @@ description: Explicitly invoked workflow for thoroughly reviewing the current br
 
 # Last Review
 
-Review `git diff master` thoroughly. Do not modify code.
+Review `git diff master` or `git diff main` thoroughly. Do not modify code.
 
 ## Input
 The main input is the current branch's code changes compared to master/main.  
@@ -14,7 +14,7 @@ The original implementation plan might be included, but not necessarily.
 ## Process
 1. Compare the current branch against `master`/`main` unless the user specifies another base.
 2. Review only changed code and directly related context.
-3. Focus on:
+3. In this review focus on:
   - Bugs and edge cases.
   - Maintainability.
   - Code quality.
