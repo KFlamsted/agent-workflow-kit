@@ -1,9 +1,9 @@
 ---
-name: last-review
-description: Explicitly invoked workflow for thoroughly reviewing the current branch against master without making code changes.
+name: code-review
+description: Explicitly invoked workflow for thoroughly reviewing the current branch against master or main without making code changes.
 ---
 
-# Last Review
+# Code Review
 
 Review `git diff master` or `git diff main` thoroughly. Do not modify code.
 
