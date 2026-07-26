@@ -44,6 +44,20 @@ npm run copy-skills
 npm run copy-agents
 ```
 
+To archive a local skill and optionally remove its installed copies, run:
+
+```bash
+npm run remove-skill <SKILL_NAME>
+# The conventional explicit npm argument separator is also supported:
+npm run remove-skill -- <SKILL_NAME>
+```
+
+The skill folder is moved from `skills/<SKILL_NAME>` to
+`.legacy-skill/<SKILL_NAME>`. The command stops rather than overwriting an
+existing archive. It then asks whether the same named folder should be removed
+from every `SKILL_TARGET_FOLDERS` location; answer `Y` and Enter to remove them,
+or `N` and Enter to leave target folders unchanged.
+
 You can also run the script directly:
 
 ```bash

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "copy-skills": "node scripts/copy-skills.js",
+    "remove-skill": "node scripts/remove.js skill",
     "copy-agents": "node scripts/copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents",
     "test": "node --test"
   }
