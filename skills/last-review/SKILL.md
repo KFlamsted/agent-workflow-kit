@@ -8,11 +8,11 @@ description: Explicitly invoked workflow for thoroughly reviewing the current br
 Review `git diff master` thoroughly. Do not modify code.
 
 ## Input
-The main input is the current branch's code changes compared to master.  
+The main input is the current branch's code changes compared to master/main.  
 The original implementation plan might be included, but not necessarily. 
 
 ## Process
-1. Compare the current branch against `master` unless the user specifies another base.
+1. Compare the current branch against `master`/`main` unless the user specifies another base.
 2. Review only changed code and directly related context.
 3. Focus on:
   - Bugs and edge cases.
@@ -22,8 +22,21 @@ The original implementation plan might be included, but not necessarily.
   - Design and architecture.
 
 Be thorough in your analysis, but do not be nitpicky in terms of issues you find.  
-Do not find something just to find something. This is the last review before merging to master.
+Do not find something just to find something.
 
 ## Output
-If you find issues, report them clearly with file paths and recommendations.
+If you find issues, report them clearly with file paths and recommendations.  
+
+Use this format:
+
+```md
+## Findings
+
+### 1. Short title
+- Severity: low | medium | high
+- File: `path/to/file`
+- Issue: ...
+- Recommendation: ...
+```
+
 If there are no findings, say so clearly.
