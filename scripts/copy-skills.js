@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const scriptDir = __dirname;
+const repositoryDir = path.resolve(__dirname, '..');
 
 const copyModes = {
   skills: {
@@ -308,7 +308,7 @@ function copyEntry(entryPath, targetRoot, entryType) {
 }
 
 function loadSharedPrompts() {
-  const promptsDir = path.join(scriptDir, 'agents');
+  const promptsDir = path.join(repositoryDir, 'agents');
 
   if (!fs.existsSync(promptsDir) || !fs.statSync(promptsDir).isDirectory()) {
     throw new Error(`Shared prompts folder not found: ${promptsDir}`);
@@ -385,8 +385,8 @@ function injectPrompts(destination, prompts) {
 function runCopyMode(mode, env, envDir, allowMissingTarget, prompts) {
   const copyMode = copyModes[mode];
   const sourceDir = copyMode.sourcePath
-    ? path.join(scriptDir, ...copyMode.sourcePath)
-    : path.join(scriptDir, copyMode.sourceFolderName);
+    ? path.join(repositoryDir, ...copyMode.sourcePath)
+    : path.join(repositoryDir, copyMode.sourceFolderName);
 
   if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
     throw new Error(`${copyMode.label} folder not found: ${sourceDir}`);
@@ -429,7 +429,7 @@ function runCopyMode(mode, env, envDir, allowMissingTarget, prompts) {
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
-  const envPath = path.resolve(options.envFile || path.join(scriptDir, '.env'));
+  const envPath = path.resolve(options.envFile || path.join(repositoryDir, '.env'));
   const env = readEnvFile(envPath);
   const envDir = path.dirname(envPath);
   const allowMissingTarget = options.modes.length > 1;

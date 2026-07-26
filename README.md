@@ -47,19 +47,19 @@ npm run copy-agents
 You can also run the script directly:
 
 ```bash
-node copy-skills.js
-node copy-skills.js --pi-agents
-node copy-skills.js --codex-agents
-node copy-skills.js --claude-agents
-node copy-skills.js --opencode-agents
-node copy-skills.js --copilot-agents
-node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents
+node scripts/copy-skills.js
+node scripts/copy-skills.js --pi-agents
+node scripts/copy-skills.js --codex-agents
+node scripts/copy-skills.js --claude-agents
+node scripts/copy-skills.js --opencode-agents
+node scripts/copy-skills.js --copilot-agents
+node scripts/copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents
 ```
 
 On Linux/WSL, the executable form also works:
 
 ```bash
-./copy-skills.js
+./scripts/copy-skills.js
 ```
 
 To use a custom `.env` file path:
@@ -68,13 +68,13 @@ To use a custom `.env` file path:
 npm run copy-skills -- /path/to/.env
 npm run copy-agents -- /path/to/.env
 # or
-node copy-skills.js /path/to/.env
-node copy-skills.js --pi-agents /path/to/.env
-node copy-skills.js --codex-agents /path/to/.env
-node copy-skills.js --claude-agents /path/to/.env
-node copy-skills.js --opencode-agents /path/to/.env
-node copy-skills.js --copilot-agents /path/to/.env
-node copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents /path/to/.env
+node scripts/copy-skills.js /path/to/.env
+node scripts/copy-skills.js --pi-agents /path/to/.env
+node scripts/copy-skills.js --codex-agents /path/to/.env
+node scripts/copy-skills.js --claude-agents /path/to/.env
+node scripts/copy-skills.js --opencode-agents /path/to/.env
+node scripts/copy-skills.js --copilot-agents /path/to/.env
+node scripts/copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents /path/to/.env
 ```
 
 The script copies every skill folder from `./skills` into each configured `SKILL_TARGET_FOLDERS` folder, every Pi agent folder from `./agents/pi` into each configured `PI_AGENTS_TARGET_FOLDER` folder, every Codex agent file from `./agents/codex` into each configured `CODEX_AGENTS_TARGET_FOLDER` folder, every Claude agent `.md` file from `./agents/claude` into each configured `CLAUDE_AGENTS_TARGET_FOLDER` folder, every OpenCode agent `.md` file from `./agents/opencode` into each configured `OPENCODE_AGENTS_TARGET_FOLDER` folder, and every Copilot agent `.md` file from `./agents/copilot` into each configured `COPILOT_AGENTS_FOLDER` folder. Existing entries with the same name are overwritten.

@@ -17,9 +17,10 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'copy-agents-'));
   t.after(() => fs.rmSync(sandbox, { recursive: true, force: true }));
 
+  fs.mkdirSync(path.join(sandbox, 'scripts'));
   fs.copyFileSync(
-    path.join(repositoryDir, 'copy-skills.js'),
-    path.join(sandbox, 'copy-skills.js')
+    path.join(repositoryDir, 'scripts', 'copy-skills.js'),
+    path.join(sandbox, 'scripts', 'copy-skills.js')
   );
   fs.cpSync(path.join(repositoryDir, 'agents'), path.join(sandbox, 'agents'), {
     recursive: true,
@@ -57,7 +58,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   const result = spawnSync(
     process.execPath,
     [
-      path.join(sandbox, 'copy-skills.js'),
+      path.join(sandbox, 'scripts', 'copy-skills.js'),
       '--pi-agents',
       '--codex-agents',
       '--claude-agents',
