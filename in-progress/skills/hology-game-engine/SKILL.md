@@ -77,11 +77,11 @@ my-game/
 ├── tsconfig.json
 ├── package.json
 ├── src/
-│   ├── main.tsx                    # UI entry: renders <HologyScene> with game and runtime registries
-│   ├── App.tsx                     # HUD / menus (React) layered over the game
+│   ├── main.tsx                    # React bootstrap: renders <App />
+│   ├── App.tsx                     # renders <HologyScene> with HUD / menu DOM layered over the game
 │   ├── App.css
 │   ├── actors/
-│   │   ├── index.ts                # MUST re-export every actor (default export object) or the editor won't see them
+│   │   ├── index.ts                # registry exports for editor placement and serialized scene/prefab content
 │   │   └── *-actor.ts              # one file per actor class
 │   ├── components/
 │   │   ├── index.ts                # re-exports shared ActorComponents
@@ -99,11 +99,12 @@ my-game/
     └── assets/                     # raw model/texture/audio source files
 ```
 
-- The entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Supply the actor and shader registries there, plus the component registry when the project defines custom components. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here.
-- Re-export files (`actors/index.ts`, `components/index.ts`, `shaders/index.ts`) are how the editor and runtime discover your classes. Add every new class to the matching `index.ts`.
+- The entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Supply the actor and shader registries there, plus the component registry when the project defines custom components. These registry exports make registered classes available when loading editor-authored content. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here.
+- Add actors that need editor placement or loading from serialized scene/prefab content to `actors/index.ts`. An actor used only through direct runtime spawning with its class does not need an actor registry export. Likewise, add custom components and shaders to their registries when serialized or editor-authored content needs them; a registry export is distinct from a normal TypeScript import.
 - Prefer the editor's "Add new → Actor class" to scaffold new actors (it wires up the file + export for you).
 - Run in dev with `npm run dev` (Vite, serves on http://localhost:5173).
 - Reference: no single "project structure" doc page exists — the canonical example is https://github.com/hologyengine/starter-third-person-shooter (described at https://docs.hology.app/getting-started/starter-project-third-person-shooter.md).
+- This React organization matches the official starter, but it is not an engine requirement. Equivalent composition is valid as long as `HologyScene` receives the required game class and registries.
 
 ```typescript
 // src/services/game.ts — entry point
@@ -125,7 +126,7 @@ export default Game
 ## Core concepts (essentials)
 
 ### Actors — `@Actor()` + `BaseActor`
-A game object with a transform (`position`, `rotation`) and a Three.js object at `this.object`. Extend `BaseActor`, decorate with `@Actor()`, re-export from `src/actors/index.ts`.
+A game object with a transform (`position`, `rotation`) and a Three.js object at `this.object`. Extend `BaseActor` and decorate with `@Actor()`. Add a registry export from `src/actors/index.ts` when the actor needs editor placement or must load from serialized scene/prefab content; direct runtime spawning by class does not require one.
 
 ```typescript
 @Actor()
@@ -230,7 +231,7 @@ Body types: `static` / `kinematic` / `dynamic`. → `references/physics.md`
 
 **Do**
 - Structure the game around actors, components and services; wire everything up in `GameInstance.onStart`.
-- Re-export every actor from `src/actors/index.ts` (and components/shaders similarly).
+- Register actors needed for editor placement or serialized scene/prefab content in `src/actors/index.ts`; register custom components and shaders when editor-authored or serialized content uses them.
 - Call `inject(...)`/`attach(...)` only in the constructor / field initializers; read `@Parameter` values only from `onInit` onward.
 - Pre-allocate vectors/objects outside `onUpdate`/`beforeStep` and mutate them; use `deltaTime` to stay frame-rate independent.
 - Put camera-follow code in `onLateUpdate`; build behavior trees in `onBeginPlay`.

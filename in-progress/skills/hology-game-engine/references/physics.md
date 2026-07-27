@@ -43,7 +43,14 @@ onInit() {
 }
 ```
 
-Events: `onBeginContact`, `onEndContact`, `onHasContactChanged`, `onCollisionWithActor`, `onCollisionWithActorType`, `onBeginOverlapWithActor(Type)`, `onEndOverlapWithActor(Type)`. Overlap events require a trigger body (`isTrigger: true`).
+Events: `onBeginContact`, `onEndContact`, `onHasContactChanged`, `onCollisionWithActor`, and `onCollisionWithActorType`. The four overlap subscription APIs are:
+
+- `onBeginOverlapWithActorType(self, ActorClass)`
+- `onEndOverlapWithActorType(self, ActorClass)`
+- `onBeginOverlapWithActor(self, actorInstance)`
+- `onEndOverlapWithActor(self, actorInstance)`
+
+The `ActorType` variants filter by actor class; the `Actor` variants target one specific actor instance. Overlap events require a trigger body (`isTrigger: true`).
 
 ## Applying forces (dynamic bodies)
 
@@ -88,7 +95,7 @@ class CharacterActor extends BaseActor {
   private mesh = attach(MeshComponent, {
     object: new Mesh(new CylinderGeometry(.5, .5, 2), new MeshStandardMaterial({ color: 0xffffff }))
   })
-  private thirdPersonCamera = attach(ThirdPersonCameraComponent /* { fixedBehind: false } */)
+  public thirdPersonCamera = attach(ThirdPersonCameraComponent /* { fixedBehind: false } */)
   public movement = attach(CharacterMovementComponent, {
     autoStepMaxHeight: 0, colliderHeight: 2, colliderRadius: .5,
     maxWalkingSlopeAngle: 70, maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
@@ -101,7 +108,16 @@ Control it by binding its inputs (see `input.md`):
 - **directionInput** — `togglePositiveY/negativeY/positiveX/negativeX` for WASD movement.
 - **jumpInput** — `.toggle`.
 - **sprintInput** — `.toggle`.
-- **rotationInput** — `.rotateY` (turn), plus camera rotation when `fixedBehind: false`.
+- **rotationInput** — `movement.rotationInput.rotateY` rotates the character. A camera configured with `fixedBehind: false` does not rotate automatically; rotate it through its own `thirdPersonCamera.rotationInput.rotateY` input.
+
+For a freely rotating third-person camera (`fixedBehind: false`), expose the camera component on the character as shown above and send the same input delta to both components:
+
+```typescript
+this.input.bindDelta(InputAction.rotate, delta => {
+  character.movement.rotationInput.rotateY(delta)
+  character.thirdPersonCamera.rotationInput.rotateY(delta)
+})
+```
 
 For AI-driven movement toward a navmesh target, use `CharacterMoveToNode` with this component (see `ai-and-navigation.md`).
 
