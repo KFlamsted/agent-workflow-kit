@@ -32,10 +32,55 @@ Raw Three.js is still fair game for **content details** — geometries, material
 
 ## Project structure & entry point
 
-- Actor classes live in `src/actors/*.ts` and MUST be re-exported from `src/actors/index.ts` (default export object) or the editor won't find them.
-- Services live in `src/services/*.ts`.
-- The game entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`). Its `async onStart()` runs when the game starts — spawn actors, wire up controllers and cameras here.
+A Hology project is a Vite + TypeScript web app. `hology.config.json` at the root declares the engine paths — keep to these conventions:
+
+```json
+{
+  "dataPath": "public/data",     // editor-authored scenes & asset metadata
+  "shadersPath": "src/shaders",
+  "actorsPath": "src/actors",
+  "componentsPath": "src/components"
+}
+```
+
+Canonical layout (matches the official `starter-third-person-shooter`):
+
+```
+my-game/
+├── hology.config.json              # engine paths (above)
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── package.json
+├── src/
+│   ├── main.tsx                    # UI entry: renders <HologyScene gameClass sceneName dataDir shaders actors>
+│   ├── App.tsx                     # HUD / menus (React) layered over the game
+│   ├── App.css
+│   ├── actors/
+│   │   ├── index.ts                # MUST re-export every actor (default export object) or the editor won't see them
+│   │   └── *-actor.ts              # one file per actor class
+│   ├── components/
+│   │   ├── index.ts                # re-exports shared ActorComponents
+│   │   └── *-component.ts
+│   ├── services/
+│   │   ├── game.ts                 # GameInstance entry point (see below)
+│   │   └── player-controller.ts    # input/keybind service, other game systems & state
+│   └── shaders/
+│       └── index.ts                # re-exports node/TS shaders
+└── public/
+    ├── data/                       # engine data written by the editor — don't hand-edit
+    │   ├── asset/
+    │   ├── scene/
+    │   └── scene-blob/
+    └── assets/                     # raw model/texture/audio source files
+```
+- The game entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here.
+- Re-export files (`actors/index.ts`, `components/index.ts`, `shaders/index.ts`) are how the editor and runtime discover your classes. Add every new class to the matching `index.ts`.
+- Prefer the editor's "Add new → Actor class" to scaffold new actors (it wires up the file + export for you).
 - Run in dev with `npm run dev` (Vite, serves on http://localhost:5173).
+
+Reference: there is no single "project structure" doc page — the canonical example is the official starter repo (https://github.com/hologyengine/starter-third-person-shooter), described at https://docs.hology.app/getting-started/starter-project-third-person-shooter.md.
+
 
 ```typescript
 // src/services/game.ts
