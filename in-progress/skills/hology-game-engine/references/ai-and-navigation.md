@@ -12,7 +12,7 @@ private navigation = inject(Navigation)
 onUpdate(dt: number) {
   const player = this.world.findActorByType(Character)
   const { success, path } = this.navigation.findPath(this.position, player.position)
-  if (success) {
+  if (success && path.length >= 2) {
     const dir = path[1].clone().sub(this.position).normalize()
     this.position.addScaledVector(dir, dt * this.movementSpeed)
   }
@@ -20,7 +20,7 @@ onUpdate(dt: number) {
 ```
 
 Key methods:
-- **`findPath(from, to)`** → `{ success: boolean, path: Vector3[] }` — `path[0]` is the start; steer toward `path[1]`.
+- **`findPath(from, to)`** → `{ success: boolean, path: Vector3[] }` — `path[0]` is normally the start, and `path[1]` is the next waypoint only when at least two points are returned.
 - **`findClosestPoint(point)`** → `Vector3 | null` — nearest point on the navmesh (may be `null` while the mesh is still generating — handle it).
 
 ## Behavior trees
@@ -34,7 +34,9 @@ onUpdate(dt: number) { this.behaviorTree?.tick(dt) }
 
 ### Built-in nodes
 
-**Composite** (manage children): `SequenceNode` (all must succeed, stops on first failure), `SelectorNode` (first success wins, tries next on failure), `ParallelSequenceNode`, `ParallelSelectorNode`, `WeightedRandomSelectorNode`.
+**Composite** (manage children): `SequenceNode` (runs children in order, stops on the first failure, and conceptually succeeds after all children succeed), `SelectorNode` (first success wins, tries next on failure), `ParallelSequenceNode`, `ParallelSelectorNode`, `WeightedRandomSelectorNode`.
+
+> **Version note (`@hology/core@0.0.232`):** `SequenceNode.tick()` returns `SUCCESS` while retaining its position when the active child returns `RUNNING`. This differs from conventional behavior and the public documentation. If a sequence is nested under a node that relies on propagated `RUNNING` state, inspect and test the behavior of the installed package.
 
 **Decorator** (wrap one child): `InverterNode`, `RepeatNode` (loop forever — typical root), `RepeatTimesNode`, `RepeatUntilNode`, `RepeatUntilFailNode`, `GuardNode`, `CooldownNode`, `TimerNode`, `DelayNode`, `ThrottleNode`.
 

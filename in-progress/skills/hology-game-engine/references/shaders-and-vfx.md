@@ -17,7 +17,9 @@ const ballMaterial = new NodeShaderMaterial({
 
 ## TypeScript (node) shaders
 
-Write shaders in TypeScript instead of GLSL. The code builds a graph of nodes that compiles to GPU code — no runtime performance penalty, but you get types and reuse. You can create shader assets in the editor (see the "Creating shaders" doc) or build materials directly in code with the `@hology/core/shader-nodes` library.
+Custom shaders are defined in project source as either a TypeScript `NodeShader` class or a GLSL-backed `Shader` class. Export the class from the configured shader registry—conventionally `src/shaders/index.ts`—to make it available to Hology and the editor. When you need a reusable editor-authored material, create or configure a material asset in the editor and select the registered custom shader.
+
+You can also construct a `NodeShaderMaterial` directly in gameplay code with the `@hology/core/shader-nodes` library. This direct material construction complements registered, editor-facing shader classes rather than replacing them:
 
 ```typescript
 import { rgb, standardMaterial, translateY, sin, float, NodeShaderMaterial, timeUniforms } from '@hology/core/shader-nodes'

@@ -104,11 +104,13 @@ class CharacterActor extends BaseActor {
   public thirdPersonCamera = attach(ThirdPersonCameraComponent /* { fixedBehind: false } */)
   public movement = attach(CharacterMovementComponent, {
     autoStepMaxHeight: 0, colliderHeight: 2, colliderRadius: .5,
-    maxWalkingSlopeAngle: 70, maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
+    maxSlopeClimbAngle: 70, maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
     // rotateToMovementDirection: true,  // face movement dir instead of camera dir
   })
 }
 ```
+
+Current `@hology/core` versions use `maxSlopeClimbAngle`. Older releases and the published character-movement documentation may use `maxWalkingSlopeAngle`; for an existing project, verify the property in its installed `@hology/core` declarations.
 
 Control it by binding its inputs (see `input.md`):
 - **directionInput** — `togglePositiveY/negativeY/positiveX/negativeX` for WASD movement.
