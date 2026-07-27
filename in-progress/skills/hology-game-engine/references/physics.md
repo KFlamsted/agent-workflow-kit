@@ -10,7 +10,7 @@ Inject it for forces, damping, transform sync, raycasts, and collision events. A
 private physics = inject(PhysicsSystem)
 
 onInit() {
-  this.physics.addActor(this, [new BoxCollisionShape(1, 1, 1)], {
+  this.physics.addActor(this, [new BoxCollisionShape(new Vector3(1, 1, 1))], {
     isTrigger: false,
     mass: 1,
     friction: 1,
@@ -135,4 +135,5 @@ import { MeshComponent, CharacterMovementComponent, ThirdPersonCameraComponent,
          TriggerVolumeComponent, TriggerVolume } from '@hology/core/gameplay/actors'
 import { PhysicalShapeMesh, BoxCollisionShape, SphereCollisionShape } from '@hology/core'
 import { takeUntil } from 'rxjs'
+import { Vector3 } from 'three'
 ```
