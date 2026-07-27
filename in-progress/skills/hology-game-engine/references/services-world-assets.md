@@ -99,7 +99,7 @@ this.pointer.onClickActorType(Coin).subscribe(({ actor: coin, intersection }) =>
 })
 ```
 
-Event kinds (each has `Object3D` / `Actor` / `ActorType` variants): `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`. Object3D variants emit an event with `object` and `intersection`; actor and actor-type variants emit an event with `actor` and `intersection`, rather than passing the actor directly. The intersection includes `point`, `distance`, `face`, `object`, `uv`, and `uv2`. When rendering DOM UI over the game, add the overlay CSS from `ui-and-react.md` so canvas clicks still reach PointerEvents.
+Event kinds (each has `Object3D` / `Actor` / `ActorType` variants): `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`. Object3D variants emit an event with `object` and `intersection`; actor and actor-type variants emit an event with `actor` and `intersection`, rather than passing the actor directly. The intersection normally includes `point`, `distance`, `face`, `object`, `uv`, and `uv2`. **Exception:** in current Hology runtime versions, pointer-leave events emit `intersection: null` because the pointer is no longer intersecting the target, despite the public docs and TypeScript declarations typing it as always present. Do not access intersection fields in a leave handler without a null check. When rendering DOM UI over the game, add the overlay CSS from `ui-and-react.md` so canvas clicks still reach PointerEvents.
 
 ## Sound
 
