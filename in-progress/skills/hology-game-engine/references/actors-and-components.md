@@ -116,7 +116,7 @@ class BallActor extends BaseActor {
       new SphereGeometry(0.2, 50, 50),
       new MeshStandardMaterial({ color: 0xffff00 }),
       new SphereCollisionShape(0.2)),   // physics shape, independent of render geometry
-    bodyType: PhysicsBodyType.dynamic,  // dynamic | kinematic | static
+    bodyType: PhysicsBodyType.dynamic,
     mass: 2,
     friction: 1,
   })
@@ -137,9 +137,10 @@ const ball = await spawnPoint.spawnActor(BallActor) // shorthand using the spawn
 
 ## Moving actors
 
-Two approaches:
+Three approaches:
 - **Direct transform**: set `this.position` / `this.rotation`. This updates the rendered object but NOT the physics world — call `physics.updateActorTransform(this)` afterwards to sync the body.
-- **Physics simulation**: give the actor a dynamic/kinematic body and drive it with forces/velocity (see `physics.md`).
+- **Dynamic physics body**: drive simulated motion with forces or impulses; velocity control can also be appropriate. Dynamic bodies respond to gravity and collisions.
+- **Kinematic physics body**: control movement explicitly through position or velocity. Kinematic bodies ignore forces and impulses but can push dynamic bodies. See `physics.md` for the version-specific kinematic body values.
 
 ```typescript
 onUpdate(deltaTime: number) {

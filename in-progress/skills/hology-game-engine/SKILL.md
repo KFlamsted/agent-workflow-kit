@@ -19,7 +19,7 @@ Hology already wraps most of what a game needs. **Do not hand-roll from scratch 
 | --- | --- |
 | A game object | `@Actor()` + `BaseActor` (not a bare `THREE.Object3D`) |
 | Mesh + physics body | `MeshComponent` + `PhysicalShapeMesh` (not manual `THREE.Mesh` + external physics) |
-| Loading models/textures/audio/materials | `AssetLoader` (not `GLTFLoader`/`TextureLoader`/`AudioLoader` directly) |
+| Loading models/textures/audio/materials | Prefer `AssetLoader` for Hology-managed/editor assets and supported paths. Use a direct Three.js loader only for an unsupported format, loader-specific behavior `AssetLoader` does not expose, or an established project pattern. |
 | The camera / render loop / pause | `ViewController` (not your own `PerspectiveCamera` + `requestAnimationFrame`) |
 | Spawning/finding objects, directional light | `World` (not `scene.add`) |
 | Keyboard/mouse input | `InputService` (not raw `addEventListener('keydown')`) |
@@ -33,7 +33,7 @@ Hology already wraps most of what a game needs. **Do not hand-roll from scratch 
 | Shared/global state & systems | `@Service()` singletons |
 | Per-frame logic | actor `onUpdate`/`onLateUpdate` or `ViewController.onLateUpdate` (not your own loop) |
 
-Raw Three.js is still fair game for **content details** — geometries, materials, `THREE.Vector3` math, `THREE.Audio` config — but the game's structure, lifecycle, loading and systems should go through Hology.
+Raw Three.js is still fair game for **content details** — geometries, materials, `THREE.Vector3` math, `THREE.Audio` config — but the game's structure, lifecycle and systems should go through Hology. Asset loading should also use Hology's pipeline by default; direct Three.js loaders are narrow exceptions, not a replacement for `AssetLoader`.
 
 ## Reference index — open the file for your task
 
@@ -201,13 +201,15 @@ this.view.paused = true   // pauses render + input
 ```
 → `references/services-world-assets.md`
 
-### `AssetLoader` — load at runtime (not raw Three.js loaders)
+### `AssetLoader` — preferred runtime asset loading
 ```typescript
 private assets = inject(AssetLoader)
 const model = await this.assets.getModelByAssetName('MyCharacter') // { scene, animations }
 this.object.add(model.scene)
 ```
 Also `getTextureByAssetName`, `getAudioByAssetName`, `getPrefabByName`, `getModelAtPath`, `*ById`, `getAudioAtPath`, … → `references/services-world-assets.md`
+
+Use `AssetLoader` for Hology-managed/editor assets and formats or path loading it supports. A direct Three.js loader is reasonable only for an unsupported format, required loader-specific behavior, or an established project pattern such as the [official third-person starter](https://github.com/hologyengine/starter-third-person-shooter)'s raw FBX/GLB loading; it is not the default replacement for Hology's asset pipeline.
 
 ### `InputService` — player input
 Separates keybinds → actions → callbacks. Configure in a player-controller service; call `input.start()`.
@@ -229,7 +231,7 @@ this.physics.onBeginOverlapWithActorType(this, Coin)
   .subscribe(coin => this.world.removeActor(coin))
 this.physics.updateActorTransform(this)   // after manually setting position/rotation on a body
 ```
-Body types: `static` / `kinematic` / `dynamic`. → `references/physics.md`
+The public docs describe `static` / `kinematic` / `dynamic`; `@hology/core@0.0.232` also declares `kinematicVelocityBased`. → `references/physics.md`
 
 ## Do's and Don'ts
 
@@ -245,7 +247,7 @@ Body types: `static` / `kinematic` / `dynamic`. → `references/physics.md`
 - Open the matching `references/*.md` before implementing a topic in depth.
 
 **Don't**
-- Don't build your own render loop, camera, asset loaders, input listeners, pathfinding, or particle systems when Hology provides them.
+- Don't build your own render loop, camera, input listeners, pathfinding, or particle systems when Hology provides them. Don't replace `AssetLoader` by default; use a direct Three.js loader only for unsupported formats, unexposed loader-specific behavior, or an established project pattern.
 - Don't allocate new objects every frame in `onUpdate`/`beforeStep` (GC stalls).
 - Don't rely on ordering between different actors' `onUpdate`/`onInit` — communicate via events/services.
 - Don't read `@Parameter` fields in the constructor (still `undefined`).

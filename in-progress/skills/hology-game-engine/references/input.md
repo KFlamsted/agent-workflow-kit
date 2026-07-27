@@ -17,11 +17,12 @@ enum InputAction { moveForward, moveBackward, moveLeft, moveRight, jump, sprint,
 ```typescript
 this.input.setKeybind(InputAction.moveForward, new Keybind('w'))     // Keybind(key, shift?, ctrl?)
 this.input.setKeybind(InputAction.jump, new Keybind(' '))
+this.input.setKeybind(InputAction.shoot, new Keybind('MouseLeft'))
 this.input.setMousebind(InputAction.rotate, new Mousebind(0.01, true, 'x'))  // (sensitivity, flipped, 'x'|'y')
 this.input.setWheelbind(InputAction.zoomCamera, new Wheelbind(0.0003, false)) // (sensitivity, flipped)
 ```
 
-`key` is a `KeyboardEvent.key` value (e.g. `'w'`, `' '`, `'Shift'`). Keybinds can be read from persistent storage to let players remap controls.
+For keyboard input, `key` is generally a `KeyboardEvent.key` value (e.g. `'w'`, `' '`, `'Shift'`). Hology also accepts the mouse-button values `'MouseLeft'`, `'MouseMiddle'`, and `'MouseRight'` in a `Keybind`. `Mousebind` is specifically for mouse **movement** on an axis; mouse-button presses use `Keybind`. Keybinds can be read from persistent storage to let players remap controls.
 
 ## Binding actions to callbacks
 

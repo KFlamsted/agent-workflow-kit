@@ -68,7 +68,7 @@ Don't build your own `PerspectiveCamera` + `requestAnimationFrame` loop — use 
 
 ## AssetLoader — load assets at runtime
 
-Load by asset **name** (as set in editor), asset **id**, or **file path**. Use this instead of raw Three.js loaders so assets resolve through the project pipeline.
+Load by asset **name** (as set in editor), asset **id**, or **file path**. Prefer this for Hology-managed/editor assets and supported paths so assets resolve through the project pipeline. Direct Three.js loaders are narrow exceptions for unsupported formats, loader-specific behavior `AssetLoader` does not expose, or an established project pattern; they should not replace this service by default.
 
 ```typescript
 private assets = inject(AssetLoader)
@@ -79,13 +79,22 @@ const buf  = await this.assets.getAudioByAssetName('JumpSound')     // AudioBuff
 const prefab = await this.assets.getPrefabByName('Enemy')           // Prefab
 ```
 
-Full method set:
+Common documented methods:
 - Models: `getModelByAssetName`, `getModelByAssetId` → `LoadedMesh`; `getModelAtPath` (`.glb/.gltf/.fbx/.obj`) → `Object3D`; `getGltfAtPath` → full `GLTF`.
 - Textures: `getTextureByAssetName`, `getTextureByAssetId` → `THREE.Texture`.
 - Audio: `getAudioByAssetName`, `getAudioByAssetId`, `getAudioAtPath` → `AudioBuffer`.
 - Materials: `getMaterialByAssetId` → `THREE.Material`.
 - Prefabs: `getPrefabByName`, `getPrefabById` → `Prefab`.
 - Raw: `getAsset(id)` → `Asset`.
+
+Additional APIs declared by **`@hology/core@0.0.232`** (not all are covered by the public loading guide):
+- Animation: `getAnimationClipByAssetId`, `getAnimationClipByAssetName` → `Promise<THREE.AnimationClip | null>`; `getAnimationClipForTargetByAssetId(id, targetRigId?)` resolves an animation reference for a target rig and returns the same type.
+- Sequences: `getSequenceById`, `getSequenceByName` → `Promise<Sequence>`.
+- Data assets: `getDataAssetById(id, type?)`, `getDataAssetByName(name, type?)` → `Promise<DataAssetRef<T> | null>`; `getDataAssetsByType(type)` → `Promise<T[]>`.
+- Shader graphs: `getShaderGraphByAssetId` → `Promise<ShaderGraphDocument>`; `prepareShaderGraphParameters(graph, params?)` → `Promise<Record<string, unknown>>`.
+- Cache: `clearCache(asset)` and `clearCacheById(assetId)` → `void`.
+
+This is not an exhaustive or cross-version-stable inventory. Inspect the project's installed `AssetLoader` declarations for the authoritative API, signatures, and return types.
 
 ## PointerEvents — clicks / hovers on 3D objects
 

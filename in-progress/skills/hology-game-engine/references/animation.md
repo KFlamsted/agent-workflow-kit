@@ -51,7 +51,9 @@ this.characterAnimation.playStateMachine(asm)
 Transition methods on a state:
 - **`transitionsTo(state, predicate)`** — one-way; transition when predicate is true.
 - **`transitionsBetween(state, predicate)`** — bi-directional (back when predicate goes false).
-- **`transitionsOnComplete(state, predicate?)`** — for clips that naturally end (jump → fall); optional predicate selects among candidates.
+- **`transitionsOnComplete(state, predicate?)`** — for clips that naturally end (jump → fall). The public documentation presents the optional predicate as useful for selecting among multiple possible completion destinations.
+
+  **`@hology/core@0.0.232` version note:** in this runtime, a true predicate can trigger the transition early, but after the clip reaches its completion threshold the transition can succeed regardless of that predicate. Predicates therefore do not reliably gate or select completion destinations in this version. Inspect and test the installed package before designing multiple completion transitions around predicate selection.
 
 ### Child states
 

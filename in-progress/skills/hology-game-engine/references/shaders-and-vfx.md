@@ -37,4 +37,45 @@ const mesh = new Mesh(new SphereGeometry(5, 30, 15), material)
 
 ## VFX
 
-VFX (particle systems, custom shaders, materials, animation, post-processing combined) has dedicated editor tooling. Create effect assets in the editor, then place them in scenes or spawn them dynamically from gameplay code. Use this tooling rather than assembling particle systems by hand in Three.js. See the VFX doc pages (VFX assets, emitter/flipbook/lens-flare tutorials) for authoring specifics.
+VFX (particle systems, custom shaders, materials, animation, post-processing combined) has dedicated editor tooling. Create effect assets in the editor, then place them in scenes or spawn them dynamically from gameplay code. Use this tooling rather than assembling particle systems by hand in Three.js. See the [VFX asset documentation](https://docs.hology.app/visual-effects/vfx-assets.md) and emitter/flipbook/lens-flare tutorials for authoring specifics.
+
+### Spawn by asset ID
+
+Inject `VfxService` during construction or field initialization, create the effect from an async lifecycle method, then start it:
+
+```typescript
+import { Actor, BaseActor, VfxService, inject } from '@hology/core/gameplay'
+
+@Actor()
+class ImpactEffect extends BaseActor {
+  private vfx = inject(VfxService)
+
+  async onInit() {
+    const vfxActor = await this.vfx.createFromAssetId('your-asset-id')
+    vfxActor.play()
+  }
+}
+```
+
+### Select the effect in the editor
+
+Use a `VisualEffect` parameter when designers should select the asset per actor instance:
+
+```typescript
+import { Actor, BaseActor, Parameter, VisualEffect } from '@hology/core/gameplay'
+
+@Actor()
+class ConfigurableEffect extends BaseActor {
+  @Parameter()
+  private visualEffect: VisualEffect
+
+  async onInit() {
+    const vfxActor = await this.visualEffect.create(this)
+    vfxActor.play()
+  }
+}
+```
+
+The public example shows `await visualEffect.create()` with no argument; the `@hology/core@0.0.232` declaration requires a parent `Object3D | BaseActor`, so the version-valid example above passes `this`. Check the installed declaration when targeting another version.
+
+The returned VFX actor provides the documented `play()` and `stop()` controls, plus a writable `timescale` speed multiplier (for example, `vfxActor.timescale = 0.5`). The parameter workflow preserves editor configuration; the service workflow is convenient for runtime spawning by known asset ID.

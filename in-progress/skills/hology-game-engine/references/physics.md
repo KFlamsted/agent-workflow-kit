@@ -23,8 +23,10 @@ onInit() {
 ## Body types (`PhysicsBodyType`)
 
 - **static** — never moves; unaffected by forces/collisions (ground, walls, platforms). Can be collided with.
-- **kinematic** — moved explicitly by setting position/velocity; unaffected by forces but pushes dynamic bodies (moving platforms, elevators, the built-in character controller).
+- **kinematic** — moved explicitly through position-based kinematic control; unaffected by forces and impulses but pushes dynamic bodies (moving platforms, elevators, the built-in character controller).
 - **dynamic** — fully simulated: responds to forces, impulses, gravity, collisions (balls, crates, props).
+
+Those are the three types presented in the public Hology physics documentation. **`@hology/core@0.0.232` version note:** the installed enum also declares **`kinematicVelocityBased`**. In that runtime, `kinematic` maps to Rapier's position-based kinematic body and `kinematicVelocityBased` maps to Rapier's velocity-based kinematic body. Both are explicitly controlled kinematic bodies rather than force-driven bodies. Before using the fourth value in an existing project, inspect that project's installed `PhysicsBodyType` enum; it is not yet part of the public three-type prose model and may vary by package version.
 
 ## Collision shapes
 
