@@ -28,7 +28,7 @@ It is very important that if you do not have these subagents available to spawn 
    - the implementer's summary;
    - the changes made by the implementer, using the current diff or changed files as evidence.
 4. If the reviewer returns `APPROVED`, stop the loop and summarize the result.
-5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementation-loop.code-implementer` (might be called `code-implementer`) agent.
+5. If the reviewer returns `CHANGES_REQUESTED`, synthesize only the required fixes into a focused prompt and spawn a new `code-implementer` agent.
 6. Repeat implementer -> reviewer until approval.
 
 ## Rules
