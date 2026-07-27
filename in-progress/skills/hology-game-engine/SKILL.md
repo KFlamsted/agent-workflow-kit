@@ -1,6 +1,6 @@
 ---
 name: hology-game-engine
-description: Reference for building games with the Hology engine (a TypeScript/Three.js game framework). Use whenever writing or reviewing Hology gameplay code — actors, services, components, input, physics, assets, world, cameras and UI. Prefer Hology's built-in framework helpers over reimplementing engine features directly in Three.js.
+description: Reference for building games with the Hology engine (a TypeScript/Three.js game framework). Use whenever writing or reviewing Hology gameplay code — actors, services, components, input, physics, assets, world, cameras and UI.
 ---
 
 # Hology Game Engine
