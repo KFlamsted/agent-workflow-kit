@@ -4,6 +4,7 @@ import { PhysicalShapeMesh, SphereCollisionShape } from '@hology/core'
 import { Actor, BaseActor, PhysicsBodyType, PhysicsSystem, attach, inject } from '@hology/core/gameplay'
 import { MeshComponent } from '@hology/core/gameplay/actors'
 import { AxisInput } from '@hology/core/gameplay/input'
+import { takeUntil } from 'rxjs'
 import { MeshStandardMaterial, SphereGeometry, Vector3 } from 'three'
 
 @Actor()
@@ -31,10 +32,12 @@ class ExampleActor extends BaseActor {
   onInit() {
     // Parameters are defined here. Set up subscriptions and gameplay logic.
     this.physics.setLinearDamping(this, 0.2)
-    this.physics.beforeStep.subscribe(dt => {
-      this.impulse.set(0, 0, this.axisInput.vertical).multiplyScalar(100 * dt)
-      this.physics.applyImpulse(this, this.impulse)
-    })
+    this.physics.beforeStep
+      .pipe(takeUntil(this.disposed))
+      .subscribe(dt => {
+        this.impulse.set(0, 0, this.axisInput.vertical).multiplyScalar(100 * dt)
+        this.physics.applyImpulse(this, this.impulse)
+      })
   }
 
   onBeginPlay() {
@@ -46,7 +49,7 @@ class ExampleActor extends BaseActor {
   }
 
   onEndPlay() {
-    // Cleanup. RxJS subscriptions using .pipe(takeUntil(this.disposed)) auto-unsubscribe.
+    // The beforeStep subscription above automatically unsubscribes when this actor is disposed.
   }
 }
 

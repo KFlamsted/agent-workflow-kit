@@ -39,7 +39,7 @@ Subscribe on the physics system (RxJS observables). Use `takeUntil(this.disposed
 ```typescript
 onInit() {
   this.physics.onCollisionWithActorType(this, Target).subscribe(other => { /* score++ */ })
-  this.physics.onBeginOverlapWithActorType(this, Coin).subscribe(coin => this.world.remove(coin))
+  this.physics.onBeginOverlapWithActorType(this, Coin).subscribe(coin => this.world.removeActor(coin))
 }
 ```
 
@@ -69,7 +69,7 @@ Reuse one `RayTestResult` when casting frequently. `RayTestOptions`: `excludeAct
 
 ## Trigger volumes
 
-Detect entry/exit zones. Either place a `TriggerVolumeActor` in the editor (reference it via a parameter) or attach a `TriggerVolumeComponent` (a box). React via the physics overlap events above.
+Detect entry/exit zones. Either place the built-in `TriggerVolume` actor in the editor (reference it via a parameter) or attach a `TriggerVolumeComponent` (a box). React via the physics overlap events above.
 
 ```typescript
 @Actor()
@@ -110,6 +110,6 @@ For AI-driven movement toward a navmesh target, use `CharacterMoveToNode` with t
 ```typescript
 import { PhysicsSystem, PhysicsBodyType, RayTestResult, inject, attach } from '@hology/core/gameplay'
 import { MeshComponent, CharacterMovementComponent, ThirdPersonCameraComponent,
-         TriggerVolumeComponent, TriggerVolumeActor } from '@hology/core/gameplay/actors'
+         TriggerVolumeComponent, TriggerVolume } from '@hology/core/gameplay/actors'
 import { PhysicalShapeMesh, BoxCollisionShape, SphereCollisionShape } from '@hology/core'
 ```

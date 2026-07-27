@@ -26,7 +26,7 @@ Hology already wraps most of what a game needs. **Do not hand-roll from scratch 
 | Character walking/jumping | `CharacterMovementComponent` (not custom kinematics) |
 | Third-person camera follow | `ThirdPersonCameraComponent` |
 | Collisions, forces, raycasts | `PhysicsSystem` |
-| Overlap zones | `TriggerVolumeComponent` / `TriggerVolumeActor` |
+| Overlap zones | `TriggerVolumeComponent` / `TriggerVolume` |
 | NPC pathfinding / decisions | `Navigation` + navmesh, behavior-tree nodes (not custom A*/state machines) |
 | Character animation blending | `CharacterAnimationComponent` + `AnimationStateMachine` |
 | Custom materials / vertex effects | `NodeShaderMaterial` (TS shaders), VFX tooling |
@@ -52,7 +52,7 @@ Raw Three.js is still fair game for **content details** — geometries, material
 
 Starter files to copy from: `templates/actor.ts`, `templates/component.ts`, `templates/service.ts`.
 
-There is no networking/multiplayer feature in Hology — don't assume one exists.
+The public Hology docs do not document networking. Do not invent or rely on multiplayer APIs unless the installed `@hology/core` types/version and the project's requirements confirm them; do not treat exposed networking APIs as stable or generally supported.
 
 ## Project structure & entry point
 
@@ -77,7 +77,7 @@ my-game/
 ├── tsconfig.json
 ├── package.json
 ├── src/
-│   ├── main.tsx                    # UI entry: renders <HologyScene gameClass sceneName dataDir shaders actors>
+│   ├── main.tsx                    # UI entry: renders <HologyScene> with game and runtime registries
 │   ├── App.tsx                     # HUD / menus (React) layered over the game
 │   ├── App.css
 │   ├── actors/
@@ -99,7 +99,7 @@ my-game/
     └── assets/                     # raw model/texture/audio source files
 ```
 
-- The entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here.
+- The entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Supply the actor and shader registries there, plus the component registry when the project defines custom components. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here.
 - Re-export files (`actors/index.ts`, `components/index.ts`, `shaders/index.ts`) are how the editor and runtime discover your classes. Add every new class to the matching `index.ts`.
 - Prefer the editor's "Add new → Actor class" to scaffold new actors (it wires up the file + export for you).
 - Run in dev with `npm run dev` (Vite, serves on http://localhost:5173).
@@ -186,7 +186,7 @@ Built-in services: `World`, `PhysicsSystem`, `ViewController`, `AssetLoader`, `I
 private world = inject(World)
 const a = await this.world.spawnActor(ExampleActor, position, rotation)
 const first = this.world.findActorByType(SpawnPoint)   // findActorsByType → array
-this.world.remove(a)
+this.world.removeActor(a)
 this.world.directionalLight.intensity = 0.2
 ```
 → `references/services-world-assets.md`
@@ -221,7 +221,7 @@ this.input.bindDelta(InputAction.rotate, character.movement.rotationInput.rotate
 ```typescript
 private physics = inject(PhysicsSystem)
 this.physics.beforeStep.subscribe(dt => this.physics.applyImpulse(this, impulse))
-this.physics.onBeginOverlapWithActorType(this, Coin).subscribe(coin => this.world.remove(coin))
+this.physics.onBeginOverlapWithActorType(this, Coin).subscribe(coin => this.world.removeActor(coin))
 this.physics.updateActorTransform(this)   // after manually setting position/rotation on a body
 ```
 Body types: `static` / `kinematic` / `dynamic`. → `references/physics.md`
@@ -247,20 +247,20 @@ Body types: `static` / `kinematic` / `dynamic`. → `references/physics.md`
 - Don't `scene.add(...)` actors manually — spawn through `World`/`SpawnPoint`.
 - Don't set an actor's transform for a physics body without `physics.updateActorTransform(this)`.
 - Don't expect `onBeginPlay`/`onEndPlay` to run in the editor.
-- Don't invent a networking/multiplayer API — Hology has none documented.
+- Don't invent or rely on networking/multiplayer APIs: the public docs do not document networking, so first confirm the installed `@hology/core` types/version and project requirements.
 
 ## Import cheat sheet
 
 ```typescript
 import { Actor, BaseActor, Component, ActorComponent, Parameter, ParameterDefinition,
-         Service, GameInstance, World, ViewController, AssetLoader, InputService,
+         Service, GameInstance, World, ViewController, AssetLoader,
          PhysicsSystem, PhysicsBodyType, PointerEvents, Navigation,
          AnimationState, AnimationStateMachine,
          Node, LeafNode, NodeState, SelectorNode, SequenceNode, ActionNode, WaitNode,
          RepeatNode, CharacterMoveToNode, RayTestResult, inject, attach } from '@hology/core/gameplay'
 import { MeshComponent, SpawnPoint, CharacterMovementComponent, ThirdPersonCameraComponent,
-         CharacterAnimationComponent, TriggerVolumeComponent, TriggerVolumeActor } from '@hology/core/gameplay/actors'
-import { Keybind, Mousebind, Wheelbind, AxisInput, ActionInput } from '@hology/core/gameplay/input'
+         CharacterAnimationComponent, TriggerVolumeComponent, TriggerVolume } from '@hology/core/gameplay/actors'
+import { InputService, Keybind, Mousebind, Wheelbind, AxisInput, ActionInput } from '@hology/core/gameplay/input'
 import { NodeShaderMaterial, rgb, rgba, select, varyingAttributes, timeUniforms } from '@hology/core/shader-nodes'
 import { PhysicalShapeMesh, SphereCollisionShape, BoxCollisionShape } from '@hology/core'
 import * as THREE from 'three'

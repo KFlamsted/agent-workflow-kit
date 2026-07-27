@@ -12,11 +12,13 @@ Mount the engine with the `HologyScene` component and pass the config (the defau
 import { HologyScene } from '@hology/react'   // provided by the React template
 import Game from './services/game'
 import actors from './actors'
+import components from './components'
 import shaders from './shaders'
 
 function App() {
   return (
-    <HologyScene gameClass={Game} sceneName="demo" dataDir="data" shaders={shaders} actors={actors}>
+    <HologyScene gameClass={Game} sceneName="demo" dataDir="data"
+      shaders={shaders} actors={actors} components={components}>
       {/* DOM overlay UI goes here, rendered on top of the game */}
       <PlayerHealthDisplay />
     </HologyScene>
@@ -27,7 +29,7 @@ function App() {
 - **gameClass** — your `GameInstance` subclass.
 - **sceneName** — scene to load (e.g. `'demo'`).
 - **dataDir** — path to game data (`'data'`).
-- **shaders / actors** — the objects re-exported from `src/shaders/index.ts` and `src/actors/index.ts`.
+- **shaders / actors / components** — the objects re-exported from their `src/*/index.ts` registries. Pass `components` when the project defines serialized custom actor components; projects without custom components do not need a non-empty component registry.
 
 ## Required overlay CSS
 
@@ -43,7 +45,9 @@ So pointer events reach the canvas (for the `PointerEvents` service) while still
 - **`useService(ServiceClass)`** — get a gameplay service instance (read global state to display).
 - **`useActorQuery(...)`** — query actors in the world; re-renders when matching actors are added/removed.
 - **`useRenderUpdate(fn)`** — run `fn` before every frame.
-- **`useRenderLaterUpdate(fn)`** — like above but after other update functions.
+- **`useRenderLateUpdate(fn)`** — like above but after other update functions.
+
+Some official prose documentation still uses the stale `useRenderLaterUpdate` spelling, but current `@hology/react` declarations export `useRenderLateUpdate`.
 
 ## Reacting to state changes with signals
 

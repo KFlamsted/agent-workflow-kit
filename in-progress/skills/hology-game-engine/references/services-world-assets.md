@@ -43,7 +43,8 @@ private world = inject(World)
 const a = await this.world.spawnActor(ExampleActor, position, rotation)
 const first = this.world.findActorByType(SpawnPoint)   // first of a class
 const all = this.world.findActorsByType(Character)      // all of a class (array)
-this.world.remove(actor)
+this.world.removeActor(actor)                         // remove an actor instance
+this.world.removePrefab(instance)                    // remove a spawned prefab instance
 this.world.scene                                        // the underlying THREE.Scene (for PointerEvents targets, etc.)
 this.world.directionalLight.intensity = 0.2            // .direction (Vector3), .intensity, .position (read-only)
 ```
@@ -93,10 +94,12 @@ Inject `PointerEvents` and subscribe by `Object3D`, actor instance, or actor typ
 ```typescript
 private pointer = inject(PointerEvents)
 this.pointer.onClickObject3D(this.world.scene).subscribe(e => console.log(e.intersection.point))
-this.pointer.onClickActorType(Coin).subscribe(coin => { /* ... */ })
+this.pointer.onClickActorType(Coin).subscribe(({ actor: coin, intersection }) => {
+  console.log(coin, intersection.point)
+})
 ```
 
-Event kinds (each has `Object3D` / `Actor` / `ActorType` variants): `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`. The event carries the `object`/`actor` and an `intersection` (`point`, `distance`, `face`, `object`, `uv`, `uv2`). When rendering DOM UI over the game, add the overlay CSS from `ui-and-react.md` so canvas clicks still reach PointerEvents.
+Event kinds (each has `Object3D` / `Actor` / `ActorType` variants): `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`. Object3D variants emit an event with `object` and `intersection`; actor and actor-type variants emit an event with `actor` and `intersection`, rather than passing the actor directly. The intersection includes `point`, `distance`, `face`, `object`, `uv`, and `uv2`. When rendering DOM UI over the game, add the overlay CSS from `ui-and-react.md` so canvas clicks still reach PointerEvents.
 
 ## Sound
 

@@ -87,6 +87,5 @@ See `physics.md` for `CharacterMovementComponent`'s input surface (`directionInp
 ## Imports
 
 ```typescript
-import { InputService } from '@hology/core/gameplay'
-import { Keybind, Mousebind, Wheelbind, AxisInput, ActionInput } from '@hology/core/gameplay/input'
+import { InputService, Keybind, Mousebind, Wheelbind, AxisInput, ActionInput } from '@hology/core/gameplay/input'
 ```

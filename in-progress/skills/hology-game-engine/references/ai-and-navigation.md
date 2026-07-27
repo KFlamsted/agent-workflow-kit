@@ -4,7 +4,7 @@ Covers the `Navigation` service + navmeshes and the behavior-tree system. Read t
 
 ## Navigation & navmeshes
 
-Add a **NavMesh** actor to the scene (asset browser → Actors → NavMesh) to auto-generate a walkable-area mesh over your terrain/obstacles. Then inject the `Navigation` service to query it.
+Add a **NavMesh** actor to the scene (asset browser → Actors → NavMesh). This actor is the bounding volume used for generation: position and scale its box to cover the intended walkable landscape and relevant obstacles. Once configured, the navmesh generates automatically; then inject the `Navigation` service to query it. See the [character AI tutorial](https://docs.hology.app/tutorials/character-ai-behavior.md) for the editor setup details.
 
 ```typescript
 private navigation = inject(Navigation)
