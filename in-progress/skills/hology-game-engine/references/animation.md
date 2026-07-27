@@ -12,6 +12,9 @@ async onInit() {
   this.object.add(model.scene)
   this.mixer = new THREE.AnimationMixer(model.scene)
   const clip = THREE.AnimationClip.findByName(model.animations, 'idle')
+  if (!clip) {
+    throw new Error("Animation clip 'idle' not found in model asset 'character-human'")
+  }
   this.mixer.clipAction(clip).play()
 }
 onUpdate(dt: number) { this.mixer.update(dt) }
@@ -30,7 +33,11 @@ async onInit() {
   const model = await this.assetLoader.getModelByAssetName('character-human')
   this.object.add(model.scene)
   this.characterAnimation.setup(model.scene)
-  this.characterAnimation.play(THREE.AnimationClip.findByName(model.animations, 'idle'))
+  const clip = THREE.AnimationClip.findByName(model.animations, 'idle')
+  if (!clip) {
+    throw new Error("Animation clip 'idle' not found in model asset 'character-human'")
+  }
+  this.characterAnimation.play(clip)
 }
 ```
 

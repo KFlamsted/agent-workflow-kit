@@ -151,4 +151,26 @@ onUpdate(deltaTime: number) {
 
 ## Prefabs
 
-A prefab is a reusable, preconfigured tree of objects/actors authored in the editor (group → "Convert to a prefab", or create empty from the asset browser; edit in the prefab editor, changes propagate everywhere it's used). In code, reference prefabs via `Prefab` / `PrefabOf<T>` parameters, load them with `AssetLoader.getPrefabByName/getPrefabById`, and spawn through the world. Prefer prefabs over rebuilding the same object graph repeatedly.
+A prefab is a reusable, preconfigured tree of objects/actors authored in the editor (group → "Convert to a prefab", or create empty from the asset browser; edit in the prefab editor, changes propagate everywhere it's used). Prefer prefabs over rebuilding the same object graph repeatedly.
+
+`AssetLoader.getPrefabByName()` and `AssetLoader.getPrefabById()` load generic `Prefab` assets. Spawn one with `world.spawnPrefab(prefab, position?, rotation?)`; it resolves to a `PrefabInstance`, which is removed with `world.removePrefab(instance)`.
+
+```typescript
+const genericPrefab: Prefab = await this.assetLoader.getPrefabByName('village-house')
+const prefabInstance: PrefabInstance = await this.world.spawnPrefab(genericPrefab, position, rotation)
+
+this.world.removePrefab(prefabInstance)
+```
+
+`PrefabOf<T>` is primarily used as an editor parameter on an actor instance. It restricts selection to a prefab whose main actor is `T` or a subclass of `T`. Spawn it with `world.spawnActor(prefab, position?, rotation?)`; it resolves directly to an actor typed as `T`, which is removed with `world.removeActor(actor)`.
+
+```typescript
+@Parameter()
+weaponPrefab: PrefabOf<WeaponActor>
+
+async spawnWeapon() {
+  const weaponActor: WeaponActor = await this.world.spawnActor(this.weaponPrefab, position, rotation)
+
+  this.world.removeActor(weaponActor)
+}
+```

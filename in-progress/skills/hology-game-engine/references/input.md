@@ -9,7 +9,7 @@ The input system separates **keybinds** (which key/mouse) → **actions** (playe
 Any string works, but an enum is convenient:
 
 ```typescript
-enum InputAction { moveForward, moveBackward, moveLeft, moveRight, jump, sprint, rotate, zoomCamera }
+enum InputAction { moveForward, moveBackward, moveLeft, moveRight, jump, sprint, shoot, walk, rotate, zoomCamera }
 ```
 
 ## Configuring keybinds (on `InputService`)
