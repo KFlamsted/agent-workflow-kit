@@ -1,7 +1,6 @@
 ---
 name: implement-plan-loop
 description: Starts a delegated implementation loop from an implementation plan or freeform task prompt.
-disable-model-invocation: true
 ---
 
 # Implement Plan Loop
