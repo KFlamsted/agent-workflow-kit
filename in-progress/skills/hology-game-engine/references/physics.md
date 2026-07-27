@@ -38,8 +38,12 @@ Subscribe on the physics system (RxJS observables). Use `takeUntil(this.disposed
 
 ```typescript
 onInit() {
-  this.physics.onCollisionWithActorType(this, Target).subscribe(other => { /* score++ */ })
-  this.physics.onBeginOverlapWithActorType(this, Coin).subscribe(coin => this.world.removeActor(coin))
+  this.physics.onCollisionWithActorType(this, Target)
+    .pipe(takeUntil(this.disposed))
+    .subscribe(other => { /* score++ */ })
+  this.physics.onBeginOverlapWithActorType(this, Coin)
+    .pipe(takeUntil(this.disposed))
+    .subscribe(coin => this.world.removeActor(coin))
 }
 ```
 
@@ -59,7 +63,9 @@ Subscribe to `physics.beforeStep` for per-physics-step logic; pre-allocate vecto
 ```typescript
 this.physics.setLinearDamping(this, 0.2)
 this.physics.setAngularDamping(this, 5)
-this.physics.beforeStep.subscribe(dt => this.physics.applyImpulse(this, impulse))
+this.physics.beforeStep
+  .pipe(takeUntil(this.disposed))
+  .subscribe(dt => this.physics.applyImpulse(this, impulse))
 ```
 
 Methods: `applyForce` (continuous, global), `applyImpulse` (instant, global), `applyLocalForce` / `applyLocalImpulse` (in the body's local frame), `applyTorque` / `applyTorqueImpulse` (rotational). Also `updateActorTransform(this)` after manually setting transform on a physics body.
@@ -128,4 +134,5 @@ import { PhysicsSystem, PhysicsBodyType, RayTestResult, inject, attach } from '@
 import { MeshComponent, CharacterMovementComponent, ThirdPersonCameraComponent,
          TriggerVolumeComponent, TriggerVolume } from '@hology/core/gameplay/actors'
 import { PhysicalShapeMesh, BoxCollisionShape, SphereCollisionShape } from '@hology/core'
+import { takeUntil } from 'rxjs'
 ```

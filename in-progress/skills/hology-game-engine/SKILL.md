@@ -221,8 +221,12 @@ this.input.bindDelta(InputAction.rotate, character.movement.rotationInput.rotate
 ### `PhysicsSystem` — forces / collisions / raycasts
 ```typescript
 private physics = inject(PhysicsSystem)
-this.physics.beforeStep.subscribe(dt => this.physics.applyImpulse(this, impulse))
-this.physics.onBeginOverlapWithActorType(this, Coin).subscribe(coin => this.world.removeActor(coin))
+this.physics.beforeStep
+  .pipe(takeUntil(this.disposed))
+  .subscribe(dt => this.physics.applyImpulse(this, impulse))
+this.physics.onBeginOverlapWithActorType(this, Coin)
+  .pipe(takeUntil(this.disposed))
+  .subscribe(coin => this.world.removeActor(coin))
 this.physics.updateActorTransform(this)   // after manually setting position/rotation on a body
 ```
 Body types: `static` / `kinematic` / `dynamic`. → `references/physics.md`
@@ -264,6 +268,7 @@ import { MeshComponent, SpawnPoint, CharacterMovementComponent, ThirdPersonCamer
 import { InputService, Keybind, Mousebind, Wheelbind, AxisInput, ActionInput } from '@hology/core/gameplay/input'
 import { NodeShaderMaterial, rgb, rgba, select, varyingAttributes, timeUniforms } from '@hology/core/shader-nodes'
 import { PhysicalShapeMesh, SphereCollisionShape, BoxCollisionShape } from '@hology/core'
+import { takeUntil } from 'rxjs'
 import * as THREE from 'three'
 ```
 
