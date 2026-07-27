@@ -10,6 +10,7 @@ Supported agent formats include Pi, Codex CLI, Claude Code, OpenCode, and GitHub
 - `agents/` contains shared prompt bodies and tool-specific agent configurations.
 - `scripts/` contains the copy and removal utilities.
 - `base-prompts/` and `configs/` contain my personal OpenCode config and the system prompts for custom primary agents also in OpenCode.
+- `in-progress/` uses skills and agents that are currently in progress of being readied up for a "first release".
 
 ## Requirements
 
