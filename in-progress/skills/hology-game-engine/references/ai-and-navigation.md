@@ -43,7 +43,11 @@ onUpdate(dt: number) { this.behaviorTree?.tick(dt) }
 ```typescript
 import { SelectorNode, SequenceNode, ActionNode, WaitNode, RepeatNode, NodeState } from '@hology/core/gameplay'
 
-const attack = new ActionNode(() => { /* ... */ return NodeState.SUCCESS })
+const attack = new ActionNode(() => {
+  if (!canAttackTarget()) return NodeState.FAILURE // game-specific check
+  attackTarget()                                   // game-specific action
+  return NodeState.SUCCESS
+})
 const patrol = new SequenceNode()
 patrol.addChild(new ActionNode(() => NodeState.SUCCESS))
 patrol.addChild(new WaitNode(1000))
