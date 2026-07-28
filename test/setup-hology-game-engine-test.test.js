@@ -37,13 +37,23 @@ function assertSetup(target, result) {
     fs.readFileSync(path.join(target, 'hology-game-engine-test-prompt.md'), 'utf8'),
     fs.readFileSync(path.join(suiteSource, 'hology-game-engine-test-prompt.md'), 'utf8')
   );
+  const runnerPrompt = fs.readFileSync(
+    path.join(target, 'hology-game-engine-test-prompt.md'),
+    'utf8'
+  );
+  assert.match(runnerPrompt, /spawn a fresh subagent from the suite root/);
+  assert.match(runnerPrompt, /Write all files exclusively within output\/task_NN\//);
+  assert.ok(fs.existsSync(path.join(target, 'test_files', 'README.md')));
 
   for (const entry of fs.readdirSync(suiteSource, { withFileTypes: true })) {
     if (!entry.isFile() || !/^\d{2}_.+\.md$/.test(entry.name)) continue;
     assert.equal(
-      fs.readFileSync(path.join(target, entry.name), 'utf8'),
+      fs.readFileSync(path.join(target, 'test_files', entry.name), 'utf8'),
       fs.readFileSync(path.join(suiteSource, entry.name), 'utf8')
     );
+    const taskNumber = entry.name.slice(0, 2);
+    assert.ok(fs.statSync(path.join(target, 'output', `task_${taskNumber}`)).isDirectory());
+    assert.equal(fs.existsSync(path.join(target, entry.name)), false);
   }
 
   for (const harnessDirectory of ['.agents', '.claude']) {

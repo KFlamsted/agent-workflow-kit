@@ -80,13 +80,28 @@ function setupTestFolder(configuredTarget) {
   }
   fs.mkdirSync(targetRoot, { recursive: true });
 
+  const testTargetDir = path.join(targetRoot, 'test_files');
+  const outputTargetDir = path.join(targetRoot, 'output');
+  fs.mkdirSync(testTargetDir, { recursive: true });
+  fs.mkdirSync(outputTargetDir, { recursive: true });
+
   const testFiles = fs.readdirSync(testSourceDir, { withFileTypes: true }).filter(
     (entry) =>
       entry.isFile() &&
       (entry.name === 'README.md' || /^\d{2}_.+\.md$/.test(entry.name))
   );
   for (const testFile of testFiles) {
-    copyFile(path.join(testSourceDir, testFile.name), path.join(targetRoot, testFile.name));
+    copyFile(
+      path.join(testSourceDir, testFile.name),
+      path.join(testTargetDir, testFile.name)
+    );
+
+    const taskMatch = testFile.name.match(/^(\d{2})_/);
+    if (taskMatch) {
+      fs.mkdirSync(path.join(outputTargetDir, `task_${taskMatch[1]}`), {
+        recursive: true,
+      });
+    }
   }
 
   copyFile(
@@ -102,7 +117,8 @@ function setupTestFolder(configuredTarget) {
   const claudeSkill = copySkill(skillSourceDir, targetRoot, '.claude');
 
   console.log(`\nHology game engine test suite set up in: ${targetRoot}`);
-  console.log(`  copied ${testFiles.length} test suite files`);
+  console.log(`  copied ${testFiles.length} test suite files to ${testTargetDir}`);
+  console.log(`  prepared per-task output folders in ${outputTargetDir}`);
   console.log(`  copied skill to ${agentsSkill}`);
   console.log(`  copied skill to ${claudeSkill}`);
   console.warn(
