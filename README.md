@@ -70,7 +70,8 @@ node scripts/copy-skills.js --pi-agents --env /path/to/.env
 npm run remove-skill -- <SKILL_NAME>
 ```
 
-This moves the skill from `skills/` to `.legacy-skills/` and asks whether matching installed copies should also be removed. Existing archives are not overwritten.
+This moves the skill from `skills/` to `.legacy-skills/` and asks whether matching installed copies should also be removed. Existing archives are not overwritten.  
+This can also be used to remove a skill that doesn't exist in this repo from all of the folders in the SKILL_TARGET_FOLDERS variable in the .env file.
 
 ## Agent configuration
 
