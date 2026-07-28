@@ -1,4 +1,4 @@
-# Simple skills and agents
+# Skills and agents
 
 A collection of reusable skills and agents for AI coding tools. The repository includes workflows for planning, implementation, code review, and orchestration, along with scripts that install them into local tool directories.
 
