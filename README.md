@@ -8,7 +8,7 @@ Supported agent formats include Pi, Codex CLI, Claude Code, OpenCode, and GitHub
 
 - `skills/` contains the reusable skills.
 - `agents/` contains shared prompt bodies and tool-specific agent configurations.
-- `scripts/` contains the copy and removal utilities.
+- `scripts/` contains the copy, removal, and test-suite setup utilities.
 - `base-prompts/` and `configs/` contain my personal OpenCode config and the system prompts for custom primary agents also in OpenCode.
 - `in-progress/` contains skills and agents that are currently in progress of being readied up for a "first release".
 
@@ -63,6 +63,14 @@ npm run copy-skills -- /path/to/.env
 npm run copy-agents -- /path/to/.env
 node scripts/copy-skills.js --pi-agents --env /path/to/.env
 ```
+
+### Set up the Hology skill test suite
+
+```bash
+npm run setup-hology-test
+```
+
+The script asks for an absolute or relative target folder, then prepares the Hology test tasks, isolated per-task output folders, runner prompt, harness instruction files, and the `hology-game-engine` skill for `.agents` and `.claude`. If you use another harness, copy the installed skill into that harness's skill folder manually.
 
 ### Remove a skill
 
