@@ -45,9 +45,9 @@ So pointer events reach the canvas (for the `PointerEvents` service) while still
 - **`useService(ServiceClass)`** — get a gameplay service instance (read global state to display).
 - **`useActorQuery(...)`** — query actors in the world; re-renders when matching actors are added/removed.
 - **`useRenderUpdate(fn)`** — run `fn` before every frame.
-- **`useRenderLateUpdate(fn)`** — like above but after other update functions.
+- **`useRenderLaterUpdate(fn)`** — like above but after other update functions.
 
-Some official prose documentation still uses the stale `useRenderLaterUpdate` spelling, but current `@hology/react` declarations export `useRenderLateUpdate`.
+`useRenderLaterUpdate` is the public documented API. When targeting a different package version, inspect the installed `@hology/react` exports and follow the spelling they provide.
 
 ## Reacting to state changes with signals
 

@@ -70,12 +70,12 @@ class ConfigurableEffect extends BaseActor {
   private visualEffect: VisualEffect
 
   async onInit() {
-    const vfxActor = await this.visualEffect.create(this)
+    const vfxActor = await this.visualEffect.create()
     vfxActor.play()
   }
 }
 ```
 
-The public example shows `await visualEffect.create()` with no argument; the `@hology/core@0.0.232` declaration requires a parent `Object3D | BaseActor`, so the version-valid example above passes `this`. Check the installed declaration when targeting another version.
+The public documentation defines `VisualEffect.create()` with no argument. A project's installed declarations may instead require a parent argument; when targeting such a version, follow those declarations.
 
 The returned VFX actor provides the documented `play()` and `stop()` controls, plus a writable `timescale` speed multiplier (for example, `vfxActor.timescale = 0.5`). The parameter workflow preserves editor configuration; the service workflow is convenient for runtime spawning by known asset ID.

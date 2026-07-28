@@ -23,10 +23,10 @@ onInit() {
 ## Body types (`PhysicsBodyType`)
 
 - **static** — never moves; unaffected by forces/collisions (ground, walls, platforms). Can be collided with.
-- **kinematic** — moved explicitly through position-based kinematic control; unaffected by forces and impulses but pushes dynamic bodies (moving platforms, elevators, the built-in character controller).
+- **kinematic** — moved explicitly through position or velocity; unaffected by forces and impulses but can affect dynamic bodies through collisions (moving platforms, elevators, the built-in character controller).
 - **dynamic** — fully simulated: responds to forces, impulses, gravity, collisions (balls, crates, props).
 
-Those are the three types presented in the public Hology physics documentation. **`@hology/core@0.0.232` version note:** the installed enum also declares **`kinematicVelocityBased`**. In that runtime, `kinematic` maps to Rapier's position-based kinematic body and `kinematicVelocityBased` maps to Rapier's velocity-based kinematic body. Both are explicitly controlled kinematic bodies rather than force-driven bodies. Before using the fourth value in an existing project, inspect that project's installed `PhysicsBodyType` enum; it is not yet part of the public three-type prose model and may vary by package version.
+Those are the three types presented in the public Hology physics documentation. **`@hology/core@0.0.232` version note:** that package's enum also declares **`kinematicVelocityBased`**. In that package version, `kinematic` maps to Rapier's position-based kinematic body and `kinematicVelocityBased` maps to Rapier's velocity-based kinematic body. Both are explicitly controlled kinematic bodies rather than force-driven bodies. Before using the fourth value in an existing project, inspect that project's installed `PhysicsBodyType` enum; it is absent from the public three-type model and may vary by package version.
 
 ## Collision shapes
 
@@ -106,13 +106,13 @@ class CharacterActor extends BaseActor {
   public thirdPersonCamera = attach(ThirdPersonCameraComponent /* { fixedBehind: false } */)
   public movement = attach(CharacterMovementComponent, {
     autoStepMaxHeight: 0, colliderHeight: 2, colliderRadius: .5,
-    maxSlopeClimbAngle: 70, maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
+    maxWalkingSlopeAngle: 70, maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
     // rotateToMovementDirection: true,  // face movement dir instead of camera dir
   })
 }
 ```
 
-Current `@hology/core` versions use `maxSlopeClimbAngle`. Older releases and the published character-movement documentation may use `maxWalkingSlopeAngle`; for an existing project, verify the property in its installed `@hology/core` declarations.
+`maxWalkingSlopeAngle` is the option shown in the public character-movement documentation. When targeting a specific Hology release, verify the installed `CharacterMovementComponent` option declarations if that name is unavailable.
 
 Control it by binding its inputs (see `input.md`):
 - **directionInput** — `togglePositiveY/negativeY/positiveX/negativeX` for WASD movement.
