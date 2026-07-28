@@ -17,7 +17,7 @@ const ballMaterial = new NodeShaderMaterial({
 
 ## TypeScript (node) shaders
 
-Custom shaders are defined in project source as either a TypeScript `NodeShader` class or a GLSL-backed `Shader` class. Export the class from the configured shader registry—conventionally `src/shaders/index.ts`—to make it available to Hology and the editor. When you need a reusable editor-authored material, create or configure a material asset in the editor and select the registered custom shader.
+Custom shaders are defined in project source as either a TypeScript `NodeShader` class or a GLSL-backed `Shader` class. Import the class in the configured shader registry—conventionally `src/shaders/index.ts`—and add it to that file's default-exported object to make it available to Hology and the editor. When you need a reusable editor-authored material, create or configure a material asset in the editor and select the registered custom shader.
 
 You can also construct a `NodeShaderMaterial` directly in gameplay code with the `@hology/core/shader-nodes` library. This direct material construction complements registered, editor-facing shader classes rather than replacing them:
 

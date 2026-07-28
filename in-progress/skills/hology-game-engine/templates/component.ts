@@ -1,5 +1,6 @@
 // Template: a reusable ActorComponent encapsulating one aspect of an actor's behaviour.
-// Copy into src/components/<name>-component.ts, rename, and re-export from src/components/index.ts.
+// Copy into src/components/<name>-component.ts, rename, then import it in src/components/index.ts
+// and add it to that file's default registry object: `export default { HealthComponent }`.
 // Attach to an actor with: `health = attach(HealthComponent)` (see templates/actor.ts).
 import { ActorComponent, Component, Parameter } from '@hology/core/gameplay'
 

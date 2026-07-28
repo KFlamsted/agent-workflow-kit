@@ -1,5 +1,6 @@
 // Template: a Hology actor with a mesh + physics body and player-driven movement.
-// Copy into src/actors/<name>-actor.ts, rename the class, and re-export it from src/actors/index.ts.
+// Copy into src/actors/<name>-actor.ts, rename the class, then import it in src/actors/index.ts
+// and add it to that file's default registry object: `export default { ExampleActor }`.
 import { PhysicalShapeMesh, SphereCollisionShape } from '@hology/core'
 import { Actor, BaseActor, PhysicsBodyType, PhysicsSystem, attach, inject } from '@hology/core/gameplay'
 import { MeshComponent } from '@hology/core/gameplay/actors'

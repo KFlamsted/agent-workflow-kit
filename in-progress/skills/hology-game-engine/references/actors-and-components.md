@@ -4,7 +4,7 @@ Covers `@Actor()`/`BaseActor`, the actor lifecycle, `@Parameter()`, `@Component(
 
 ## Actors — `@Actor()` + `BaseActor`
 
-An actor is a game object with a transform (`position`, `rotation`) and an underlying Three.js object at `this.object` (an `Object3D`). Define one by extending `BaseActor` and decorating with `@Actor()`. Re-export it from `src/actors/index.ts` or the editor won't see it.
+An actor is a game object with a transform (`position`, `rotation`) and an underlying Three.js object at `this.object` (an `Object3D`). Define one by extending `BaseActor` and decorating with `@Actor()`. To make it available to the editor, import it in `src/actors/index.ts` and add it to that file's default-exported registry object (for example, `export default { ExampleActor }`).
 
 ```typescript
 import { Actor, BaseActor } from '@hology/core/gameplay'
