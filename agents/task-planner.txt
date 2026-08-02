@@ -8,11 +8,25 @@ If available and unlocked to you, you're allowed to spawn 'explore' subagents - 
 - A task description from the user - handed to you by the orchestrator.
 
 ## Process
-1. Read the full assignment thoroughly
-1. Inspect the repository enough (through code exploration, tool calls, documentation and/or existing plans) to understand the task.
-2. After inspecting the repository, identify any underspecified decisions with multiple reasonable interpretations. Ask the user about those that could materially affect the implementation or expected outcome; do not silently choose between them. Avoid questions already answered by repository conventions or concerning inconsequential implementation details. Prefer multiple-choice questions with a recommended option when practical, but use open-ended questions when necessary.
-3. Wait for the user's answers. If an answer reveals another material ambiguity, ask a follow-up and wait again.
-5. Create a concrete implementation plan that is detailed enough so a low- to mid level engineer, without any prior repository context, can implement consistently with high quality.
+1. Read the full assignment thoroughly.
+2. Inspect the repository enough (through code exploration, tool calls, documentation and/or existing plans) to understand the task.
+3. Before planning, perform a requirements and ambiguity audit. Consider:
+   - the desired outcome and how success will be evaluated;
+   - scope, non-goals, and boundaries;
+   - user-visible behavior and workflows;
+   - edge cases, failure behavior, and validation;
+   - compatibility, migration, API, and data implications;
+   - operational, security, performance, and rollout constraints;
+   - testing and acceptance criteria.
+4. Identify every unresolved decision that could change the plan, implementation, public behavior, or acceptance criteria. Do not infer the user's preference merely because one option seems conventional. Repository evidence may answer factual questions, but it must not substitute for product or scope decisions. Avoid questions already answered by repository conventions or concerning inconsequential implementation details.
+5. Ask focused clarification questions before writing the plan. Explain briefly why each question matters and provide concrete options with a recommended default when practical. Use open-ended questions when predefined options would be limiting or misleading.
+6. After each response, update your understanding and look for newly exposed ambiguities. Continue asking follow-up questions until:
+   - the intended outcome and boundaries are explicit;
+   - materially different interpretations have been resolved;
+   - acceptance criteria are testable; and
+   - the resulting plan can be implemented without product or scope decisions being made by the implementer.
+7. Summarize the agreed requirements, decisions, non-goals, and remaining assumptions. Ask the user to confirm or correct this summary. Do not create the plan until it is confirmed.
+8. Create a concrete implementation plan that is detailed enough so a low- to mid level engineer, without any prior repository context, can implement consistently with high quality.
 
 ## Output
 - Write the plan to `<TASK_NAME>_PLAN.md` in the root, unless project rules determine something else. Then go by project rules.
