@@ -32,10 +32,9 @@ If any of these are unavailable, stop the workflow and report the missing depend
 ## Create Implementation Plan
 The goal of this section is to create an implementation plan.  
 Spawn the `task-planner` subagent with the user's task description as its complete prompt, reproduced verbatim. Do not summarize, rewrite, interpret, annotate, or supplement it. Do not add output-format or workflow instructions; rely on the `task-planner`'s own instructions.  
-Clarification questions, if any, from the `task-planner` agent should be presented to the human by the `question`-tool if this (or similar) tool is available. Otherwise present the question by plain text.  
-Do not answer any clarifying questions yourself.  
+If the planner requests clarification or confirmation, relay its questions to the human and wait for their response. Do not answer or infer answers yourself. Then continue the same planner session when supported; otherwise spawn a new `task-planner` with the original task, preserved planner context, and the complete clarification question-and-answer history. Repeat until the plan is written.
 
-Before proceeding, ensure the plan is divided into practical implementation phases. If a phase is too large, resume the `task-planner` and ask it to divide the phase without changing the plan's scope.
+Before proceeding, ensure the plan is divided into practical implementation phases. If a phase is too large, ask the planner to divide it without changing scope, resuming it when supported or reinvoking it with the prior planning context.
 
 Once the plan is ready, proceed to the [Implement and Review Code loop](#implement-and-review-code-loop).
 

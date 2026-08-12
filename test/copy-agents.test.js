@@ -105,6 +105,75 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   assert.ok(copilotOutput.endsWith(implementerPrompt));
   assert.equal(countOccurrences(copilotOutput, implementerPrompt), 1);
 
+  const plannerPrompt = fs.readFileSync(
+    path.join(sandbox, 'agents', 'task-planner.txt'),
+    'utf8'
+  );
+  const copilotPlannerSourcePath = path.join(
+    sandbox,
+    'agents',
+    'copilot',
+    'task-planner.agent.md'
+  );
+  const copilotPlannerSource = fs.readFileSync(copilotPlannerSourcePath, 'utf8');
+  const copilotPlannerOutput = fs.readFileSync(
+    path.join(targets.copilot, 'task-planner.agent.md'),
+    'utf8'
+  );
+  assert.ok(copilotPlannerOutput.startsWith(copilotPlannerSource));
+  assert.ok(copilotPlannerOutput.endsWith(plannerPrompt));
+  assert.equal(countOccurrences(copilotPlannerOutput, plannerPrompt), 1);
+  assert.match(copilotPlannerOutput, /NEEDS_CLARIFICATION/);
+
+  for (const harness of ['claude', 'opencode']) {
+    const sourcePath = path.join(
+      sandbox,
+      'agents',
+      harness,
+      'task-planner.md'
+    );
+    const source = fs.readFileSync(sourcePath, 'utf8');
+    const output = fs.readFileSync(
+      path.join(targets[harness], 'task-planner.md'),
+      'utf8'
+    );
+    assert.ok(output.startsWith(source));
+    assert.ok(output.endsWith(plannerPrompt));
+    assert.equal(countOccurrences(output, plannerPrompt), 1);
+  }
+
+  const piPlannerSourcePath = path.join(
+    sandbox,
+    'agents',
+    'pi',
+    'task-planner',
+    'task-planner.md'
+  );
+  const piPlannerSource = fs.readFileSync(piPlannerSourcePath, 'utf8');
+  const piPlannerOutput = fs.readFileSync(
+    path.join(targets.pi, 'task-planner', 'task-planner.md'),
+    'utf8'
+  );
+  assert.ok(piPlannerOutput.startsWith(piPlannerSource));
+  assert.ok(piPlannerOutput.endsWith(plannerPrompt));
+  assert.equal(countOccurrences(piPlannerOutput, plannerPrompt), 1);
+
+  const codexPlannerSourcePath = path.join(
+    sandbox,
+    'agents',
+    'codex',
+    'task-planner.toml'
+  );
+  const codexPlannerSource = fs.readFileSync(codexPlannerSourcePath, 'utf8');
+  const codexPlannerOutput = fs.readFileSync(
+    path.join(targets.codex, 'task-planner.toml'),
+    'utf8'
+  );
+  const codexPlannerInstructions = `developer_instructions = '''\n${plannerPrompt}'''\n`;
+  assert.ok(codexPlannerOutput.startsWith(codexPlannerSource));
+  assert.ok(codexPlannerOutput.endsWith(codexPlannerInstructions));
+  assert.equal(countOccurrences(codexPlannerOutput, 'developer_instructions ='), 1);
+
   const codexOutput = fs.readFileSync(
     path.join(targets.codex, 'code-implementer.toml'),
     'utf8'
@@ -153,14 +222,19 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   for (const sourcePath of [
     path.join(sandbox, 'agents', 'claude', 'code-implementer.md'),
     path.join(sandbox, 'agents', 'claude', 'code-reviewer.md'),
+    path.join(sandbox, 'agents', 'claude', 'task-planner.md'),
     path.join(sandbox, 'agents', 'opencode', 'code-implementer.md'),
     path.join(sandbox, 'agents', 'opencode', 'code-reviewer.md'),
+    path.join(sandbox, 'agents', 'opencode', 'task-planner.md'),
     path.join(sandbox, 'agents', 'copilot', 'code-implementer.agent.md'),
     path.join(sandbox, 'agents', 'copilot', 'code-reviewer.agent.md'),
+    path.join(sandbox, 'agents', 'copilot', 'task-planner.agent.md'),
     path.join(sandbox, 'agents', 'pi', 'code-implementer', 'code-implementer.md'),
     path.join(sandbox, 'agents', 'pi', 'code-reviewer', 'code-reviewer.md'),
+    path.join(sandbox, 'agents', 'pi', 'task-planner', 'task-planner.md'),
     path.join(sandbox, 'agents', 'codex', 'code-implementer.toml'),
     path.join(sandbox, 'agents', 'codex', 'code-reviewer.toml'),
+    path.join(sandbox, 'agents', 'codex', 'task-planner.toml'),
   ]) {
     const source = fs.readFileSync(sourcePath, 'utf8');
     assert.equal(source.includes('# Code Implementer'), false);

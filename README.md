@@ -88,7 +88,7 @@ Shared agent prompts live in `agents/*.txt`. Tool-specific files under `agents/<
 ## Compatibility notes
 
 - Codex CLI does not currently support spawning the custom agents included here.
-- In Copilot CLI auto mode, orchestrator agents may answer questions themselves instead of returning control to the user.
+- GitHub Copilot subagent invocations are stateless: they cannot idle for clarification or receive follow-up messages. The end-to-end orchestrator therefore relays questions to the user and starts a new planner with the original task, preserved context, and answers. Copilot CLI auto mode may still answer questions itself instead of returning control to the user, so use an interactive mode for workflows that require human decisions.
 - Pi support uses the [pi-subagents extension](https://github.com/nicobailon/pi-subagents).
 
 The skills and agents are primarily tested with OpenCode. Support for other tools may vary as their agent APIs evolve.
