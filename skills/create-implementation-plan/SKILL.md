@@ -30,7 +30,7 @@ Create a detailed implementation plan only. Do not change code.
 6. Summarize the agreed requirements, decisions, non-goals, and remaining assumptions. Ask the user to confirm or correct this summary. Do not create the plan until it is confirmed.
 7. Create a concrete implementation plan that is detailed enough so a low- to mid level engineer, without any prior repository context, can implement consistently with high quality.
 
-For questions and clarifications, use the `question` tool if available (sometimes called `AskUserQuestions` or a variant); otherwise, ask in plain text.
+For questions and clarifications, use the available clarification tool (`AskQuestion`, `question`, or similar variants such as `AskUserQuestions`) if available; otherwise, ask in plain text.
 
 ## Output
 - Write the plan to `<TASK_NAME>_PLAN.md` unless project rules determine something else. Then go by project rules.

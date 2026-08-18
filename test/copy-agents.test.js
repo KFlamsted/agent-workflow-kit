@@ -41,6 +41,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     claude: path.join(sandbox, 'targets', 'claude'),
     opencode: path.join(sandbox, 'targets', 'opencode'),
     copilot: path.join(sandbox, 'targets', 'copilot'),
+    cursor: path.join(sandbox, 'targets', 'cursor'),
   };
   const envPath = path.join(sandbox, '.env');
   fs.writeFileSync(
@@ -51,6 +52,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
       `CLAUDE_AGENTS_TARGET_FOLDER=${JSON.stringify([targets.claude])}`,
       `OPENCODE_AGENTS_TARGET_FOLDER=${JSON.stringify([targets.opencode])}`,
       `COPILOT_AGENTS_FOLDER=${JSON.stringify([targets.copilot])}`,
+      `CURSOR_AGENTS_TARGET_FOLDER=${JSON.stringify([targets.cursor])}`,
       '',
     ].join('\n')
   );
@@ -64,6 +66,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
       '--claude-agents',
       '--opencode-agents',
       '--copilot-agents',
+      '--cursor-agents',
       '--env',
       envPath,
     ],
@@ -125,7 +128,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   assert.equal(countOccurrences(copilotPlannerOutput, plannerPrompt), 1);
   assert.match(copilotPlannerOutput, /NEEDS_CLARIFICATION/);
 
-  for (const harness of ['claude', 'opencode']) {
+  for (const harness of ['claude', 'opencode', 'cursor']) {
     const sourcePath = path.join(
       sandbox,
       'agents',
@@ -141,6 +144,47 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     assert.ok(output.endsWith(plannerPrompt));
     assert.equal(countOccurrences(output, plannerPrompt), 1);
   }
+
+  const cursorImplementerSourcePath = path.join(
+    sandbox,
+    'agents',
+    'cursor',
+    'code-implementer.md'
+  );
+  const cursorImplementerSource = fs.readFileSync(cursorImplementerSourcePath, 'utf8');
+  const cursorImplementerOutput = fs.readFileSync(
+    path.join(targets.cursor, 'code-implementer.md'),
+    'utf8'
+  );
+  assert.ok(cursorImplementerOutput.startsWith(cursorImplementerSource));
+  assert.ok(cursorImplementerOutput.endsWith(implementerPrompt));
+  assert.equal(countOccurrences(cursorImplementerOutput, implementerPrompt), 1);
+  assert.match(cursorImplementerOutput, /composer-2\.5\[fast=false\]/);
+
+  const cursorReviewerSourcePath = path.join(
+    sandbox,
+    'agents',
+    'cursor',
+    'code-reviewer.md'
+  );
+  const cursorReviewerSource = fs.readFileSync(cursorReviewerSourcePath, 'utf8');
+  const reviewerPrompt = fs.readFileSync(
+    path.join(sandbox, 'agents', 'code-reviewer.txt'),
+    'utf8'
+  );
+  const cursorReviewerOutput = fs.readFileSync(
+    path.join(targets.cursor, 'code-reviewer.md'),
+    'utf8'
+  );
+  assert.ok(cursorReviewerOutput.startsWith(cursorReviewerSource));
+  assert.ok(cursorReviewerOutput.endsWith(reviewerPrompt));
+  assert.equal(countOccurrences(cursorReviewerOutput, reviewerPrompt), 1);
+  assert.match(cursorReviewerOutput, /readonly: true/);
+  assert.match(cursorReviewerOutput, /grok-4\.6\[effort=medium\]/);
+  assert.match(
+    fs.readFileSync(path.join(targets.cursor, 'task-planner.md'), 'utf8'),
+    /grok-4\.6\[effort=medium\]/
+  );
 
   const piPlannerSourcePath = path.join(
     sandbox,
@@ -229,6 +273,9 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     path.join(sandbox, 'agents', 'copilot', 'code-implementer.agent.md'),
     path.join(sandbox, 'agents', 'copilot', 'code-reviewer.agent.md'),
     path.join(sandbox, 'agents', 'copilot', 'task-planner.agent.md'),
+    path.join(sandbox, 'agents', 'cursor', 'code-implementer.md'),
+    path.join(sandbox, 'agents', 'cursor', 'code-reviewer.md'),
+    path.join(sandbox, 'agents', 'cursor', 'task-planner.md'),
     path.join(sandbox, 'agents', 'pi', 'code-implementer', 'code-implementer.md'),
     path.join(sandbox, 'agents', 'pi', 'code-reviewer', 'code-reviewer.md'),
     path.join(sandbox, 'agents', 'pi', 'task-planner', 'task-planner.md'),

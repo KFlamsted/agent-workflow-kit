@@ -2,7 +2,7 @@
 
 A collection of reusable skills and agents for AI coding tools. The repository includes workflows for planning, implementation, code review, and orchestration, along with scripts that install them into local tool directories.
 
-Supported agent formats include Pi, Codex CLI, Claude Code, OpenCode, and GitHub Copilot CLI. Skills are copied in the common `SKILL.md` directory format.
+Supported agent formats include Pi, Codex CLI, Claude Code, OpenCode, GitHub Copilot CLI, and Cursor. Skills are copied in the common `SKILL.md` directory format.
 
 ## Repository structure
 
@@ -31,6 +31,7 @@ CODEX_AGENTS_TARGET_FOLDER=["/path/to/codex-agents"]
 CLAUDE_AGENTS_TARGET_FOLDER=["/path/to/claude-agents"]
 OPENCODE_AGENTS_TARGET_FOLDER=["/path/to/opencode-agents"]
 COPILOT_AGENTS_FOLDER=["/path/to/copilot-agents"]
+CURSOR_AGENTS_TARGET_FOLDER=["/path/to/.cursor/agents", "~/.cursor/agents"]
 ```
 
 JSON arrays are preferred and may contain multiple destinations. Relative paths are resolved from the `.env` file's directory. Paths beginning with `~` or `%USERPROFILE%`, as well as Windows drive paths, are supported.
@@ -54,6 +55,7 @@ node scripts/copy-skills.js --codex-agents
 node scripts/copy-skills.js --claude-agents
 node scripts/copy-skills.js --opencode-agents
 node scripts/copy-skills.js --copilot-agents
+node scripts/copy-skills.js --cursor-agents
 ```
 
 Flags can be combined. To use a different environment file, pass its path positionally or with `--env`:
@@ -90,6 +92,7 @@ Shared agent prompts live in `agents/*.txt`. Tool-specific files under `agents/<
 - Codex CLI does not currently support spawning the custom agents included here.
 - GitHub Copilot subagent invocations are stateless: they cannot idle for clarification or receive follow-up messages. The end-to-end orchestrator therefore relays questions to the user and starts a new planner with the original task, preserved context, and answers. Copilot CLI auto mode may still answer questions itself instead of returning control to the user, so use an interactive mode for workflows that require human decisions.
 - Pi support uses the [pi-subagents extension](https://github.com/nicobailon/pi-subagents).
+- Cursor subagents are copied to `.cursor/agents/` (project) or `~/.cursor/agents/` (user). Each file uses YAML frontmatter with `name`, `description`, and optional `model` and `readonly` fields.
 
 The skills and agents are primarily tested with OpenCode. Support for other tools may vary as their agent APIs evolve.
 

@@ -52,6 +52,14 @@ const copyModes = {
     fileExtension: '.md',
     injectPrompts: true,
   },
+  cursorAgents: {
+    sourcePath: ['agents', 'cursor'],
+    targetEnvKey: 'CURSOR_AGENTS_TARGET_FOLDER',
+    label: 'Cursor agents',
+    entryType: 'file',
+    fileExtension: '.md',
+    injectPrompts: true,
+  },
 };
 
 function parseArgs(args) {
@@ -113,6 +121,16 @@ function parseArgs(args) {
       arg === 'copilotAgents'
     ) {
       modes.push('copilotAgents');
+      continue;
+    }
+
+    if (
+      arg === '--cursor-agents' ||
+      arg === 'cursor-agents' ||
+      arg === '--cursorAgents' ||
+      arg === 'cursorAgents'
+    ) {
+      modes.push('cursorAgents');
       continue;
     }
 

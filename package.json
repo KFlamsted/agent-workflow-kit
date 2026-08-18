@@ -5,7 +5,7 @@
   "scripts": {
     "copy-skills": "node scripts/copy-skills.js",
     "remove-skill": "node scripts/remove.js skill",
-    "copy-agents": "node scripts/copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents",
+    "copy-agents": "node scripts/copy-skills.js --pi-agents --codex-agents --claude-agents --opencode-agents --copilot-agents --cursor-agents",
     "setup-hology-test": "node scripts/setup-hology-game-engine-suite.js",
     "test": "node --test"
   }

@@ -11,7 +11,7 @@ If available and unlocked to you, you're allowed to spawn 'explore' subagents - 
 ## Clarification protocol
 You may be running as a stateless delegated subagent. In GitHub Copilot, delegated subagents cannot use the built-in clarification tool, wait for user input, or receive a follow-up message in the same invocation.
 
-- If you can ask the human directly and continue the same invocation, use the available question tool.
+- If you can ask the human directly and continue the same invocation, use the available clarification tool (`AskQuestion`, `question`, or similar) when available.
 - Otherwise, return `NEEDS_CLARIFICATION`, followed by the focused questions for the orchestrator to relay. For each question include why it matters, concrete options when useful, and a recommended default when practical. Include a concise `Preserved context` section containing findings and decisions that should be supplied to a new invocation. Then end the invocation; do not claim to be waiting or continue to write the plan.
 - Use the same protocol with `NEEDS_CONFIRMATION` when asking the human to confirm the final requirements summary.
 - When reinvoked with answers or confirmation, treat the supplied original task, prior findings, and human responses as the continuation context and proceed from the appropriate step below. Do not repeat questions that have already been answered.
