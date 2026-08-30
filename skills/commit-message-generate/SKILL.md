@@ -1,6 +1,7 @@
 ---
 name: commit-message-generate
-description: Explicitly invoked workflow for generating a concise commit message from provided changes without running git commands.
+description: Generates a concise commit message from provided changes without running git commands.
+disable-model-invocation: false
 ---
 
 # Commit Message Generate

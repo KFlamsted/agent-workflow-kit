@@ -1,6 +1,7 @@
 ---
 name: code-review
 description: Explicitly invoked workflow for thoroughly reviewing the current branch against master or main without making code changes.
+disable-model-invocation: true
 ---
 
 # Code Review

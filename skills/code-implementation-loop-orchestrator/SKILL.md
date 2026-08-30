@@ -1,6 +1,7 @@
 ---
 name: code-implementation-loop-orchestrator
 description: Coordinates an implementation/review loop by delegating all code writing and reviewing to subagents.
+disable-model-invocation: false
 ---
 
 # Code Implementation Loop Orchestrator

@@ -1,6 +1,7 @@
 ---
 name: review-findings-to-plan
 description: Explicitly invoked workflow for discussing review findings one by one and converting agreed fixes into an implementation plan.
+disable-model-invocation: true
 ---
 
 # Review Findings To Plan

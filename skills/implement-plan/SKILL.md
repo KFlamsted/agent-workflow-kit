@@ -1,6 +1,7 @@
 ---
 name: implement-plan
 description: Explicitly invoked workflow for implementing an existing plan file in the repository.
+disable-model-invocation: true
 ---
 
 # Implement Plan

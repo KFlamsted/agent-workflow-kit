@@ -1,6 +1,7 @@
 ---
 name: create-implementation-plan
 description: Explicitly invoked workflow for creating a concrete implementation plan file from a requested task.
+disable-model-invocation: true
 ---
 
 # Create Implementation Plan
