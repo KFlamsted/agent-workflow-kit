@@ -1,6 +1,7 @@
 ---
 name: union-merge-loop
 description: Explicitly invoked workflow for making a union merge from master/main into the current branch.
+disable-model-invocation: true
 ---
 
 # Union merge loop

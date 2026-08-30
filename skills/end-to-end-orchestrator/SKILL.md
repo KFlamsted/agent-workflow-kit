@@ -1,6 +1,7 @@
 ---
 name: end-to-end-orchestrator
 description: Orchestrates software tasks end to end by delegating planning, phased implementation, review, and final reporting to specialized subagents.
+disable-model-invocation: true
 ---
 
 # End-to-End-Orchestrator
