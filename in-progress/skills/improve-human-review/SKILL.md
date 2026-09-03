@@ -15,6 +15,7 @@ Help the human review the document. Do not approve, reject, or edit it for them.
 3. Review one chunk at a time. For each:
    - cite its headings or line range;
    - restate it in concise, plain technical language without losing requirements, constraints, tradeoffs, dependencies, risks, or unresolved questions;
+   - prefer short, grouped lists when the chunk contains multiple requirements, decisions, constraints, risks, dependencies, or questions;
    - separate document content from your explanation;
    - optionally use a faithful table or Mermaid diagram when it reduces reading effort;
    - mention only clear omissions or edge cases, labelled `Possible gap`.
@@ -22,6 +23,15 @@ Help the human review the document. Do not approve, reject, or edit it for them.
 5. Record the human's decision and notes. Never treat silence or moving on as approval.
 6. Continue until every chunk has an explicit status.
 7. Finish with a review record containing each chunk, its status, requested changes, open questions, and possible gaps.
+
+## Output format
+
+- Lead each chunk with its source heading or line range.
+- Present the plain-language restatement as a short list by default when it contains more than one distinct point.
+- Group related items under descriptive labels such as `Requirements`, `Decisions`, `Dependencies`, `Risks`, and `Open questions`. Omit labels that do not apply.
+- Keep one idea per list item. Preserve relationships and qualifying language within the item.
+- Use prose for a single point or when splitting the explanation would obscure causality, sequence, or a tradeoff.
+- Avoid long paragraphs that combine independently reviewable points.
 
 ## Rules
 
