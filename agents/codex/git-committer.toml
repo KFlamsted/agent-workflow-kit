@@ -1,0 +1,4 @@
+name = "git-committer"
+description = "Creates a local git commit for an explicit file list. Never pushes. Use after each planning artifact or reviewer-approved implementation phase."
+model = "gpt-5.6-sol"
+model_reasoning_effort = "low"

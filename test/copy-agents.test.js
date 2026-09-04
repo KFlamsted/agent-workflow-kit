@@ -340,6 +340,46 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   assert.ok(codexOutput.endsWith(codexInstructions));
   assert.equal(countOccurrences(codexOutput, 'developer_instructions ='), 1);
 
+  const codePlannerPrompt = fs.readFileSync(
+    path.join(sandbox, 'agents', 'code-planner.txt'),
+    'utf8'
+  );
+  const copilotCodePlannerSourcePath = path.join(
+    sandbox,
+    'agents',
+    'copilot',
+    'code-planner.agent.md'
+  );
+  const copilotCodePlannerSource = fs.readFileSync(copilotCodePlannerSourcePath, 'utf8');
+  const copilotCodePlannerOutput = fs.readFileSync(
+    path.join(targets.copilot, 'code-planner.agent.md'),
+    'utf8'
+  );
+  assert.ok(copilotCodePlannerOutput.startsWith(copilotCodePlannerSource));
+  assert.ok(copilotCodePlannerOutput.endsWith(codePlannerPrompt));
+  assert.equal(countOccurrences(copilotCodePlannerOutput, codePlannerPrompt), 1);
+  assert.match(copilotCodePlannerOutput, /NEEDS_CLARIFICATION/);
+
+  const gitCommitterPrompt = fs.readFileSync(
+    path.join(sandbox, 'agents', 'git-committer.txt'),
+    'utf8'
+  );
+  const opencodeGitCommitterSourcePath = path.join(
+    sandbox,
+    'agents',
+    'opencode',
+    'git-committer.md'
+  );
+  const opencodeGitCommitterSource = fs.readFileSync(opencodeGitCommitterSourcePath, 'utf8');
+  const opencodeGitCommitterOutput = fs.readFileSync(
+    path.join(targets.opencode, 'git-committer.md'),
+    'utf8'
+  );
+  assert.ok(opencodeGitCommitterOutput.startsWith(opencodeGitCommitterSource));
+  assert.ok(opencodeGitCommitterOutput.endsWith(gitCommitterPrompt));
+  assert.equal(countOccurrences(opencodeGitCommitterOutput, gitCommitterPrompt), 1);
+  assert.match(gitCommitterPrompt, /You never push/);
+
   for (const agentName of [
     'code-implementer',
     'code-reviewer',

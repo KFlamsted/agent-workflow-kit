@@ -1,0 +1,4 @@
+name = "architect-planner"
+description = "Clarifies architectural choices or records Status: SKIPPED when none are needed, then writes architectural.md. Use for the architecture phase of end-to-end-orchestrator-detailed."
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"

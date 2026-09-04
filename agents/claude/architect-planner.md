@@ -1,0 +1,7 @@
+---
+name: architect-planner
+description: Clarifies architectural choices or records Status: SKIPPED when none are needed, then writes architectural.md. Use for the architecture phase of end-to-end-orchestrator-detailed.
+tools: Read, Write, Edit, Grep, Glob, Bash
+model: opus
+effort: high
+---
