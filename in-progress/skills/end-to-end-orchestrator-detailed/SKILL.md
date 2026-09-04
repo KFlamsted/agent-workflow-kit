@@ -85,7 +85,7 @@ For each planner spawn: pass the verbatim human prompt plus the task folder path
 
 ### Clarification relay
 
-When a planner returns `NEEDS_CLARIFICATION` or `NEEDS_CONFIRMATION`, relay its questions to the human unchanged. Do not answer or infer answers yourself.
+When a planner returns `NEEDS_CLARIFICATION`, relay its questions to the human unchanged. Do not answer or infer answers yourself. Do not insert a confirmation step of your own.
 
 Resume the same planner session when supported; otherwise spawn a new one with the original prompt, preserved context, and the full question-and-answer history. Repeat until the artifact is written.
 
