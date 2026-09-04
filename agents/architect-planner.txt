@@ -71,6 +71,8 @@ Status: DECIDED
 - **Constraints for the implementation plan:** rules `code-planner` must honour.
 - Omit a section only when it would be empty; do not fill sections with implementation steps or Gherkin.
 
+When `Status: DECIDED`, the document must be detailed enough that `code-planner` can plan implementation without re-deciding stack, repository shape, or system boundaries. It is not an implementation plan. When `Status: SKIPPED`, keep the rationale short.
+
 ## Output
 Return the path to `architectural.md` and a concise summary.
 

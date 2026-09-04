@@ -53,6 +53,8 @@ Use this section structure. Put the behavioural spec in Gherkin inside **Feature
 - **Assumptions:** observable behaviour assumed true unless contradicted.
 - **Features:** Gherkin `Feature` / `Scenario` / `Given` / `When` / `Then` (and `And` / `But` as needed). Cover main flows, edges, and failures. Group related scenarios under one `Feature` when they share a capability. Gherkin keywords are enough inside this section; do not wrap each scenario in extra markdown headings.
 
+The document must be detailed enough that a later planner or implementer does not have to invent user-visible behaviour. It is not an implementation plan.
+
 ## Output
 Return the path to `gherkin.md` and a concise summary.
 
