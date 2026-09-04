@@ -1,5 +1,5 @@
 ---
-name: improve-human-review
+name: improve-human-spec-review
 description: Guide a human through reviewing a specification or implementation plan in clear, meaningful chunks without reviewing or editing the document for them.
 disable-model-invocation: true
 ---
