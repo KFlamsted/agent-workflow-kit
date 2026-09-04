@@ -20,4 +20,5 @@ Generate a proper commit message only. Do not run git commands.
 
 ## Output
 - Return only the commit message.
+- When possible, wrap it in a fenced Markdown code block for direct copy and paste.
 - Be very concise.
