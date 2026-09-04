@@ -36,8 +36,24 @@ When you don't have any more questions or clarifications, write `gherkin.md`. Co
 
 If available and unlocked to you, you may spawn `explore` subagents — do not overdo it.
 
+## gherkin.md shape
+Use this section structure. Put the behavioural spec in Gherkin inside **Features**; do not invent extra technical sections.
+
+```md
+# Behaviour
+
+## Scope
+## Out of scope
+## Assumptions
+## Features
+```
+
+- **Scope:** actors and in-scope user-visible behaviour, in prose.
+- **Out of scope:** behavioural non-goals only (not frameworks or file lists).
+- **Assumptions:** observable behaviour assumed true unless contradicted.
+- **Features:** Gherkin `Feature` / `Scenario` / `Given` / `When` / `Then` (and `And` / `But` as needed). Cover main flows, edges, and failures. Group related scenarios under one `Feature` when they share a capability. Gherkin keywords are enough inside this section; do not wrap each scenario in extra markdown headings.
+
 ## Output
-Write Gherkin using `Feature` / `Scenario` / `Given` / `When` / `Then` (and `And` / `But` as needed), covering main flows, edges, and failures agreed with the human.
 Return the path to `gherkin.md` and a concise summary.
 
 ## Forbidden

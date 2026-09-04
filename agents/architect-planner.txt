@@ -36,7 +36,11 @@ When you don't have any more questions or clarifications, write `architectural.m
 3. Follow the clarification protocol and grill-me steps above.
 4. Write `architectural.md` only in the task folder. Confirmation is not necessary.
 
-If skipped, use this shape:
+If available and unlocked to you, you may spawn `explore` subagents — do not overdo it.
+
+## architectural.md shape
+
+If skipped:
 
 ```md
 # Architecture
@@ -44,10 +48,28 @@ If skipped, use this shape:
 Status: SKIPPED
 
 ## Rationale
-...
 ```
 
-If available and unlocked to you, you may spawn `explore` subagents — do not overdo it.
+If decisions were made:
+
+```md
+# Architecture
+
+Status: DECIDED
+
+## Stack and tools
+## Repository shape
+## System boundaries
+## Rejected alternatives
+## Constraints for the implementation plan
+```
+
+- **Stack and tools:** frameworks, libraries, and services chosen or retained.
+- **Repository shape:** where new work lives (apps, packages, top-level layout) at a high level.
+- **System boundaries:** what this change owns vs what it must not reshape.
+- **Rejected alternatives:** brief; only options that were actually considered.
+- **Constraints for the implementation plan:** rules `code-planner` must honour.
+- Omit a section only when it would be empty; do not fill sections with implementation steps or Gherkin.
 
 ## Output
 Return the path to `architectural.md` and a concise summary.
