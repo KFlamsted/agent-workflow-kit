@@ -19,9 +19,10 @@ You may be running as a stateless delegated subagent. In GitHub Copilot, delegat
 - When reinvoked with answers, treat the supplied original task, prior findings, and human responses as the continuation context. Do not repeat questions that have already been answered. Do not add a confirmation step; write the artifact once remaining questions are answered or none remain.
 
 ## Grill-me
-Be persistent, not deferential. Probe vague terms, implied workflows, and unstated edge cases. If an answer uses subjective language (`simple`, `normal`, `fast`, `user-friendly`), ask what observable behaviour it implies. Explain why each question matters.
-
-When you don't have any more questions or clarifications, write `implementation-plan.md`. Confirmation is not necessary.
+Ask the human about every remaining in-scope implementation choice or clarification that is still missing and not already settled by prior artifacts. Do not guess and do not silently assume.
+Treat the work as a decision tree: each choice can branch further choices. In one round, ask only questions that are not blocked by another unanswered question.
+Look up repository/environment facts yourself. Put remaining decisions to the human (concrete options and a recommended default when practical) and wait for answers.
+When nothing in-scope is still assumed, write `implementation-plan.md`. Confirmation is not necessary.
 
 ## Process
 1. Read the full assignment and all prior artifacts.
