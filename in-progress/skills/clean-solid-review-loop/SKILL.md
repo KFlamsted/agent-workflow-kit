@@ -1,12 +1,12 @@
 ---
 name: clean-solid-review-loop
-description: Runs a Clean/SOLID quality review/fix loop until a 10/10 score, with a required behavior code-reviewer after each implementer. Human-stopped or stall also ends the loop.
+description: Runs a Clean/SOLID quality review/fix loop until a 10/10 score, with a required behavior code-reviewer after each implementer. Scope may be a diff/change or the full repository. Human-stopped or stall also ends the loop.
 disable-model-invocation: true
 ---
 
 # Clean Solid Review Loop
 
-Orchestrate a `clean-solid-code-reviewer` → `code-implementer` → `code-reviewer` → `code-implementer` loop. Do not review or edit code yourself. `code-reviewer` always runs after an implementer; it is not optional.
+Orchestrate a `clean-solid-code-reviewer` → `code-implementer` → `code-reviewer` → `code-implementer` loop. Do not review or edit code yourself. `code-reviewer` always runs after an implementer; it is not optional. The review scope may be a diff/change or the full repository.
 
 ## Required subagents
 
@@ -19,7 +19,7 @@ It is very important that if you do not have these subagents available to spawn 
 ## Process
 
 1. Preserve the user's original task prompt exactly as received (verbatim). Use it for `clean-solid-code-reviewer` and for implementers that apply clean-solid findings. Do **not** give it to `code-reviewer`.
-2. Spawn a fresh `clean-solid-code-reviewer`. Include the original prompt verbatim, plus the current branch diff or changed files, and any latest implementer summary.
+2. Spawn a fresh `clean-solid-code-reviewer`. Include the original prompt verbatim, plus the assigned review scope (branch diff, changed files, or the full repository), and any latest implementer summary.
 3. If `Score` is not `10/10` or `Status` is `CHANGES_REQUESTED`, spawn one `code-implementer` with the original prompt and **all** listed findings (HIGH through TRIVIAL). There are no optional clean-solid findings.
 4. After that implementer, spawn a fresh `code-reviewer`. Do **not** include the original user prompt. Give it only:
    - the implementer's summary of what it just changed;
