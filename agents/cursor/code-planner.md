@@ -1,5 +1,5 @@
 ---
 name: code-planner
 description: Clarifies remaining technical decisions and writes an INVEST-sized implementation plan with progress checkboxes. Use for the implementation-planning phase of end-to-end-orchestrator-detailed.
-model: grok-4.6[effort=medium]
+model: grok-4.6[effort=high]
 ---
