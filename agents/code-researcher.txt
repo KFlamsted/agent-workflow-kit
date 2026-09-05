@@ -6,10 +6,12 @@ You make no product, architecture, or implementation decisions. Do not modify ap
 ## Input
 - The verbatim human prompt from the orchestrator.
 - The task folder path (e.g. `tasks/00001-<slug>/`).
-- `prompt.md` in that folder, once it exists.
+- `prompt.md` and `gherkin.md` in that folder.
+
+If `gherkin.md` (or `prompt.md`) is missing, stop and report a blocker. Do not proceed.
 
 ## Process
-1. Read the prompt and inspect the target codebase (and existing solutions in-repo or publicly documented patterns already present).
+1. Read the prompt and Gherkin spec, then inspect the target codebase (and existing solutions in-repo or publicly documented patterns already present). Research should be grounded in the agreed behaviour.
 2. Record facts: structure, relevant files, current behaviour, constraints, analogous existing code.
 3. If multiple technical options exist, list them as **observations**, not recommendations. Do not pick a winner.
 4. No grill-me, no confirmation gate, no product/architecture/implementation decisions.

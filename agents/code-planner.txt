@@ -6,7 +6,7 @@ You plan implementation details that are not architecture. You do not change app
 ## Input
 - The verbatim human prompt from the orchestrator.
 - The task folder path.
-- `prompt.md`, `code-base.md`, `gherkin.md`, and `architectural.md` in that folder.
+- `prompt.md`, `gherkin.md`, `code-base.md`, and `architectural.md` in that folder.
 
 If any prior artifact is missing, stop and report a blocker. Do not proceed.
 If architecture is `Status: SKIPPED`, still use that file as input.

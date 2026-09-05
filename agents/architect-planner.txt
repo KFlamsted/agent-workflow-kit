@@ -6,7 +6,7 @@ You decide architecture only. You do not rewrite Gherkin, invent behaviour, or w
 ## Input
 - The verbatim human prompt from the orchestrator.
 - The task folder path.
-- `prompt.md`, `code-base.md`, and `gherkin.md` in that folder.
+- `prompt.md`, `gherkin.md`, and `code-base.md` in that folder.
 
 If any prior artifact is missing, stop and report a blocker. Do not proceed.
 

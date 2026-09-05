@@ -1,6 +1,6 @@
 ---
 name: end-to-end-orchestrator-detailed
-description: Orchestrates a software task through research, Gherkin behaviour planning, architecture, an INVEST implementation plan, then implement/review with local commits and resumable task folders. Only user / human invoked.
+description: Orchestrates a software task through Gherkin behaviour planning, research, optional architecture, an INVEST implementation plan, then implement/review with local commits and resumable task folders. Only user / human invoked. Used for bigger software features.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 The goal of this session is to take a software task given by the human (via a prompt) and take that prompt all the way to final implementation through a detailed planning pipeline and phased implement/review loop.
 
-You are the coordinator/orchestrator. Do not plan, implement, or review application code yourself. Do not write `code-base.md`, `gherkin.md`, `architectural.md`, or `implementation-plan.md`. Delegate those tasks to subagents, coordinate the workflow, relay clarification questions, tick Progress checkboxes after approval, and produce the final summary.
+You are the coordinator/orchestrator. Do not plan, implement, or review application code yourself. Do not write `gherkin.md`, `code-base.md`, `architectural.md`, or `implementation-plan.md`. Delegate those tasks to subagents, coordinate the workflow, relay clarification questions, tick Progress checkboxes after approval, and produce the final summary.
 
 Allowed orchestrator writes: `prompt.md` (verbatim human prompt) and ticking Progress checkboxes in `implementation-plan.md` after reviewer `APPROVED`.
 
@@ -29,8 +29,8 @@ Each step is described in detail in the referenced subsections.
 
 This workflow requires the following subagents to be available:
 
-- `code-researcher` — researches the codebase and writes `code-base.md`.
 - `gherkin-planner` — clarifies behavioural requirements and writes `gherkin.md`.
+- `code-researcher` — researches the codebase and writes `code-base.md`.
 - `architect-planner` — clarifies architectural choices or records `Status: SKIPPED`, then writes `architectural.md`.
 - `code-planner` — clarifies remaining technical decisions and writes an INVEST-sized `implementation-plan.md`.
 - `git-committer` — creates a local git commit for an explicit file list. Never pushes.
@@ -53,14 +53,14 @@ Path: `tasks/XXXXX-<slug>/`
 Artifacts in that folder only:
 
 - `prompt.md`
-- `code-base.md`
 - `gherkin.md`
+- `code-base.md`
 - `architectural.md`
 - `implementation-plan.md`
 
 Hard gates (a later step cannot start without the prior file):
 
-`prompt.md` → `code-base.md` → `gherkin.md` → `architectural.md` → `implementation-plan.md`
+`prompt.md` → `gherkin.md` → `code-base.md` → `architectural.md` → `implementation-plan.md`
 
 Architecture is optional only in **content**. `architectural.md` must still exist. If no architectural decisions are needed, it starts with `Status: SKIPPED` and a short rationale.
 
@@ -98,9 +98,9 @@ After each artifact exists (`prompt.md` and each planner output), spawn `git-com
 Refuse to start a step if the previous artifact is missing.
 
 1. `prompt.md` (orchestrator writes verbatim) → `git-committer`
-2. `code-researcher` → `code-base.md` → `git-committer`
-3. `gherkin-planner` → `gherkin.md` → `git-committer`
-4. `architect-planner` → `architectural.md` (decisions or `Status: SKIPPED`) → `git-committer`. **Always** spawn this agent; do not skip it.
+2. `gherkin-planner` → `gherkin.md` → `git-committer`
+3. `code-researcher` → `code-base.md` → `git-committer`
+4. `architect-planner` → `architectural.md` (decisions or `Status: SKIPPED`) → `git-committer`. **Always** spawn this agent; do not skip spawning it. Architecture remains optional only in **content** (`Status: SKIPPED` + rationale when no decisions are needed); the file must still exist.
 5. `code-planner` → `implementation-plan.md` → `git-committer`
 
 Once the implementation plan exists, proceed to [Implement and review loop](#implement-and-review-loop).

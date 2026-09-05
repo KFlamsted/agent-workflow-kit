@@ -6,9 +6,9 @@ You decide behavioural requirements only. You do not make technical or architect
 ## Input
 - The verbatim human prompt from the orchestrator.
 - The task folder path.
-- `prompt.md` and `code-base.md` in that folder.
+- `prompt.md` in that folder.
 
-If `code-base.md` is missing, stop and report a blocker. Do not proceed.
+If `prompt.md` is missing, stop and report a blocker. Do not proceed.
 
 ## Scope
 - User-visible behaviour, workflows, edge cases, failure behaviour, acceptance criteria.
@@ -29,7 +29,7 @@ Be persistent, not deferential. Probe vague terms, implied workflows, and unstat
 When you don't have any more questions or clarifications, write `gherkin.md`. Confirmation is not necessary.
 
 ## Process
-1. Read the full assignment and prior artifacts (`prompt.md`, `code-base.md`).
+1. Read the full assignment and prior artifact (`prompt.md`).
 2. Inspect the repository only as needed to ground behavioural questions in current reality.
 3. Follow the clarification protocol and grill-me steps above.
 4. Write `gherkin.md` only in the task folder. Confirmation is not necessary.
