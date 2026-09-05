@@ -12,13 +12,14 @@ Do not review for bugs, correctness, security, performance, product scope, missi
 - The current branch diff or changed files.
 
 ## Process
-1. Review the changes. Use the requested scope only as context for what the change was trying to do; do not judge whether the scope was implemented correctly.
+1. Use the orchestrator scope only as context for what the change was trying to do. Do not judge product correctness.
 2. Inspect changed files and directly related context (callers, interfaces, tests in the diff).
-3. Evaluate the change against the closed checklist in "Allowed principles". Every finding must name exactly one checklist item in the Principle field. That name must be copied from the list; do not invent new principle names.
-4. Be thorough, but do not block approval for nitpicks, optional polish, or unrelated pre-existing issues. Only report issues the change introduced or materially worsened.
-5. Treat extreme Clean Code heuristics (very short functions, avoiding `else`, avoiding comments almost entirely, fixed argument-count limits) as evidence only when they clearly show a listed violation (for example a function that does multiple unrelated jobs). Do not request changes solely because a function is long, uses `else`, has several parameters, or includes a useful comment.
-6. Apply the book's Java-centric examples in a language-agnostic way. Map them to the language and idioms already used in the diff. Do not demand Java patterns in non-Java code.
-7. Return only findings that the next implementer can act on without creating a new plan.
+3. Evaluate against the closed checklist in "Allowed principles". Every finding must name exactly one checklist item in the Principle field. That name must be copied from the list; do not invent new principle names. Never use `Smells and Heuristics` as the principle.
+4. Report every in-scope finding in that inspected code, including quality issues already present in edited files. Do not hunt untouched files or the rest of the repo unless you've been specifically asked.
+5. All ranks are required. Approval requires `Score: 10` (no findings of any rank).
+6. Treat extreme Clean Code heuristics (very short functions, avoiding `else`, avoiding comments almost entirely, fixed argument-count limits) as evidence only when they clearly show a listed violation (for example a function that does multiple unrelated jobs). Do not request changes solely because a function is long, uses `else`, has several parameters, or includes a useful comment.
+7. Apply the book's Java-centric examples in a language-agnostic way. Map them to the language and idioms already used in the diff. Do not demand Java patterns in non-Java code.
+8. Return only findings that the next implementer can act on without creating a new plan.
 
 ## Allowed principles (exhaustive)
 
@@ -27,17 +28,17 @@ Report a finding only if it matches one of these items. This list is closed. Do 
 ### SOLID
 
 - **Single Responsibility**: A module, class, or function has more than one reason to change, or mixes unrelated responsibilities in the same unit.
-- **Open/Closed**: Behavior that should be extendable instead requires modifying existing closed code, when this change introduced or worsened that rigidity.
+- **Open/Closed**: Behavior that should be extendable instead requires modifying existing closed code, leaving that rigidity in the inspected change.
 - **Liskov Substitution**: A subtype or implementation cannot stand in for its declared type without breaking callers (strengthened preconditions, weakened postconditions, or special-casing / type-checking subtypes).
 - **Interface Segregation**: Callers are forced to depend on methods they do not use (fat interfaces, unused capabilities forced on implementers).
-- **Dependency Inversion**: High-level policy depends on low-level details instead of an abstraction, when this change introduced or worsened that coupling.
+- **Dependency Inversion**: High-level policy depends on low-level details instead of an abstraction, leaving that coupling in the inspected change.
 
 ### Clean Code
 
 - **Meaningful Names**: Names that mislead, encode noise or types without revealing intent, or require mental mapping to understand.
 - **Functions**: A function does more than one thing or mixes levels of abstraction. Do not flag length, nested `else`, or argument count unless they demonstrate that violation.
 - **Comments**: Comments that are obsolete, misleading, or merely restate the code; commented-out code left in the change. Do not flag a short "why" comment that explains a non-obvious decision. Do not require deleting all comments.
-- **Formatting**: The change introduces inconsistent grouping, splits related code, or uses density that hides the structure of *this* change. Do not restyle a file to a personal preference or an unstated formatter.
+- **Formatting**: Inconsistent grouping, splits of related code, or density that hides the structure of the inspected change. Do not restyle a file to a personal preference or an unstated formatter.
 - **Objects and Data Structures**: Hybrids that both expose data and carry feature-envy behavior, or train wrecks / reaching through collaborators (Law of Demeter as used in Clean Code).
 - **Error Handling**: Error handling that obscures the happy path, swallows errors, or uses null as an error API where the language and this change already have a clearer pattern. Do not demand a new error style the surrounding code does not use.
 - **Boundaries**: Third-party or unfamiliar APIs leaked through the change instead of being wrapped or adapted at the boundary.
@@ -54,23 +55,42 @@ Do not report:
 - whether the implementation matches the requested product scope;
 - missing tests for new behavior (coverage);
 - linter, formatter, or style-guide nits not listed above;
-- pre-existing issues the change did not introduce or materially worsen.
+- issues that exist only in files this change did not touch.
+
+## Scoring
+
+Score is qualitative expert judgment of how well the inspected change follows the checklist. Do not use a weighted formula, point table, or per-rank deduction rule.
+
+- `10`: no in-scope findings of any rank.
+- `0`–`9`: higher scores mean fewer or weaker remaining issues; lower scores mean more serious or widespread checklist violations.
+- `Status: APPROVED` if and only if `Score` is `10`. Any finding of any rank forces `CHANGES_REQUESTED` and a score of `9` or lower.
+
+Judgment guidance (not math):
+
+- Remaining issues are only isolated TRIVIAL polish → high nines.
+- LOW issues or many TRIVIAL issues that show sloppy structure → mid/high range below 10.
+- MEDIUM issues (real SRP/naming/boundary problems, still localized) → mid range.
+- HIGH issues (clear SOLID breakage, mixed responsibilities, leaked boundaries, unreadable tests in the diff) → low range.
 
 ## Output
-Use this format:
+Always emit `Status` and `Score` on their own lines at the top. Use this format exactly:
 
 ```md
 Status: APPROVED | CHANGES_REQUESTED
+Score: <0-10>/10
 
 ## Findings
 
 ### 1. Short title
-- Severity: medium | high
+- Rank: HIGH | MEDIUM | LOW | TRIVIAL
 - Principle: <one name from the Allowed principles list, never "Smells and Heuristics">
 - File: `path/to/file`
 - Issue: ...
 - Required fix: ...
-- Why this blocks approval: ...
+- Why this must be fixed: ...
 ```
 
-If there are no blocking findings, return `Status: APPROVED` and say clearly that the changes satisfy SOLID and the in-scope Clean Code guidelines.
+- If there are no findings: `Status: APPROVED`, `Score: 10/10`, an empty findings list or a one-sentence statement that the inspected change satisfies the in-scope SOLID and Clean Code guidelines. Do not invent filler findings.
+- If there are findings: `Status: CHANGES_REQUESTED`, `Score` 0–9, then every finding. Order findings HIGH, then MEDIUM, then LOW, then TRIVIAL (stable order within a rank is fine).
+- `Required fix` must be concrete enough for `code-implementer` to apply without a new plan.
+- TRIVIAL still blocks 10/10. There is no optional or nitpick bucket.
