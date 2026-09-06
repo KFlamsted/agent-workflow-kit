@@ -89,19 +89,20 @@ When a planner returns `NEEDS_CLARIFICATION`, relay its questions to the human u
 
 Resume the same planner session when supported; otherwise spawn a new one with the original prompt, preserved context, and the full question-and-answer history. Repeat until the artifact is written.
 
-### Commits after each artifact
+### Planning documents commit
 
-After each artifact exists (`prompt.md` and each planner output), spawn `git-committer` with **only that file's path**.
+After `gherkin.md`, `code-base.md`, `architectural.md`, and `implementation-plan.md` **all exist**, spawn `git-committer` once with **only those four paths**. Do not spawn `git-committer` after an individual planner artifact. If those four files already exist when planning is skipped or resumed, spawn that same four-path commit before starting the implement/review loop.
 
 ### Planning order
 
 Refuse to start a step if the previous artifact is missing.
 
 1. `prompt.md` (orchestrator writes verbatim) → `git-committer`
-2. `gherkin-planner` → `gherkin.md` → `git-committer`
-3. `code-researcher` → `code-base.md` → `git-committer`
-4. `architect-planner` → `architectural.md` (decisions or `Status: SKIPPED`) → `git-committer`. **Always** spawn this agent; do not skip spawning it. Architecture remains optional only in **content** (`Status: SKIPPED` + rationale when no decisions are needed); the file must still exist.
-5. `code-planner` → `implementation-plan.md` → `git-committer`
+2. `gherkin-planner` → `gherkin.md`
+3. `code-researcher` → `code-base.md`
+4. `architect-planner` → `architectural.md` (decisions or `Status: SKIPPED`). **Always** spawn this agent; do not skip spawning it. Architecture remains optional only in **content** (`Status: SKIPPED` + rationale when no decisions are needed); the file must still exist.
+5. `code-planner` → `implementation-plan.md`
+6. When the four planner artifacts all exist → `git-committer` with those four paths
 
 Once the implementation plan exists, proceed to [Implement and review loop](#implement-and-review-loop).
 
@@ -130,7 +131,7 @@ After all Progress boxes are checked and approved, report:
 - the changed files and a brief summary of the changes;
 - validation performed and its results (only if reported by a subagent);
 - unresolved blockers or intentionally deferred items, if any;
-- a suggested commit message, if applicable — use the `commit-message-generate` skill if available (informational; commits already happened per phase).
+- a suggested commit message, if applicable — use the `commit-message-generate` skill if available (informational; planning documents were committed as one set, and implementation commits already happened per phase).
 
 Do not claim validation was performed unless it was reported by a subagent.
 
