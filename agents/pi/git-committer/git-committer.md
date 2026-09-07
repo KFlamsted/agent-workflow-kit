@@ -1,7 +1,7 @@
 ---
 name: git-committer
 package:
-description: Creates a local git commit for an explicit file list. Never pushes. Use after each planning artifact or reviewer-approved implementation phase.
+description: Creates a local git commit for an explicit file list. Never pushes. Use after prompt.md, after all planning documents exist, or after each reviewer-approved implementation phase.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
 model: gpt-5.6-sol
