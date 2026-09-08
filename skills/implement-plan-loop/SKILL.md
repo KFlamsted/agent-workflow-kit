@@ -14,8 +14,9 @@ Use this as the entrypoint for looped implementation. The orchestrator owns the 
 ## Process
 1. If the user provides a plan file path, read the full plan.
 2. If the user provides a freeform prompt, treat it as the implementation scope.
-3. Ask clarification questions only when the scope is too ambiguous or risky to start.
-4. Invoke the `code-implementation-loop-orchestrator` skill with:
+3. For a freeform prompt, first turn it into a small implementation plan before invoking the orchestrator.
+4. Ask clarification questions when the scope is too ambiguous or risky to start.
+5. Invoke the `code-implementation-loop-orchestrator` skill with:
    - the full original scope;
    - relevant user constraints;
    - expected validation, if known;
