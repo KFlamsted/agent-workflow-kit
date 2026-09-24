@@ -6,7 +6,7 @@ disable-model-invocation: false
 
 # Commit Message Generate
 
-Generate a proper commit message only. Do not run git commands.
+Generate a proper commit message only. Git diff commands are allowed to help identifying changes, but avoid git commands that modify the repository.
 
 ## Input
 - A change summary, diff, file list, or user-provided context describing the changes.
