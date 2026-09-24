@@ -4,9 +4,9 @@ package:
 description: Researches the codebase and existing solutions for a task and writes code-base.md. Use for the research phase of end-to-end-orchestrator-detailed. Makes no product or architecture decisions.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: gpt-5.6-sol
-fallbackModels: gpt-5.6-sol
-thinking: high
+model: gpt-6-sol
+fallbackModels: gpt-6-sol
+thinking: medium
 systemPromptMode: replace
 inheritProjectContext: false
 inheritSkills: true
