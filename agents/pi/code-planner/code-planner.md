@@ -4,8 +4,8 @@ package:
 description: Clarifies remaining technical decisions and writes an INVEST-sized implementation plan with progress checkboxes. Use for the implementation-planning phase of end-to-end-orchestrator-detailed.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: gpt-6-sol
-fallbackModels: gpt-6-sol
+model: gpt-6.1-sol
+fallbackModels: gpt-6.1-sol
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: false

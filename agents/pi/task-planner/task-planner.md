@@ -4,8 +4,8 @@ package:
 description: Analyzes coding tasks and creates actionable implementation plans with clear steps, affected files, and validation guidance.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: gpt-6-sol
-fallbackModels: gpt-6-sol
+model: gpt-6.1-sol
+fallbackModels: gpt-6.1-sol
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: false

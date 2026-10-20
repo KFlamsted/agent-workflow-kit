@@ -269,7 +269,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   assert.ok(codexCleanSolidOutput.startsWith(codexCleanSolidSource));
   assert.ok(codexCleanSolidOutput.endsWith(codexCleanSolidInstructions));
   assert.equal(countOccurrences(codexCleanSolidOutput, 'developer_instructions ='), 1);
-  assert.match(codexCleanSolidSource, /model = "gpt-6-sol"/);
+  assert.match(codexCleanSolidSource, /model = "gpt-6\.1-sol"/);
   assert.match(codexCleanSolidSource, /model_reasoning_effort = "medium"/);
   assert.match(codexCleanSolidSource, /sandbox_mode = "read-only"/);
 
@@ -278,7 +278,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     'utf8'
   );
   assert.match(opencodeCleanSolidSource, /mode: subagent/);
-  assert.match(opencodeCleanSolidSource, /openai\/gpt-6-sol/);
+  assert.match(opencodeCleanSolidSource, /openai\/gpt-6\.1-sol/);
   assert.match(opencodeCleanSolidSource, /variant: medium/);
   assert.match(opencodeCleanSolidSource, /edit: deny/);
   assert.match(opencodeCleanSolidSource, /task: deny/);

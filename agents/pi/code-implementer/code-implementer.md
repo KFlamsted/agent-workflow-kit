@@ -4,8 +4,8 @@ package:
 description: Implements an assigned scope or reviewer-requested fixes as one step in an implementation loop.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
-model: gpt-6-sol
-fallbackModels: gpt-6-sol
+model: gpt-6.1-sol
+fallbackModels: gpt-6.1-sol
 thinking: medium
 systemPromptMode: append
 inheritProjectContext: false

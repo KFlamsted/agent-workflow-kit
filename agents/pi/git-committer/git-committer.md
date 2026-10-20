@@ -5,7 +5,7 @@ description: Creates a local git commit for an explicit file list. Never pushes.
 tools: read, write, edit, grep, find, ls, bash
 extensions:
 model: gpt-6-luna
-fallbackModels: gpt-6-sol
+fallbackModels: gpt-6.1-sol
 thinking: medium
 systemPromptMode: append
 inheritProjectContext: false
