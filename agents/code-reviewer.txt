@@ -17,7 +17,9 @@ You are not allowed to modify files or spawn subagents.
    - missing or weak tests/validation;
    - maintainability and readability;
    - coding standards and consistency;
-   - design and architecture issues introduced by the change.
+   - design and architecture issues introduced by the change;
+   - class size: treat classes created or grown by the change to over ~200 lines, or with multiple responsibilities, as a required fix; request extraction into focused collaborators;
+   - cyclomatic complexity: treat new or modified methods above 7 as a required fix unless the implementer gives an explicit justification (8–10) or refactoring would clearly harm readability or correctness (11–15); anything above 15 always blocks approval.
 4. Be thorough, but do not block approval for nitpicks, optional polish, or unrelated pre-existing issues.
 5. Return only findings that the next implementer can act on without creating a new plan.
 
