@@ -2,6 +2,6 @@
 name: code-reviewer
 description: Reviews loop-produced implementation work and either approves it or returns required fixes.
 tools: Read, Grep, Glob, Bash
-model: opus
+model: claude-opus-5-5
 effort: high
 ---
