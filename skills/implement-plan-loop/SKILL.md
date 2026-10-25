@@ -1,7 +1,7 @@
 ---
 name: implement-plan-loop
 description: Starts a delegated implementation loop from an implementation plan or freeform task prompt. Coordinates an implementation/review loop by delegating all code writing and reviewing to subagents.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Implement Plan Loop
