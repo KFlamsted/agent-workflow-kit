@@ -11,7 +11,7 @@ You are the coordinator/orchestrator in this end to end process.
 
 The end-to-end process consists of the following steps:
 1. Create an implementation plan for the task. (See [Create Implementation Plan](#create-implementation-plan))
-2. Implement and review the code in an implementer-to-reviewer loop. (See [Implement and Review Code loop](#implement-and-review-code-loop))
+2. Implement and review each plan phase by invoking the `implement-plan-loop` skill once per phase. (See [Implement and Review Code loop](#implement-and-review-code-loop))
 3. Conduct a final summary of the entire process. (See [Final Summary](#final-summary))
 
 Each step is described in detail in the referenced subsections.
@@ -20,15 +20,20 @@ Do not plan, implement, or review code yourself. Delegate those tasks to subagen
 ## Input
 - A task description from the user.
 
-## Required Subagents - IMPORTANT!
-This workflow requires the following subagent to be available:
+## Required Skills and Subagents - IMPORTANT!
+This workflow requires the following skill to be available:
+
+- `implement-plan-loop` — runs the implementer-to-reviewer loop for one plan phase.
+
+This workflow requires the following subagents to be available:
 
 - `task-planner` — creates the phased implementation plan and raises clarification questions.
-- `code-implementer` — implements and validates an assigned implementation unit.
-- `code-reviewer` — reviews an implementation unit and returns `APPROVED` or `CHANGES_REQUESTED`.
+- `code-implementer` — implements and validates a plan phase (spawned through `implement-plan-loop`).
+- `code-reviewer` — reviews a plan phase (spawned through `implement-plan-loop`).
+- `clean-solid-code-reviewer` — reviews a plan phase for Clean Code and SOLID quality (spawned through `implement-plan-loop`). Mandatory for this workflow.
 
-It is very important before starting the workflow, to ensure all required subagent types are available to spawn - They must have the exact same name and you may not generate them or spawn any agent with a similar name.  
-If any of these are unavailable, stop the workflow and report the missing dependency rather than substituting another agent or performing its responsibilities yourself.
+It is very important before starting the workflow, to ensure the skill and all required subagent types are available - They must have the exact same name and you may not generate them or spawn any agent with a similar name.  
+If any of these are unavailable, stop the workflow and report the missing dependency rather than substituting another skill or agent, or performing its responsibilities yourself. Because this check runs before planning, it replaces the workaround question in `implement-plan-loop`'s own subagent check.
 
 ## Create Implementation Plan
 The goal of this section is to create an implementation plan.  
@@ -42,32 +47,34 @@ Once the plan is ready, proceed to the [Implement and Review Code loop](#impleme
 ## Implement and Review Code loop
 Ensure the implementation plan exists in the project. Treat each plan phase as one implementation unit; if the plan has no phases, treat the full plan as one unit. Optionally track these units with `todowrite`.
 
-For each unit, in order:
+For each unit, in order, invoke the `implement-plan-loop` skill and follow its instructions with this input:
+- the implementation plan file path;
+- the current unit as the only implementation scope: implement only this phase and use the rest of the plan as read-only context;
+- an explicit request for the clean-solid review (`clean-solid-code-reviewer`) for this phase;
+- any constraints, validation requirements, or stopping rules from the human.
 
-1. Spawn a new `code-implementer` to implement and validate the unit.
-2. Spawn a new `code-reviewer` to review the result against the implementation plan and current unit.
-3. If the result is `CHANGES_REQUESTED`, resume the same implementer with only the required fixes, then resume the same reviewer to review the changes.
-4. Repeat until the reviewer returns `APPROVED`, then continue to the next unit.
+Invoke the skill separately for every unit; never run it over the full plan when the plan has phases. `implement-plan-loop` owns the implementation/review rounds, the reviewers, and when a unit is approved; do not restate or override them. Its own skip rule (see its Bigger-Change Trigger section) still applies, so the clean-solid review may be skipped for some phases.
 
-Use new implementer and reviewer sessions for each unit. After all units are approved, proceed to [Final Summary](#final-summary).
+When the loop for a unit finishes:
+- If it reports final approval, record its report (rounds, clean-solid result, changed files, validation, deferred items) and continue with the next unit without waiting for the human. Do not present its per-unit commit message suggestion.
+- If it stops on a blocker, stop the workflow and report the blocker to the human.
+
+After all units are approved, proceed to [Final Summary](#final-summary).
 
 ## Final Summary
 After all implementation units are approved, report:
 
 - the original task and implementation plan;
-- the units completed and implementation/review rounds for each;
+- the units completed and, per unit, the implementation/review rounds and the clean-solid result (whether it ran and why or why not; if it ran, its final score and deferred findings);
 - the final approval status;
 - the changed files and a brief summary of the changes;
 - validation performed and its results;
 - unresolved blockers or intentionally deferred items, if any;
-- a suggested commit message, if applicable - use the `commit-message-generate` skill for this if available.
+- one suggested commit message for the whole change, if applicable - use the `commit-message-generate` skill for this if available.
 
 Do not claim validation was performed unless it was reported by a subagent.
 
 ## Extra Rules and Guidelines
-- Remain the orchestrator; do not implement or review code yourself.
-- Use only one writing implementer at a time against the active worktree.
-- Do not ask implementers or reviewers to create a new implementation plan.
-- Forward only changes required for approval, not optional reviewer suggestions.
-- Ask the human if a finding requires a product, scope, or architecture decision not covered by the plan.
-- If an issue repeats or the loop becomes stuck, stop and report the blocker instead of continuing indefinitely.
+- Remain the orchestrator; do not plan, implement, or review code yourself.
+- `implement-plan-loop` owns the implementer/reviewer round mechanics, approval criteria, fix forwarding, human escalation for findings, and stuck-loop handling. Follow it rather than duplicating or overriding those rules.
+- Invoke `implement-plan-loop` once per plan phase, in plan order, and start a phase only after the previous one is approved.
