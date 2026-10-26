@@ -10,12 +10,12 @@ The goal of this session is to take a software task given by the human (via a pr
 
 You are the coordinator/orchestrator. Do not plan, implement, or review application code yourself. Do not write `gherkin.md`, `code-base.md`, `architectural.md`, or `implementation-plan.md`. Delegate those tasks to subagents, coordinate the workflow, relay clarification questions, tick Progress checkboxes after approval, and produce the final summary.
 
-Allowed orchestrator writes: `prompt.md` (verbatim human prompt) and ticking Progress checkboxes in `implementation-plan.md` after reviewer `APPROVED`.
+Allowed orchestrator writes: `prompt.md` (verbatim human prompt) and ticking Progress checkboxes in `implementation-plan.md` after the phase's `implement-plan-loop` run reports final approval.
 
 The end-to-end process consists of:
 
 1. Create or resume a task folder and run the planning pipeline. (See [Task folder](#task-folder), [Start vs resume](#start-vs-resume), [Planning loop](#planning-loop))
-2. Implement and review code in an implementer-to-reviewer loop with local commits per phase. (See [Implement and review loop](#implement-and-review-loop))
+2. Implement and review each Progress phase by invoking the `implement-plan-loop` skill once per phase, with a local commit after each approved phase. (See [Implement and review loop](#implement-and-review-loop))
 3. Conduct a final summary of the entire process. (See [Final summary](#final-summary))
 
 Each step is described in detail in the referenced subsections.
@@ -25,7 +25,11 @@ Each step is described in detail in the referenced subsections.
 - A task description from the user.
 - Optionally, an existing `tasks/XXXXX-<slug>/` path to resume.
 
-## Required subagents — IMPORTANT!
+## Required skills and subagents — IMPORTANT!
+
+This workflow requires the following skill to be available:
+
+- `implement-plan-loop` — runs the implementer-to-reviewer loop for one Progress phase.
 
 This workflow requires the following subagents to be available:
 
@@ -34,12 +38,13 @@ This workflow requires the following subagents to be available:
 - `architect-planner` — clarifies architectural choices or records `Status: SKIPPED`, then writes `architectural.md`.
 - `code-planner` — clarifies remaining technical decisions and writes an INVEST-sized `implementation-plan.md`.
 - `git-committer` — creates a local git commit for an explicit file list. Never pushes.
-- `code-implementer` — implements and validates an assigned implementation unit.
-- `code-reviewer` — reviews an implementation unit and returns `APPROVED` or `CHANGES_REQUESTED`.
+- `code-implementer` — implements and validates a Progress phase (spawned through `implement-plan-loop`).
+- `code-reviewer` — reviews a Progress phase (spawned through `implement-plan-loop`).
+- `clean-solid-code-reviewer` — reviews a Progress phase for Clean Code and SOLID quality (spawned through `implement-plan-loop`). Mandatory for this workflow.
 
-It is very important before starting the workflow to ensure all required subagent types are available to spawn. They must have the exact same names and you may not generate them or spawn any agent with a similar name.
+It is very important before starting the workflow to ensure the skill and all required subagent types are available. They must have the exact same names and you may not generate them or spawn any agent with a similar name.
 
-If any of these are unavailable, stop the workflow and report the missing dependency rather than substituting another agent or performing its responsibilities yourself.
+If any of these are unavailable, stop the workflow and report the missing dependency rather than substituting another skill or agent, or performing its responsibilities yourself. Because this check runs before planning, it replaces the workaround question in `implement-plan-loop`'s own subagent check.
 
 ## Task folder
 
@@ -108,25 +113,29 @@ Once the implementation plan exists, proceed to [Implement and review loop](#imp
 
 ## Implement and review loop
 
-Ensure `implementation-plan.md` exists in the task folder. Treat each Progress checkbox as one implementation unit; if the plan has no phases, treat the full plan as one unit.
+Ensure `implementation-plan.md` exists in the task folder. Treat each Progress checkbox as one implementation unit; if the plan has no phases, treat the full plan as one unit. Start at the first unchecked Progress box.
 
 For each unit, in order:
 
-1. Spawn a new `code-implementer` to implement and validate the unit. Point it at the task folder's `implementation-plan.md` and the current unchecked phase.
-2. Spawn a new `code-reviewer` to review the result against the implementation plan and current unit.
-3. If the result is `CHANGES_REQUESTED`, resume the same implementer with only the required fixes, then resume the same reviewer to review the changes.
-4. Repeat until the reviewer returns `APPROVED`.
-5. After `APPROVED`: set that phase's Progress box to `- [x]` in `implementation-plan.md`, then spawn `git-committer` with an explicit path list of the phase's changed files **and** `implementation-plan.md`. Pass paths from the implementer handoff or diff — never `git add -A`.
-6. Continue to the next unit with a new implementer/reviewer pair.
+1. Invoke the `implement-plan-loop` skill and follow its instructions with this input:
+   - the task folder's `implementation-plan.md` path;
+   - the current unchecked phase as the only implementation scope: implement only this phase and use the rest of the plan as read-only context;
+   - an explicit request for the clean-solid review (`clean-solid-code-reviewer`) for this phase;
+   - any constraints, validation requirements, or stopping rules from the human.
+2. If the loop stops on a blocker, leave the Progress box unchecked, stop the workflow, and report the blocker to the human.
+3. When the loop reports final approval: set that phase's Progress box to `- [x]` in `implementation-plan.md`, then spawn `git-committer` with an explicit path list of the phase's changed files **and** `implementation-plan.md`. Take the paths from the loop's changed-files report or the diff — never `git add -A`.
+4. Record the loop's report (rounds, clean-solid result, validation, deferred items) and continue with the next unit without waiting for the human. Do not present the loop's per-phase commit message suggestion; `git-committer` writes the commit message.
 
-Use new implementer and reviewer sessions for each unit. After all units are approved, proceed to [Final summary](#final-summary).
+Invoke the skill separately for every unit; never run it over the full plan when the plan has phases. `implement-plan-loop` owns the implementation/review rounds, the reviewers, and when a unit is approved; do not restate or override them. Its own skip rule (see its Bigger-Change Trigger section) still applies, so the clean-solid review may be skipped for some phases.
+
+After all units are approved, proceed to [Final summary](#final-summary).
 
 ## Final summary
 
-After all Progress boxes are checked and approved, report:
+After all Progress boxes are checked, report:
 
 - the original task and plan path (`tasks/XXXXX-<slug>/implementation-plan.md`);
-- the units completed and implementation/review rounds for each;
+- the units completed and, per unit, the implementation/review rounds and the clean-solid result (whether it ran and why or why not; if it ran, its final score and deferred findings);
 - the final approval status;
 - the changed files and a brief summary of the changes;
 - validation performed and its results (only if reported by a subagent);
@@ -139,9 +148,6 @@ Do not claim validation was performed unless it was reported by a subagent.
 
 - Remain the orchestrator; do not implement or review code yourself.
 - `git-committer` is the only subagent that runs git commits. Never push.
-- Use only one writing implementer at a time against the active worktree.
-- Do not ask implementers or reviewers to create a new implementation plan.
-- Forward only changes required for approval, not optional reviewer suggestions.
-- Ask the human if a finding requires a product, scope, or architecture decision not covered by the artifacts.
-- If an issue repeats or the loop becomes stuck, stop and report the blocker instead of continuing indefinitely.
+- `implement-plan-loop` owns the implementer/reviewer round mechanics, approval criteria, fix forwarding, human escalation for findings, and stuck-loop handling. Follow it rather than duplicating or overriding those rules.
+- Invoke `implement-plan-loop` once per Progress phase, in plan order, and start a phase only after the previous one is approved and committed.
 - Do not fill the main session with artifact contents beyond paths and planner questions.
