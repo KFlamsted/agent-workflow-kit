@@ -22,3 +22,4 @@ Generate a proper commit message only. Git diff commands are allowed to help ide
 - Return only the commit message.
 - When possible, wrap it in a fenced Markdown code block for direct copy and paste.
 - Be very concise.
+- Never add trailers such as `Co-Authored-By:` or other attribution lines.
