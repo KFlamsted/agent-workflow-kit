@@ -9,10 +9,12 @@ disable-model-invocation: true
 Brainstorm with the user and write `<repo-root>/MVP.md`: a short, stable
 description of the smallest product worth shipping. It is the document humans
 and agents fall back on when in doubt about scope, and the source issues can be
-created from when there is no backlog.
+created from when there is no backlog. When `VISION.md` exists, the MVP is the
+first slice of that vision: `VISION.md` sets direction, `MVP.md` sets scope.
 
 Run entirely in this main session. Do not spawn or delegate to agents. Do not
-implement product code, create issues, or edit other files.
+implement product code, create issues, or edit other files, including
+`VISION.md`.
 
 Default to leaving `MVP.md` uncommitted. Commit only when the user explicitly
 asks (see step 7). Never push.
@@ -39,6 +41,7 @@ done"). Ask for observable behavior, named users, and finite evidence.
 Push toward *minimum*. For every proposed capability, ask whether the core
 journey or the hypothesis fails without it. If not, propose moving it to
 "Deferred until after the MVP". The user decides; you argue for smaller.
+Minimum applies to the MVP only: deferring an item keeps it in the vision.
 
 Do not write `MVP.md` until step 5 confirmation succeeds.
 
@@ -47,12 +50,18 @@ Do not write `MVP.md` until step 5 confirmation succeeds.
 Locate the Git repository root. The output path is always
 `<repo-root>/MVP.md`.
 
-Read, if present: the current `MVP.md`, `README.md`, any existing vision,
-roadmap, or end-goal document, `git status`, and enough of the repository to
+Read, if present: the current `MVP.md`, `VISION.md`, `README.md`, any
+roadmap or end-goal document, `git status`, and enough of the repository to
 know its stack and whether it is a game or engine project.
 
-If another goal document exists (for example `end-goal.md`), ask whether the
-MVP should be derived from it, and treat it as a seed, not as agreed MVP scope.
+If `VISION.md` exists, derive the MVP from it: the hypothesis, users, and
+journey should test the vision's pitch and pillars. Treat its release target
+as the destination, not as MVP scope.
+
+If `VISION.md` is missing, tell the user that `/create-or-update-vision` can
+define the finished product first, and ask whether to continue without it. If
+another goal document exists (for example `end-goal.md`), ask whether the MVP
+should be derived from it, and treat it as a seed, not as agreed MVP scope.
 
 Classify mode:
 
@@ -118,6 +127,15 @@ Do not skip a gap because a default feels conventional. Minimum branches:
   checks. An unavailable check is never treated as passed.
 - Which signals after release tell you whether the hypothesis held?
 
+**Vision alignment** (only when `VISION.md` exists)
+
+- Which pillars does the MVP prove, and which are deliberately not yet tested?
+- Does any MVP item, non-goal, or constraint contradict the vision? Ask the
+  user which document should change. This skill does not edit `VISION.md`;
+  point to `/create-or-update-vision` for vision changes.
+- Make the distance to the release target explicit: what 1.0 adds beyond
+  the MVP.
+
 **Game specifics**
 
 - Ask whether this is a game if unclear. If repo evidence and the user
@@ -154,6 +172,8 @@ PRs can reference what they deliver.
 Present a summary mapped to the template headings, including:
 
 - the hypothesis and the core journey
+- vision alignment: pillars proved, distance to the release target, and any
+  contradictions with `VISION.md` (or that no vision exists)
 - the MVP scope items with IDs and *Done when* lines
 - deferred items and non-goals
 - open decisions
@@ -172,8 +192,9 @@ Only after confirmation:
   remain.
 - Keep the "How to use this document" comment at the top. Remove the other
   per-section HTML comments.
-- Omit the game section when the project is not a game. Omit "Open decisions"
-  only if there are none.
+- Omit the game section when the project is not a game. Omit "Vision
+  alignment" when there is no `VISION.md`. Omit "Open decisions" only if there
+  are none.
 - Phrase open decisions so a later agent must ask, not invent.
 - Write only `<repo-root>/MVP.md`.
 

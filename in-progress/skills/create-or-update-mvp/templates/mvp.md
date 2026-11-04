@@ -2,6 +2,8 @@
 
 <!--
 How to use this document:
+- VISION.md, if present, sets the product's direction; this document sets the
+  scope of its first slice.
 - When a decision is unclear, choose the option that keeps the project inside
   this MVP. Anything not listed under "MVP scope" is out until this file says
   otherwise.
@@ -22,6 +24,18 @@ sentences each. The hypothesis should be falsifiable by shipping the MVP.
 [Problem]
 
 **Hypothesis:** [If we ship X to Y, they will Z.]
+
+## Vision alignment
+
+<!--
+Delete this section if there is no VISION.md. Which vision pillars the MVP
+proves, which it deliberately leaves untested, and how far it is from the
+vision's release target.
+-->
+
+- **Pillars proved:** [Pillar]
+- **Not yet tested:** [Pillar]
+- **Distance to release target:** [What 1.0 adds beyond the MVP]
 
 ## Target users
 
