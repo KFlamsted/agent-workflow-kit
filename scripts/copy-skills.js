@@ -6,6 +6,7 @@ const path = require('path');
 const os = require('os');
 
 const repositoryDir = path.resolve(__dirname, '..');
+const inProgressFolderName = 'in-progress';
 
 const copyModes = {
   skills: {
@@ -62,107 +63,85 @@ const copyModes = {
   },
 };
 
+const modeAliases = {};
+for (const mode of Object.keys(copyModes)) {
+  const kebab = mode.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  for (const name of new Set([mode, kebab])) {
+    modeAliases[name] = mode;
+    modeAliases[`--${name}`] = mode;
+  }
+}
+
+const includeInProgressAliases = new Set([
+  '--include-in-progress',
+  'include-in-progress',
+  '--includeInProgress',
+  'includeInProgress',
+]);
+
+// Returns the env file path and how many extra args were consumed.
+function parseEnvOption(args, index) {
+  const arg = args[index];
+
+  if (arg === '--env') {
+    if (!args[index + 1]) {
+      throw new Error('Missing value for --env');
+    }
+    return { envFile: args[index + 1], consumed: 1 };
+  }
+
+  if (arg.startsWith('--env=')) {
+    return { envFile: arg.slice('--env='.length), consumed: 0 };
+  }
+
+  return undefined;
+}
+
+function parsePositionalArg(arg, envFile) {
+  if (arg.startsWith('--')) {
+    throw new Error(`Unknown option: ${arg}`);
+  }
+
+  if (envFile) {
+    throw new Error(`Unexpected extra argument: ${arg}`);
+  }
+
+  return arg;
+}
+
 function parseArgs(args) {
   const modes = [];
   let envFile;
+  let includeInProgress = false;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
 
-    if (arg === '--skills' || arg === 'skills') {
-      modes.push('skills');
+    if (Object.hasOwn(modeAliases, arg)) {
+      modes.push(modeAliases[arg]);
       continue;
     }
 
-    if (
-      arg === '--pi-agents' ||
-      arg === 'pi-agents' ||
-      arg === '--piAgents' ||
-      arg === 'piAgents'
-    ) {
-      modes.push('piAgents');
+    if (includeInProgressAliases.has(arg)) {
+      includeInProgress = true;
       continue;
     }
 
-    if (
-      arg === '--codex-agents' ||
-      arg === 'codex-agents' ||
-      arg === '--codexAgents' ||
-      arg === 'codexAgents'
-    ) {
-      modes.push('codexAgents');
+    const envOption = parseEnvOption(args, index);
+    if (envOption) {
+      envFile = envOption.envFile;
+      index += envOption.consumed;
       continue;
     }
 
-    if (
-      arg === '--claude-agents' ||
-      arg === 'claude-agents' ||
-      arg === '--claudeAgents' ||
-      arg === 'claudeAgents'
-    ) {
-      modes.push('claudeAgents');
-      continue;
-    }
-
-    if (
-      arg === '--opencode-agents' ||
-      arg === 'opencode-agents' ||
-      arg === '--opencodeAgents' ||
-      arg === 'opencodeAgents'
-    ) {
-      modes.push('opencodeAgents');
-      continue;
-    }
-
-    if (
-      arg === '--copilot-agents' ||
-      arg === 'copilot-agents' ||
-      arg === '--copilotAgents' ||
-      arg === 'copilotAgents'
-    ) {
-      modes.push('copilotAgents');
-      continue;
-    }
-
-    if (
-      arg === '--cursor-agents' ||
-      arg === 'cursor-agents' ||
-      arg === '--cursorAgents' ||
-      arg === 'cursorAgents'
-    ) {
-      modes.push('cursorAgents');
-      continue;
-    }
-
-    if (arg === '--env') {
-      index += 1;
-      if (!args[index]) {
-        throw new Error('Missing value for --env');
-      }
-      envFile = args[index];
-      continue;
-    }
-
-    if (arg.startsWith('--env=')) {
-      envFile = arg.slice('--env='.length);
-      continue;
-    }
-
-    if (arg.startsWith('--')) {
-      throw new Error(`Unknown option: ${arg}`);
-    }
-
-    if (envFile) {
-      throw new Error(`Unexpected extra argument: ${arg}`);
-    }
-    envFile = arg;
+    envFile = parsePositionalArg(arg, envFile);
   }
 
   if (modes.length === 0) {
     modes.push('skills');
   }
 
-  return { modes, envFile };
+  return { modes, envFile, includeInProgress };
 }
 
 function readEnvFile(filePath) {
@@ -313,6 +292,48 @@ function getCopyEntries(sourceDir, entryType, fileExtension) {
     .map((entry) => path.join(sourceDir, entry.name));
 }
 
+function isDirectory(dir) {
+  return fs.existsSync(dir) && fs.statSync(dir).isDirectory();
+}
+
+function getSourcePath(copyMode) {
+  return copyMode.sourcePath || [copyMode.sourceFolderName];
+}
+
+// The in-progress tree mirrors the released layout, but may not exist for every mode.
+function collectCopyEntries(copyMode, includeInProgress) {
+  const sourceDir = path.join(repositoryDir, ...getSourcePath(copyMode));
+
+  if (!isDirectory(sourceDir)) {
+    throw new Error(`${copyMode.label} folder not found: ${sourceDir}`);
+  }
+
+  const released = getCopyEntries(sourceDir, copyMode.entryType, copyMode.fileExtension)
+    .map((entryPath) => ({ entryPath, inProgress: false }));
+
+  if (!includeInProgress) {
+    return { sourceDir, entries: released };
+  }
+
+  const inProgressDir = path.join(repositoryDir, inProgressFolderName, ...getSourcePath(copyMode));
+  if (!isDirectory(inProgressDir)) {
+    return { sourceDir, entries: released };
+  }
+
+  const releasedNames = new Set(released.map((item) => path.basename(item.entryPath)));
+  const inProgress = [];
+  for (const entryPath of getCopyEntries(inProgressDir, copyMode.entryType, copyMode.fileExtension)) {
+    const name = path.basename(entryPath);
+    if (releasedNames.has(name)) {
+      console.warn(`Warning: skipping in-progress ${name}: released version exists`);
+      continue;
+    }
+    inProgress.push({ entryPath, inProgress: true });
+  }
+
+  return { sourceDir, entries: [...released, ...inProgress] };
+}
+
 function copyEntry(entryPath, targetRoot, entryType) {
   if (entryType === 'directory') {
     return copyFolder(entryPath, targetRoot);
@@ -325,14 +346,7 @@ function copyEntry(entryPath, targetRoot, entryType) {
   throw new Error(`Unsupported copy entry type: ${entryType}`);
 }
 
-function loadSharedPrompts() {
-  const promptsDir = path.join(repositoryDir, 'agents');
-
-  if (!fs.existsSync(promptsDir) || !fs.statSync(promptsDir).isDirectory()) {
-    throw new Error(`Shared prompts folder not found: ${promptsDir}`);
-  }
-
-  const prompts = new Map();
+function readPromptsInto(prompts, promptsDir, warnOnCollision) {
   for (const entry of fs.readdirSync(promptsDir, { withFileTypes: true })) {
     if (
       entry.name.startsWith('.') ||
@@ -342,8 +356,32 @@ function loadSharedPrompts() {
       continue;
     }
 
-    const promptPath = path.join(promptsDir, entry.name);
-    prompts.set(path.basename(entry.name, '.txt'), fs.readFileSync(promptPath, 'utf8'));
+    const promptName = path.basename(entry.name, '.txt');
+    if (prompts.has(promptName)) {
+      if (warnOnCollision) {
+        console.warn(`Warning: skipping in-progress prompt ${promptName}: released version exists`);
+      }
+      continue;
+    }
+
+    prompts.set(promptName, fs.readFileSync(path.join(promptsDir, entry.name), 'utf8'));
+  }
+}
+
+function loadSharedPrompts(includeInProgress) {
+  const promptsDir = path.join(repositoryDir, 'agents');
+
+  if (!isDirectory(promptsDir)) {
+    throw new Error(`Shared prompts folder not found: ${promptsDir}`);
+  }
+
+  // Released prompts are read first so they win over in-progress ones with the same name.
+  const prompts = new Map();
+  readPromptsInto(prompts, promptsDir);
+
+  const inProgressPromptsDir = path.join(repositoryDir, inProgressFolderName, 'agents');
+  if (includeInProgress && isDirectory(inProgressPromptsDir)) {
+    readPromptsInto(prompts, inProgressPromptsDir, true);
   }
 
   return prompts;
@@ -400,16 +438,20 @@ function injectPrompts(destination, prompts) {
   }
 }
 
-function runCopyMode(mode, env, envDir, allowMissingTarget, prompts) {
-  const copyMode = copyModes[mode];
-  const sourceDir = copyMode.sourcePath
-    ? path.join(repositoryDir, ...copyMode.sourcePath)
-    : path.join(repositoryDir, copyMode.sourceFolderName);
-
-  if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
-    throw new Error(`${copyMode.label} folder not found: ${sourceDir}`);
+function copyEntriesToTarget(copyMode, entries, targetRoot, prompts) {
+  for (const { entryPath, inProgress } of entries) {
+    const destination = copyEntry(entryPath, targetRoot, copyMode.entryType);
+    if (copyMode.injectPrompts) {
+      injectPrompts(destination, prompts);
+    }
+    const origin = inProgress ? ' (in-progress)' : '';
+    console.log(`  copied ${path.basename(entryPath)}${origin} -> ${destination}`);
   }
+}
 
+function runCopyMode(mode, env, envDir, allowMissingTarget, prompts, includeInProgress) {
+  const copyMode = copyModes[mode];
+  const { sourceDir, entries } = collectCopyEntries(copyMode, includeInProgress);
   const targetFolders = parseTargetFolders(env[copyMode.targetEnvKey]);
 
   if (targetFolders.length === 0) {
@@ -423,8 +465,6 @@ function runCopyMode(mode, env, envDir, allowMissingTarget, prompts) {
     );
   }
 
-  const entries = getCopyEntries(sourceDir, copyMode.entryType, copyMode.fileExtension);
-
   if (entries.length === 0) {
     console.log(`No ${copyMode.label} found in ${sourceDir}`);
     return;
@@ -435,13 +475,7 @@ function runCopyMode(mode, env, envDir, allowMissingTarget, prompts) {
     fs.mkdirSync(targetRoot, { recursive: true });
 
     console.log(`\nCopying ${copyMode.label} to: ${targetRoot}`);
-    for (const entryPath of entries) {
-      const destination = copyEntry(entryPath, targetRoot, copyMode.entryType);
-      if (copyMode.injectPrompts) {
-        injectPrompts(destination, prompts);
-      }
-      console.log(`  copied ${path.basename(entryPath)} -> ${destination}`);
-    }
+    copyEntriesToTarget(copyMode, entries, targetRoot, prompts);
   }
 }
 
@@ -452,11 +486,18 @@ function main() {
   const envDir = path.dirname(envPath);
   const allowMissingTarget = options.modes.length > 1;
   const prompts = options.modes.some((mode) => copyModes[mode].injectPrompts)
-    ? loadSharedPrompts()
+    ? loadSharedPrompts(options.includeInProgress)
     : undefined;
 
   for (const mode of options.modes) {
-    runCopyMode(mode, env, envDir, allowMissingTarget, prompts);
+    runCopyMode(
+      mode,
+      env,
+      envDir,
+      allowMissingTarget,
+      prompts,
+      options.includeInProgress
+    );
   }
 
   console.log('\nDone.');
