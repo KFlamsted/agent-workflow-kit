@@ -12,8 +12,8 @@ is the target that `MVP.md` and later milestones are sliced from. It is not a
 specification: systems, numbers, and content lists belong in later specs.
 
 Hold the conversation in this main session. You may spawn read-only research
-agents for fact-finding: comparable products, platform or store requirements,
-or a sweep of a large repository. Present their findings to the user as input
+agents for fact-finding, such as comparable products, platform or store
+requirements, or the as-built inventory in step 1. Present their findings to the user as input
 to decisions, never as decisions. Do not implement product code, create
 issues, or edit other files, including `MVP.md`.
 
@@ -46,8 +46,8 @@ question matters when the tradeoff is not obvious. Use open questions when a
 menu would hide the real choice.
 
 Stay at north-star altitude. When an answer drifts into MVP slicing ("let's
-leave that out of the first version"), note that it belongs in `MVP.md` and ask what the finished
-product needs instead. When it drifts into specification (exact numbers,
+leave that out of the first version"), note that it belongs in `MVP.md` and
+ask what the finished product needs instead. When it drifts into specification (exact numbers,
 formulas, full content lists), capture the intent in a sentence and move on.
 
 Do not write `VISION.md` until step 5 confirmation succeeds.
@@ -60,6 +60,23 @@ Locate the Git repository root. The output path is always
 Read, if present: the current `VISION.md`, `MVP.md`, `README.md`, any design,
 pitch, or prompt documents the user points to, `git status`, and enough of the
 repository to know its stack and whether it is a game.
+
+If the repository already has user-facing functionality beyond a skeleton or
+setup, spawn read-only research agents to build an as-built inventory, and
+keep reading code out of this session. Choose how many from the size and
+shape of the codebase, and merge their reports into one inventory. Brief each
+to report facts with file references and no opinions on direction:
+
+- what users can do today
+- platforms, stack, and runtime targets
+- rough volume of features or content
+- half-built or abandoned work
+- roadmap, TODO, or design documents
+- places where documentation and code disagree
+
+Turn each significant finding into a question for the user: is this part of
+the vision, only part of the MVP, or legacy? Bring contradictions between the
+code and the user's answers to the user; never smooth them over.
 
 Treat existing material as a seed, not as agreed vision. If `MVP.md` exists,
 it shows what the user cut for a first slice; ask whether those cuts also
