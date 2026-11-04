@@ -47,11 +47,11 @@ npm run copy-agents
 
 Agent targets that are not configured are skipped. Existing entries with the same name are replaced.
 
-Entries under `in-progress/` (mirroring `skills/` and `agents/`) are not copied by default. Add `--include-in-progress` to include them, along with `in-progress/agents/*.txt` prompts. A released entry or prompt with the same name wins, and a warning is logged.
+Entries under `in-progress/` (mirroring `skills/` and `agents/`) are not copied by default. Use the `:in-progress` script variants (or pass `--include-in-progress` directly) to include them, along with `in-progress/agents/*.txt` prompts. A released entry or prompt with the same name wins, and a warning is logged.
 
 ```bash
-npm run copy-skills -- --include-in-progress
-npm run copy-agents -- --include-in-progress
+npm run copy-skills:in-progress
+npm run copy-agents:in-progress
 ```
 
 To copy agents for selected tools, run the script directly:
