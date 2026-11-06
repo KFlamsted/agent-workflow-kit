@@ -9,7 +9,7 @@ The input system separates **keybinds** (which key/mouse) → **actions** (playe
 Any string works, but an enum is convenient:
 
 ```typescript
-enum InputAction { moveForward, moveBackward, moveLeft, moveRight, jump, sprint, shoot, walk, rotate, zoomCamera }
+enum InputAction { moveForward, moveBackward, moveLeft, moveRight, jump, sprint, shoot, walk, rotate, zoomCamera, rotateCamera }
 ```
 
 ## Configuring keybinds (on `InputService`)
@@ -34,7 +34,7 @@ this.input.bindToggle(InputAction.sprint, player.toggleSprint)
 this.input.bindDelta(InputAction.rotate, player.rotateY)
 ```
 
-Remember to call `this.input.start()` once to begin capturing input.
+Call `this.input.start()` once after keybinds are configured (the player-input docs do it in the controller constructor). When rebinding to a new character, the third-person tutorial wraps the rebinding in `stop()` ... `start()`.
 
 ## Input holder objects
 
@@ -66,6 +66,9 @@ class PlayerController {
     this.input.setKeybind(InputAction.moveLeft, new Keybind('a'))
     this.input.setKeybind(InputAction.moveRight, new Keybind('d'))
     this.input.setMousebind(InputAction.rotate, new Mousebind(0.01, true, 'x'))
+    this.input.setMousebind(InputAction.rotateCamera, new Mousebind(0.003, false, 'y'))
+    this.input.setWheelbind(InputAction.zoomCamera, new Wheelbind(0.0003, false))
+    this.input.start()   // begin capturing input
   }
 
   possess(character: Character) {
@@ -78,7 +81,8 @@ class PlayerController {
     this.input.bindToggle(InputAction.moveLeft, move.toggleNegativeX)
     this.input.bindToggle(InputAction.moveRight, move.togglePositiveX)
     this.input.bindDelta(InputAction.rotate, character.movement.rotationInput.rotateY)
-    this.input.start()
+    this.input.bindDelta(InputAction.rotateCamera, character.thirdPersonCamera.rotationInput.rotateX)
+    this.input.bindDelta(InputAction.zoomCamera, character.thirdPersonCamera.zoomInput.increment)
   }
 }
 ```

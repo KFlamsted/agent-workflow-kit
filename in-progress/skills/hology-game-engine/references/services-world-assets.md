@@ -62,7 +62,10 @@ this.view.onLateUpdate(target).subscribe(() => {   // per-frame after all onUpda
 })
 this.view.paused = true            // pauses BOTH the render loop and input processing; false to resume
 this.view.audioListener            // THREE.AudioListener for THREE.Audio / PositionalAudio
+const pos = this.view.getScreenPosition(worldPos) // worldPos: Vector3 -> screen { x, y }, or nothing if off-screen (for UI overlays)
 ```
+
+For a React overlay example see `ui-and-react.md`.
 
 Don't build your own `PerspectiveCamera` + `requestAnimationFrame` loop — use the active camera and `onUpdate`/`onLateUpdate`/`ViewController.onLateUpdate`.
 

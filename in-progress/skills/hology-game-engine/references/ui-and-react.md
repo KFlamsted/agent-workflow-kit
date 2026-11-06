@@ -29,6 +29,7 @@ function App() {
 - **gameClass** — your `GameInstance` subclass.
 - **sceneName** — scene to load (e.g. `'demo'`).
 - **dataDir** — path to game data (`'data'`).
+- **xr** — `xr={{ enabled: true }}` enables VR (https://docs.hology.app/user-interfaces/vr.md).
 - **shaders / actors / components** — the objects re-exported from their `src/*/index.ts` registries. Pass `components` when the project defines serialized custom actor components; projects without custom components do not need a non-empty component registry.
 
 ## Required overlay CSS
@@ -45,9 +46,37 @@ So pointer events reach the canvas (for the `PointerEvents` service) while still
 - **`useService(ServiceClass)`** — get a gameplay service instance (read global state to display).
 - **`useActorQuery(...)`** — query actors in the world; re-renders when matching actors are added/removed.
 - **`useRenderUpdate(fn)`** — run `fn` before every frame.
-- **`useRenderLaterUpdate(fn)`** — like above but after other update functions.
+- **`useRenderLaterUpdate(fn)`** / **`useRenderLateUpdate(fn)`** — like above but after other update functions.
 
-`useRenderLaterUpdate` is the public documented API. When targeting a different package version, inspect the installed `@hology/react` exports and follow the spelling they provide.
+The docs use both spellings: the hook list in `using-react` says `useRenderLaterUpdate`, while the `getScreenPosition` overlay tutorial imports `useRenderLateUpdate` from `@hology/react`. Check the installed `@hology/react` exports before using either.
+
+## Overlaying UI at a world position
+
+`ViewController.getScreenPosition(worldPos)` returns screen `{ x, y }`, or nothing when the position is off-screen. Update the element each frame in the late-update hook (spelling per the note above; the tutorial uses `useRenderLateUpdate`):
+
+```tsx
+import { ViewController } from '@hology/core/gameplay'
+import { useRenderLateUpdate, useService } from '@hology/react'
+import { useRef } from 'react'
+import { Vector3 } from 'three'
+
+function WorldMarker({ position }: { position: Vector3 }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const view = useService(ViewController)
+
+  useRenderLateUpdate(() => {
+    const pos = view.getScreenPosition(position)
+    if (!ref.current) return
+    ref.current.style.visibility = pos ? 'visible' : 'hidden'
+    if (pos) {
+      ref.current.style.left = pos.x + 'px'
+      ref.current.style.top = pos.y + 'px'
+    }
+  })
+
+  return <div ref={ref} style={{ position: 'absolute', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+}
+```
 
 ## Reacting to state changes with signals
 
