@@ -50,6 +50,24 @@ class Configurable extends BaseActor {
 
 Supported types: `number`, `boolean`, `string`, `THREE.Vector2/3`, `THREE.Color`, `THREE.Euler`, `THREE.Object3D`, `THREE.Material`, `AudioBuffer`, `THREE.AnimationClip`, `BaseActor`, `Prefab`, `PrefabOf<T>`.
 
+### Parameter options
+
+Pass an options object to `@Parameter()` (https://docs.hology.app/gameplay/actors/actor-parameters.md):
+
+- `label` — editor display name; `help` — tooltip text.
+- `range: [min, max]` — slider; `stepSize` — input increment; `precision` — decimal places.
+- `optional` — checkbox that enables/disables the value (override mode).
+- `requires: { otherProp: value }` — show only when another property matches.
+
+```typescript
+@Parameter({ label: 'Movement Speed', range: [0, 100], stepSize: 1 })
+speed: number = 10
+
+@Parameter() canJump: boolean = false
+@Parameter({ requires: { canJump: true } })   // visible only when canJump is checked
+jumpHeight: number = 2
+```
+
 ### `@ParameterDefinition()` — structured parameter objects
 
 Group several values into a reusable, optionally-polymorphic object. The string id is stable scene/prefab data — don't change it on rename.
@@ -73,7 +91,7 @@ class WeaponActor extends BaseActor {
 }
 ```
 
-Mark a base as `@ParameterDefinition('id', { abstract: true })` when it should only exist to define a shared shape (designer must pick a concrete subclass). Definitions also work in arrays. Class names become editor labels (`MagicAttackDefinition` → "Magic Attack").
+Mark a base as `@ParameterDefinition('id', { abstract: true })` when it should only exist to define a shared shape (designer must pick a concrete subclass). Definitions also work in arrays: `@Parameter({ type: () => AbilityDefinition, array: true }) abilities: AbilityDefinition[] = []`. Each item can use a different concrete subclass. Class names become editor labels (`MagicAttackDefinition` → "Magic Attack").
 
 ## Components — `@Component()` + `ActorComponent` + `attach()`
 

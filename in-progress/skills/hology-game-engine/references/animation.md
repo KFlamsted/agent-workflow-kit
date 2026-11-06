@@ -41,6 +41,8 @@ async onInit() {
 }
 ```
 
+`play()` accepts optional options: `loop` and `priority` (a higher priority overrides lower-priority animation, including a state machine), and `inPlace` for root motion (see below).
+
 It also supports masking animations to only affect the upper or lower body (e.g. aim/shoot on top while legs run).
 
 ## Animation state machines
@@ -74,7 +76,27 @@ const fall = new AnimationState(fallClip)
 walk.transitionsBetween(fall, () => falling)   // applies from any walk child
 ```
 
-For root motion (driving movement from the animation itself), see the "Character Root Motion" doc page. A full state-machine example lives in the third-person starter's `character-actor.ts`.
+## Root motion
+
+Lets an animation drive character movement (e.g. an attack that steps forward). The root bone carries the translation track; the character movement component applies it to the actor, so colliders and slopes still work (https://docs.hology.app/gameplay/animation/character-root-motion.md).
+
+```typescript
+// 1. Setup with a root bone (no/minor rotation, has the translation track)
+const bone = this.characterMesh.getObjectByName('mixamorigSpine2') as Bone
+this.animation.setup(this.characterMesh, [], bone)
+const rootMotionSlash = RootMotionClip.fromClip(attackClips.spinSlash, false)
+
+// 2. Play it and hand the action to the movement component
+this.animation.play(rootMotionSlash, { inPlace: false, loop: false, priority: 1 })
+this.movement.setRootMotionAction(this.animation.getRootMotionAction())
+```
+
+- `inPlace: false` lets the clip move the character; `loop: false` ends it after one play.
+- Higher `priority` overrides the state machine while it plays.
+- While root motion is active, movement ignores direction input; control returns from the new position when it ends.
+- The docs do not show the `RootMotionClip` import; check the installed `@hology/core` exports.
+
+A full state-machine example lives in the third-person starter's `character-actor.ts`.
 
 ## Imports
 

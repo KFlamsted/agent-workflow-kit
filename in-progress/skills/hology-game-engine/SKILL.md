@@ -282,6 +282,7 @@ import { MeshComponent, SpawnPoint, CharacterMovementComponent, ThirdPersonCamer
          CharacterAnimationComponent, TriggerVolumeComponent, TriggerVolume } from '@hology/core/gameplay/actors'
 import { InputService, Keybind, Mousebind, Wheelbind, AxisInput, ActionInput } from '@hology/core/gameplay/input'
 import { NodeShaderMaterial, rgb, rgba, select, varyingAttributes, timeUniforms } from '@hology/core/shader-nodes'
+import { NodeShader, NodeShaderOutput, Parameter as ShaderParameter, Shader } from '@hology/core/shader/shader'  // shader classes; shader @Parameter comes from here
 import { PhysicalShapeMesh, SphereCollisionShape, BoxCollisionShape } from '@hology/core'
 import { takeUntil } from 'rxjs'
 import * as THREE from 'three'

@@ -34,6 +34,13 @@ Physics uses primitive shapes, separate from render geometry. Imported models au
 
 `BoxCollisionShape`, `PlaneCollisionShape`, `SphereCollisionShape`, `CylinderCollisionShape`, `CapsuleCollisionShape`, `ConvexPolyhedronCollisionShape`, `TrimeshCollisionShape`, `MeshCollisionShape`. Multiple shapes per actor compose a complex body.
 
+### Custom shapes in the 3D model
+
+Name meshes in the modeling tool with a prefix before export (https://docs.hology.app/assets/3d-models/custom-collision-shapes.md):
+- `USP_` sphere (cheapest), `UBX_` box, `UCX_` convex hull, `UTM_` trimesh (all triangles; most expensive).
+
+These meshes are hidden and combined into one composite collision shape. Prefer several simple shapes over a trimesh.
+
 ## Collision & overlap events
 
 Subscribe on the physics system (RxJS observables). Use `takeUntil(this.disposed)` to auto-unsubscribe.
@@ -118,7 +125,7 @@ Control it by binding its inputs (see `input.md`):
 - **directionInput** — `togglePositiveY/negativeY/positiveX/negativeX` for WASD movement.
 - **jumpInput** — `.toggle`.
 - **sprintInput** — `.toggle`.
-- **rotationInput** — `movement.rotationInput.rotateY` rotates the character. A camera configured with `fixedBehind: false` does not rotate automatically; rotate it through its own `thirdPersonCamera.rotationInput.rotateY` input.
+- **rotationInput** — `movement.rotationInput.rotateY` rotates the character. A camera configured with `fixedBehind: false` does not rotate automatically; rotate it through its own `thirdPersonCamera.rotationInput.rotateY` input. The camera also exposes `rotationInput.rotateX` (pitch) and `zoomInput.increment` (zoom); bind them with a `Mousebind(0.003, false, 'y')` and a `Wheelbind` as shown in `input.md`.
 
 For a freely rotating third-person camera (`fixedBehind: false`), expose the camera component on the character as shown above and send the same input delta to both components:
 
