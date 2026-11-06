@@ -67,8 +67,10 @@ const mesh = new Mesh(new SphereGeometry(5, 30, 15), material)
 Declare a named uniform in the node graph, give it a default in `uniforms`, and update it at runtime on the material (https://docs.hology.app/shaders/typescript-shaders/uniforms.md):
 
 ```typescript
-import { uniformFloat, float, sin, translateY, NodeShaderMaterial } from '@hology/core/shader-nodes'
+import { uniformFloat, float, sin, translateY, rgb, standardMaterial, NodeShaderMaterial } from '@hology/core/shader-nodes'
+import { Clock } from 'three'
 
+const clock = new Clock()
 const uniformTime = uniformFloat('time')
 const material = new NodeShaderMaterial({
   color: standardMaterial({ color: rgb(0x00ff00) }),
