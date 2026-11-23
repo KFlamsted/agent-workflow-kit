@@ -1,6 +1,6 @@
 ---
 name: hology-game-engine
-description: Reference for building games with the Hology engine (a TypeScript/Three.js game framework). Use whenever writing or reviewing Hology gameplay code — actors, services, components, input, physics, assets, world, cameras, animation, AI and UI. Load the matching references/*.md file for any topic you work on in depth.
+description: Reference for building games with the Hology engine (a TypeScript/Three.js game framework). Use whenever writing or reviewing Hology gameplay code — actors, services, components, input, physics, assets, world, cameras, animation, AI and UI. Before writing or editing code in a topic area, read its references/*.md file.
 ---
 
 # Hology Game Engine
@@ -31,7 +31,9 @@ The public docs don't document networking. Don't rely on multiplayer APIs unless
 
 ## Reference index
 
-| Working on… | Open |
+**Before writing or editing code in an area below, Read its file, even if you read it earlier in this session.** Re-reading is cheap; earlier reads may have been compacted away, and the files hold the version-specific gotchas this file omits.
+
+| Before editing… | Read |
 | --- | --- |
 | Actor/component classes, lifecycle, `@Parameter`, `MeshComponent`, moving, prefabs | `references/actors-and-components.md` |
 | Services, `GameInstance`, `World`, `ViewController`, `AssetLoader`, `PointerEvents`, sound | `references/services-world-assets.md` |
@@ -104,13 +106,13 @@ createRoot(document.getElementById('root')!).render(<App />) // no <StrictMode> 
 ```typescript
 @Actor()
 class CharacterActor extends BaseActor {          // transform: position, rotation; Three.js object: this.object
-  @Parameter() speed: number = 1                  // editor-editable per instance → actors-and-components.md
-  health = attach(HealthComponent)                // @Component() class extending ActorComponent
+  @Parameter() speed: number = 1                  // editor-editable per instance → references/actors-and-components.md
+  health = attach(HealthComponent)                // @Component() class extending ActorComponent → same file
   private mesh = attach(MeshComponent<PhysicalShapeMesh>, {
     object: new PhysicalShapeMesh(new SphereGeometry(0.2), new MeshStandardMaterial(), new SphereCollisionShape(0.2)),
-    bodyType: PhysicsBodyType.dynamic, mass: 2, friction: 1,
+    bodyType: PhysicsBodyType.dynamic, mass: 2, friction: 1,   // → references/physics.md
   })
-  private state = inject(GameState)               // @Service() singleton
+  private state = inject(GameState)               // @Service() singleton → references/services-world-assets.md
 
   onInit() {}                        // async allowed; @Parameter values ready
   onBeginPlay() {}                   // spawned into the running game (not the editor); build behavior trees here
@@ -121,6 +123,9 @@ class CharacterActor extends BaseActor {          // transform: position, rotati
 ```
 
 ### Lifecycle rules
+
+Phases in detail: `references/actors-and-components.md`.
+
 - **Constructor / field init** is the only place for `inject(...)` and `attach(...)`. `@Parameter` fields are still `undefined` there.
 - **`onInit`**: parameters are set. Use `this.attach` for dynamic components. `onInit`s run concurrently; don't depend on another's completion.
 - **`onUpdate` order between actors is not guaranteed**; communicate through services and events.
@@ -132,17 +137,19 @@ class CharacterActor extends BaseActor {          // transform: position, rotati
 
 ### Built-in services
 
+Each comment names the reference to read before using that service.
+
 ```typescript
-const a = await this.world.spawnActor(ExampleActor, position, rotation)  // World; also findActorByType, removeActor
-const camera = this.view.getBaseCamera()   // ViewController: drive this; getCamera() is the rendered (maybe shaken) copy
+const a = await this.world.spawnActor(ExampleActor, position, rotation)  // World → references/services-world-assets.md
+const camera = this.view.getBaseCamera()   // ViewController (same file): drive this; getCamera() is the rendered copy
 this.view.paused = true                    // pauses render + input, mutes audio
-const model = await this.assets.getModelByAssetName('MyCharacter')       // AssetLoader → { scene, animations }
-this.input.setKeybind(InputAction.jump, new Keybind(' '))               // InputService; call input.start()
+const model = await this.assets.getModelByAssetName('MyCharacter')       // AssetLoader (same file) → { scene, animations }
+this.input.setKeybind(InputAction.jump, new Keybind(' '))               // InputService → references/input.md; call input.start()
 this.input.bindToggle(InputAction.sprint, character.movement.sprintInput.toggle)
-this.physics.onBeginOverlapWithActorType(this, Coin).pipe(takeUntil(this.disposed)).subscribe(c => this.world.removeActor(c))
+this.physics.onBeginOverlapWithActorType(this, Coin).pipe(takeUntil(this.disposed)).subscribe(c => this.world.removeActor(c)) // → references/physics.md
 ```
 
-Also `Navigation`, `PointerEvents`. Body types: `static`, `kinematic`, `dynamic` (0.0.282 also declares `kinematicVelocityBased`).
+Also `Navigation` (`references/ai-and-navigation.md`) and `PointerEvents` (`references/services-world-assets.md`). Body types: `static`, `kinematic`, `dynamic` (0.0.282 also declares `kinematicVelocityBased`).
 
 ## Known pitfalls (`@hology/core@0.0.282`)
 
