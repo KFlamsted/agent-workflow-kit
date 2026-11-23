@@ -1,8 +1,6 @@
-# Rendering, Lighting & Shadows (deep reference)
+# Rendering, Lighting & Shadows
 
-Covers what the engine creates and overrides at render time (`@hology/core@0.0.282`). Read this before changing lights, fog, tone mapping or shadows, or when profiling draw calls. Backend selection and the `rendering` prop live in `ui-and-react.md`; material behaviour lives in `shaders-and-vfx.md`.
-
-Access the renderer state through `inject(RenderingView)` from `@hology/core/rendering`.
+What the engine creates and overrides at render time (`@hology/core@0.0.282`). Backend and the `rendering` prop: `ui-and-react.md`; materials: `shaders-and-vfx.md`. Renderer state: `inject(RenderingView)` from `@hology/core/rendering`.
 
 ## What the engine creates
 
