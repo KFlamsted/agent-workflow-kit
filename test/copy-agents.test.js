@@ -233,7 +233,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
   );
   assert.match(claudeCleanSolidSource, /tools: Read, Grep, Glob, Bash/);
   assert.match(claudeCleanSolidSource, /model: claude-sonnet-5-5/);
-  assert.match(claudeCleanSolidSource, /effort: medium/);
+  assert.match(claudeCleanSolidSource, /effort: high/);
 
   const copilotCleanSolidSourcePath = path.join(
     sandbox,
