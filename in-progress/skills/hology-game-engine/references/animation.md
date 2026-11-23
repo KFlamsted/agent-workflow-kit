@@ -1,30 +1,10 @@
-# Animation (deep reference)
+# Animation
 
-Covers playing animation clips, the `CharacterAnimationComponent`, and animation state machines. Read this when animating models/characters. Prefer Hology's character animation helpers over hand-built mixers when animating characters.
+Docs: https://docs.hology.app/gameplay/animation.md
 
-## Raw Three.js mixer (simple / non-character)
-
-Animation clips come from loaded models (`LoadedMesh.animations`). For simple cases you can drive a `THREE.AnimationMixer` directly and update it each frame.
-
-```typescript
-async onInit() {
-  const model = await this.assetLoader.getModelByAssetName('character-human')
-  this.object.add(model.scene)
-  this.mixer = new THREE.AnimationMixer(model.scene)
-  const clip = THREE.AnimationClip.findByName(model.animations, 'idle')
-  if (!clip) {
-    throw new Error("Animation clip 'idle' not found in model asset 'character-human'")
-  }
-  this.mixer.clipAction(clip).play()
-}
-onUpdate(dt: number) { this.mixer.update(dt) }
-```
-
-Each animated object needs its own mixer. For characters, prefer `CharacterAnimationComponent` below — it handles blending/transitions and upper/lower-body masking.
+Clips come from loaded models (`LoadedMesh.animations`). For a simple non-character object, drive a `THREE.AnimationMixer` per object and `mixer.update(dt)` in `onUpdate`. For characters use `CharacterAnimationComponent`: it handles blending, transitions and upper/lower-body masking (e.g. aim on top while legs run).
 
 ## CharacterAnimationComponent
-
-Attach it, `setup(mesh)` with the loaded model mesh, then `play(clip)` a single clip or `playStateMachine(asm)` for state-driven animation.
 
 ```typescript
 private characterAnimation = attach(CharacterAnimationComponent)
@@ -34,75 +14,50 @@ async onInit() {
   this.object.add(model.scene)
   this.characterAnimation.setup(model.scene)
   const clip = THREE.AnimationClip.findByName(model.animations, 'idle')
-  if (!clip) {
-    throw new Error("Animation clip 'idle' not found in model asset 'character-human'")
-  }
-  this.characterAnimation.play(clip)
+  if (!clip) throw new Error("Clip 'idle' not found in 'character-human'")
+  this.characterAnimation.play(clip)   // or playStateMachine(asm)
 }
 ```
 
-`play()` accepts optional options: `loop` and `priority` (a higher priority overrides lower-priority animation, including a state machine), and `inPlace` for root motion (see below).
-
-It also supports masking animations to only affect the upper or lower body (e.g. aim/shoot on top while legs run).
+`play()` options: `loop`, `fadeTime`, `priority` (higher overrides lower, including a state machine), `inPlace` (root motion). `getFullBodyAction()` is typed non-null but returns `null` until the first `play()`.
 
 ## Animation state machines
 
-Model animation as a directed graph of `AnimationState`s connected by predicate-guarded transitions. Drive predicates from gameplay state (e.g. `ActionInput.activated`, movement direction, `falling`).
+A graph of `AnimationState`s with predicate-guarded transitions driven by gameplay state (`ActionInput.activated`, movement direction, `falling`).
 
 ```typescript
 const idle = new AnimationState(idleClip)
 const walk = new AnimationState(walkClip)
-idle.transitionsBetween(walk, () => pressingWalk.activated)  // both directions
-const asm = new AnimationStateMachine(idle)                  // pass the initial state
-this.characterAnimation.playStateMachine(asm)
+idle.transitionsBetween(walk, () => pressingWalk.activated)
+this.characterAnimation.playStateMachine(new AnimationStateMachine(idle))   // initial state
 ```
 
-Transition methods on a state:
-- **`transitionsTo(state, predicate)`** — one-way; transition when predicate is true.
-- **`transitionsBetween(state, predicate)`** — bi-directional (back when predicate goes false).
-- **`transitionsOnComplete(state, predicate?)`** — for clips that naturally end (jump → fall). The public documentation presents the optional predicate as useful for selecting among multiple possible completion destinations.
+- **`transitionsTo(state, predicate)`**: one-way.
+- **`transitionsBetween(state, predicate)`**: back again when the predicate turns false.
+- **`transitionsOnComplete(state, predicate?)`**: for clips that end (jump → fall). In 0.0.282 it fires when the predicate is true **or** at `clip.duration − 0.5 s`, whichever comes first; the predicate can't block it, so predicates can't select among destinations (contrary to the docs). A 0.67 s hit clip is cut after 0.17 s.
 
-  **`@hology/core@0.0.232` version note:** in this runtime, a true predicate can trigger the transition early, but after the clip reaches its completion threshold the transition can succeed regardless of that predicate. Predicates therefore do not reliably gate or select completion destinations in this version. Inspect and test the installed package before designing multiple completion transitions around predicate selection.
+The machine calls `play()` every frame, resetting `timeScale`, so a run clip can't be stride-matched through it. For one-shots shorter than about 1 s or speed-matched locomotion, drive `play()` from your own state logic.
 
-### Child states
-
-A child state is a more specific variant of a parent (e.g. `walkLeft`/`walkRight` under `walk`). Define transitions on the parent so all children inherit them — keeps large movement graphs manageable.
+**Child states** are variants of a parent that inherit its transitions:
 
 ```typescript
-const walk = new AnimationState(walkClip)
-const walkLeft  = walk.createChild(walkLeftClip,  () => movementDirection < 0)
-const walkRight = walk.createChild(walkRightClip, () => movementDirection > 0)
-const fall = new AnimationState(fallClip)
+const walkLeft = walk.createChild(walkLeftClip, () => movementDirection < 0)
 walk.transitionsBetween(fall, () => falling)   // applies from any walk child
 ```
 
+Full example: the third-person starter's `character-actor.ts`.
+
 ## Root motion
 
-Lets an animation drive character movement (e.g. an attack that steps forward). The root bone carries the translation track; the character movement component applies it to the actor, so colliders and slopes still work (https://docs.hology.app/gameplay/animation/character-root-motion.md).
+The clip's root bone translation moves the character through the movement component, so colliders and slopes still apply ([docs](https://docs.hology.app/gameplay/animation/character-root-motion.md)).
 
 ```typescript
-// 1. Setup with a root bone (no/minor rotation, has the translation track)
-const bone = this.characterMesh.getObjectByName('mixamorigSpine2') as Bone
+const bone = this.characterMesh.getObjectByName('mixamorigSpine2') as Bone  // no/minor rotation, has the translation track
 this.animation.setup(this.characterMesh, [], bone)
-const rootMotionSlash = RootMotionClip.fromClip(attackClips.spinSlash, false)
+const slash = RootMotionClip.fromClip(attackClips.spinSlash, false)
 
-// 2. Play it and hand the action to the movement component
-this.animation.play(rootMotionSlash, { inPlace: false, loop: false, priority: 1 })
+this.animation.play(slash, { inPlace: false, loop: false, priority: 1 })
 this.movement.setRootMotionAction(this.animation.getRootMotionAction())
 ```
 
-- `inPlace: false` lets the clip move the character; `loop: false` ends it after one play.
-- Higher `priority` overrides the state machine while it plays.
-- While root motion is active, movement ignores direction input; control returns from the new position when it ends.
-- The docs do not show the `RootMotionClip` import; check the installed `@hology/core` exports.
-
-A full state-machine example lives in the third-person starter's `character-actor.ts`.
-
-## Imports
-
-```typescript
-import { AnimationState, AnimationStateMachine, inject, attach } from '@hology/core/gameplay'
-import { CharacterAnimationComponent } from '@hology/core/gameplay/actors'
-import { ActionInput } from '@hology/core/gameplay/input'
-import * as THREE from 'three'
-```
+While root motion plays, movement ignores direction input; control resumes from the new position. The docs don't show the `RootMotionClip` import; check the installed exports.

@@ -1,133 +1,90 @@
-# Services, World, Assets, View, Pointer & Sound (deep reference)
+# Services, World, Assets, View, Pointer & Sound
 
-Covers `@Service()`/`inject`, `GameInstance`, `World`, `ViewController`, `AssetLoader`, `PointerEvents`, and sound. Read this for global systems, spawning/finding, cameras, loading assets, clicks, and audio.
+Docs: https://docs.hology.app/gameplay/services.md
 
-## Services — `@Service()` + `inject(...)`
+## Services
 
-A service is a singleton (one instance per game) for shared state, systems, and cross-actor communication. Create with `@Service()`; consume anywhere (actors, components, other services) with `inject(ServiceClass)`. Call `inject` only in constructors / field initializers.
-
-```typescript
-@Service()
-class GameState { score = 0 }
-
-@Actor()
-class Goal extends BaseActor {
-  private gameState = inject(GameState)
-}
-```
-
-Use services for: global state (score, config), systems (spawning, AI director), and cross-actor events (put an event emitter / RxJS `Subject` on a service so any actor can publish/subscribe). Prefer event-based communication over relying on `onUpdate` ordering between actors.
-
-## GameInstance — the entry point
-
-The game's root is a `@Service()` extending `GameInstance` (conventionally `src/services/game.ts`), passed to the UI as `<HologyScene gameClass={Game} .../>`. Its `async onStart()` runs when the game starts.
-
-```typescript
-@Service()
-class Game extends GameInstance {
-  private world = inject(World)
-  private playerCamera = inject(PlayerCamera)
-  async onStart() {
-    const spawnPoint = this.world.findActorByType(SpawnPoint)
-    const ball = await spawnPoint.spawnActor(BallActor)
-    this.playerCamera.setup(ball)
-  }
-}
-export default Game
-```
+`@Service()` classes are per-game singletons, consumed with `inject(ServiceClass)` (constructor/field init only). Use them for global state, systems (spawning, AI director) and cross-actor events: put an RxJS `Subject` on a service so any actor can publish and subscribe. See `templates/service.ts`. The `GameInstance` entry point is in SKILL.md.
 
 ## World
 
 ```typescript
-private world = inject(World)
 const a = await this.world.spawnActor(ExampleActor, position, rotation)
-const first = this.world.findActorByType(SpawnPoint)   // first of a class
-const all = this.world.findActorsByType(Character)      // all of a class (array)
-this.world.removeActor(actor)                         // remove an actor instance
-this.world.removePrefab(instance)                    // remove a spawned prefab instance
-this.world.scene                                        // the underlying THREE.Scene (for PointerEvents targets, etc.)
-this.world.directionalLight.intensity = 0.2            // .direction (Vector3), .intensity, .position (read-only)
+const first = this.world.findActorByType(SpawnPoint)
+const all = this.world.findActorsByType(Character)
+await spawnPoint.spawnActor(BallActor)                 // uses the spawn point's transform
+this.world.removeActor(actor)                          // runs onEndPlay + disposed; does NOT dispose geometry/materials
+this.world.removePrefab(instance)
+this.world.scene                                       // the THREE.Scene
+this.world.directionalLight.intensity = 0.2            // also .direction (Vector3); .position is read-only
 ```
 
-`directionalLight.direction` emulates a sun; don't set `position` (change `direction` instead).
+The directional light emulates a sun: change `direction`, not `position`. It has no colour setter; sun colour, engine lights, fog and shadows are in `rendering.md`.
 
-## ViewController — camera, render loop, pause
+`@hology/core@0.0.282` also declares `spawnActor(type, pos, rot, options)` and `spawnActorSync`.
+
+## ViewController — camera, loop, pause
 
 ```typescript
-private view = inject(ViewController)
-const camera = this.view.getCamera()
-this.view.onLateUpdate(target).subscribe(() => {   // per-frame after all onUpdate — ideal for camera follow
+const camera = this.view.getBaseCamera()
+this.view.onLateUpdate(target).subscribe(() => {   // optional actor; per frame after all onUpdate
   camera.position.copy(target.position).addScaledVector(target.direction, -2)
   camera.lookAt(target.position)
 })
-this.view.paused = true            // pauses BOTH the render loop and input processing; false to resume
-this.view.audioListener            // THREE.AudioListener for THREE.Audio / PositionalAudio
-const pos = this.view.getScreenPosition(worldPos) // worldPos: Vector3 -> screen { x, y }, or nothing if off-screen (for UI overlays)
+this.view.paused = true
+this.view.audioListener                            // for THREE.Audio / PositionalAudio
+const pos = this.view.getScreenPosition(worldPos)  // Vector3 | null; optional target, viewportSize; call in late update
 ```
 
-For a React overlay example see `ui-and-react.md`.
+**Cameras (0.0.282).** `getCamera()` returns the **rendered** camera, which may be a shake copy rebuilt after `lateTick`; use it for raycasts and projection. Drive `getBaseCamera()`. Only the base camera is resized on window resize, so an override camera must copy its lens. Shake with `applyCameraShake`/`cameraShakeIntensity`; it moves only the rendered camera, so camera-relative movement stays steady. Medium confidence: the split is in the types, but no bug from writing to `getCamera()` was observed.
 
-Don't build your own `PerspectiveCamera` + `requestAnimationFrame` loop — use the active camera and `onUpdate`/`onLateUpdate`/`ViewController.onLateUpdate`.
+**Pause, time, audio.** `paused` stops rendering and input and mutes audio (listener gain = `muted || paused ? 0 : masterVolume`), so pause-menu sounds need their own route around the listener. While paused, `InputService` drops keydown but still delivers keyup (`input.md`). Also: `masterVolume`, `setMuted()`, `pausedChanged`, `mutedChanged`, `timeScale` (scales update deltas and physics).
 
-## AssetLoader — load assets at runtime
+## AssetLoader
 
-Load by asset **name** (as set in editor), asset **id**, or **file path**. Prefer this for Hology-managed/editor assets and supported paths so assets resolve through the project pipeline. Direct Three.js loaders are narrow exceptions for unsupported formats, loader-specific behavior `AssetLoader` does not expose, or an established project pattern; they should not replace this service by default.
+Load by editor asset **name**, asset **id**, or **file path**.
 
 ```typescript
-private assets = inject(AssetLoader)
-const model = await this.assets.getModelByAssetName('MyCharacter') // LoadedMesh { scene: Group, animations: AnimationClip[] }
+const model = await this.assets.getModelByAssetName('MyCharacter') // { scene: Group, animations: AnimationClip[] }
 this.object.add(model.scene)
-const tex  = await this.assets.getTextureByAssetName('Bark')       // THREE.Texture
-const buf  = await this.assets.getAudioByAssetName('JumpSound')     // AudioBuffer
-const prefab = await this.assets.getPrefabByName('Enemy')           // Prefab
 ```
 
-Common documented methods:
-- Models: `getModelByAssetName`, `getModelByAssetId` → `LoadedMesh`; `getModelAtPath` (`.glb/.gltf/.fbx/.obj`) → `Object3D`; `getGltfAtPath` → full `GLTF`.
-- Textures: `getTextureByAssetName`, `getTextureByAssetId` → `THREE.Texture`.
-- Audio: `getAudioByAssetName`, `getAudioByAssetId`, `getAudioAtPath` → `AudioBuffer`.
-- Materials: `getMaterialByAssetId` → `THREE.Material`.
-- Prefabs: `getPrefabByName`, `getPrefabById` → `Prefab`.
-- Raw: `getAsset(id)` → `Asset`.
+- Models: `getModelByAssetName`/`ById` → `LoadedMesh`; `getModelAtPath` (`.glb/.gltf/.fbx/.obj`) → `Object3D` only, animations dropped; `getGltfAtPath` → full `GLTF`, needed for anything animated.
+- Textures: `getTextureByAssetName`/`ById`. Audio: `getAudioByAssetName`/`ById`, `getAudioAtPath` → `AudioBuffer`. Materials: `getMaterialByAssetId`. Prefabs: `getPrefabByName`/`ById`. Raw: `getAsset(id)`.
+- Also declared in 0.0.282: `getAnimationClipByAssetId`/`ByAssetName` and `getAnimationClipForTargetByAssetId(id, targetRigId?)` → `AnimationClip | null`; `getSequenceById`/`ByName`; `getDataAssetById`/`ByName(…, type?)` → `DataAssetRef<T> | null`, `getDataAssetsByType(type)`; `getShaderGraphByAssetId`, `prepareShaderGraphParameters(graph, params?)`; `clearCache(asset)`, `clearCacheById(id)`. Check the installed declarations for exact signatures.
 
-Additional APIs declared by **`@hology/core@0.0.232`** (not all are covered by the public loading guide):
-- Animation: `getAnimationClipByAssetId`, `getAnimationClipByAssetName` → `Promise<THREE.AnimationClip | null>`; `getAnimationClipForTargetByAssetId(id, targetRigId?)` resolves an animation reference for a target rig and returns the same type.
-- Sequences: `getSequenceById`, `getSequenceByName` → `Promise<Sequence>`.
-- Data assets: `getDataAssetById(id, type?)`, `getDataAssetByName(name, type?)` → `Promise<DataAssetRef<T> | null>`; `getDataAssetsByType(type)` → `Promise<T[]>`.
-- Shader graphs: `getShaderGraphByAssetId` → `Promise<ShaderGraphDocument>`; `prepareShaderGraphParameters(graph, params?)` → `Promise<Record<string, unknown>>`.
-- Cache: `clearCache(asset)` and `clearCacheById(assetId)` → `void`.
+**Path methods** (`*AtPath`) load and parse on **every** call; nothing is cached or cloned. Cache one promise per path and clone per instance (`SkeletonUtils.clone` for skinned models). Their return types come from `three-stdlib`, not `@types/three`; type them as `Awaited<ReturnType<AssetLoader['getGltfAtPath']>>`. Paths are relative to the site base; a leading slash works.
 
-This is not an exhaustive or cross-version-stable inventory. Inspect the project's installed `AssetLoader` declarations for the authoritative API, signatures, and return types.
+## PointerEvents — clicks and hovers on 3D objects
 
-## PointerEvents — clicks / hovers on 3D objects
-
-Inject `PointerEvents` and subscribe by `Object3D`, actor instance, or actor type.
+Call `start()` yourself; the engine never does and nothing fires otherwise.
 
 ```typescript
-private pointer = inject(PointerEvents)
+this.pointer.start()
 this.pointer.onClickObject3D(this.world.scene).subscribe(e => console.log(e.intersection.point))
-this.pointer.onClickActorType(Coin).subscribe(({ actor: coin, intersection }) => {
-  console.log(coin, intersection.point)
-})
+this.pointer.onClickActorType(Coin).subscribe(({ actor, intersection }) => {})
 ```
 
-Event kinds (each has `Object3D` / `Actor` / `ActorType` variants): `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`. Object3D variants emit an event with `object` and `intersection`; actor and actor-type variants emit an event with `actor` and `intersection`, rather than passing the actor directly. The intersection normally includes `point`, `distance`, `face`, `object`, `uv`, and `uv2`. **Exception:** in current Hology runtime versions, pointer-leave events emit `intersection: null` because the pointer is no longer intersecting the target, despite the public docs and TypeScript declarations typing it as always present. Do not access intersection fields in a leave handler without a null check. When rendering DOM UI over the game, add the overlay CSS from `ui-and-react.md` so canvas clicks still reach PointerEvents.
+- Events `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`, each with `Object3D` / `Actor` / `ActorType` variants. Object3D variants emit `{ object, intersection }`, actor variants `{ actor, intersection }`.
+- Pointer-leave emits `intersection: null` despite the types; null-check it.
+- It raycasts the whole scene and uses only the **first** hit, so grass, canopies or any mesh in front swallow clicks. In cluttered scenes raycast yourself against invisible pick volumes.
+- A click registers on pointer-up over the object hit on pointer-down. It listens on the game view directly, bypassing `InputService`, rebinding and pause.
+- DOM overlays need the CSS in `ui-and-react.md` so clicks reach the canvas.
 
 ## Sound
 
-Sound uses Three.js `THREE.Audio` / `PositionalAudio` with `view.audioListener`; load buffers via `AssetLoader`. One `Audio` instance per simultaneously-playing sound; stop before replaying.
+Use `THREE.Audio` / `PositionalAudio` with `view.audioListener` and buffers from `AssetLoader`; one `Audio` per simultaneously playing sound, stopped before replaying.
 
 ```typescript
-private view = inject(ViewController)
-private assets = inject(AssetLoader)
 private sound = new THREE.Audio(this.view.audioListener)
-
 async onStart() {
-  const buffer = await this.assets.getAudioAtPath('data/asset-resources/impact.ogg')
-  this.sound.setBuffer(buffer).setVolume(0.5)
+  this.sound.setBuffer(await this.assets.getAudioAtPath('data/asset-resources/impact.ogg')).setVolume(0.5)
 }
 play() {
   if (this.sound.isPlaying) this.sound.stop()
   this.sound.play()
 }
 ```
+
+- **Wait for a user gesture.** Hology never resumes the suspended audio context; sounds played earlier all fire at once on resume. Headless Chromium ignores autoplay rules, so tests won't catch it. Loading and decoding work while suspended.
+- **The listener rides on the view camera**, which can be far from the player (18–32 m in an isometric game). Positional sounds then need an inverse distance model with a reference distance beyond the farthest zoom.

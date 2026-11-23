@@ -31,6 +31,7 @@ export default GameState
  *   private world = inject(World)
  *   async onStart() {
  *     // spawn actors, wire up player controller + camera here
+ *     // physics and rendering start only after onStart resolves: don't await frames or simulation here
  *   }
  * }
  * export default Game
