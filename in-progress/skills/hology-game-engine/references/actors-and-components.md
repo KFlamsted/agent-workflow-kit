@@ -20,6 +20,8 @@ class ExampleActor extends BaseActor {
 export default ExampleActor
 ```
 
+**Reserved members.** `BaseActor` already defines `id`, `object`, `position`, `rotation`, `disposed` and more. A subclass field with one of those names breaks typecheck and, at runtime, overwrites the engine's value (e.g. the actor id). Check `base-actor.d.ts` before adding fields with generic names.
+
 ## Lifecycle (what is valid in each phase)
 
 1. **Construction** (constructor / field initializers): call `inject(...)` and `attach(...)` here. `@Parameter` fields are still `undefined` — do NOT read them.

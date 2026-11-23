@@ -43,27 +43,33 @@ private world = inject(World)
 const a = await this.world.spawnActor(ExampleActor, position, rotation)
 const first = this.world.findActorByType(SpawnPoint)   // first of a class
 const all = this.world.findActorsByType(Character)      // all of a class (array)
-this.world.removeActor(actor)                         // remove an actor instance
+this.world.removeActor(actor)                         // runs onEndPlay + disposed; does NOT dispose geometry/materials
 this.world.removePrefab(instance)                    // remove a spawned prefab instance
 this.world.scene                                        // the underlying THREE.Scene (for PointerEvents targets, etc.)
 this.world.directionalLight.intensity = 0.2            // .direction (Vector3), .intensity, .position (read-only)
 ```
 
-`directionalLight.direction` emulates a sun; don't set `position` (change `direction` instead).
+`directionalLight.direction` emulates a sun; don't set `position` (change `direction` instead). It has no colour setter; for sun colour, engine-made lights, fog and shadows see `rendering.md`.
+
+`@hology/core@0.0.282` also declares `spawnActor(type, pos, rot, options)` and `spawnActorSync`.
 
 ## ViewController — camera, render loop, pause
 
 ```typescript
 private view = inject(ViewController)
-const camera = this.view.getCamera()
-this.view.onLateUpdate(target).subscribe(() => {   // per-frame after all onUpdate — ideal for camera follow
+const camera = this.view.getBaseCamera()
+this.view.onLateUpdate(target).subscribe(() => {   // optional actor; Observable<number>. Per-frame after all onUpdate — camera follow
   camera.position.copy(target.position).addScaledVector(target.direction, -2)
   camera.lookAt(target.position)
 })
 this.view.paused = true            // pauses BOTH the render loop and input processing; false to resume
 this.view.audioListener            // THREE.AudioListener for THREE.Audio / PositionalAudio
-const pos = this.view.getScreenPosition(worldPos) // worldPos: Vector3 -> screen { x, y }, or nothing if off-screen (for UI overlays)
+const pos = this.view.getScreenPosition(worldPos) // THREE.Vector3 | null; optional target, viewportSize. Call in late update
 ```
+
+**Cameras (0.0.282).** `ViewController` separates base, source and presentation cameras. `getCamera()` returns the **rendered** camera, which may be a shake copy rebuilt after `lateTick`; use it for raycasts and projection. Drive `getBaseCamera()` for a camera you control. The engine resizes only the base camera on window resize, so an override camera must copy its lens. For shake, use `applyCameraShake` / `cameraShakeIntensity`: it moves only the rendered camera, so camera-relative movement stays steady. Medium confidence: the split is confirmed in the types, but no bug from writing to `getCamera()` was observed.
+
+**Pause, time and audio.** `paused` also mutes audio (listener gain = `muted || paused ? 0 : masterVolume`), so pause-menu sounds need their own route around the listener. While paused, `InputService` still delivers keyup but drops keydown (see `input.md`). Related API: `masterVolume`, `setMuted()`, `pausedChanged`, `mutedChanged`, and `timeScale` (scales update deltas and physics).
 
 For a React overlay example see `ui-and-react.md`.
 
@@ -83,14 +89,16 @@ const prefab = await this.assets.getPrefabByName('Enemy')           // Prefab
 ```
 
 Common documented methods:
-- Models: `getModelByAssetName`, `getModelByAssetId` → `LoadedMesh`; `getModelAtPath` (`.glb/.gltf/.fbx/.obj`) → `Object3D`; `getGltfAtPath` → full `GLTF`.
+- Models: `getModelByAssetName`, `getModelByAssetId` → `LoadedMesh`; `getModelAtPath` (`.glb/.gltf/.fbx/.obj`) → `Object3D` (`.scene` only, animations dropped); `getGltfAtPath` → full `GLTF`, needed for anything animated.
 - Textures: `getTextureByAssetName`, `getTextureByAssetId` → `THREE.Texture`.
 - Audio: `getAudioByAssetName`, `getAudioByAssetId`, `getAudioAtPath` → `AudioBuffer`.
 - Materials: `getMaterialByAssetId` → `THREE.Material`.
 - Prefabs: `getPrefabByName`, `getPrefabById` → `Prefab`.
 - Raw: `getAsset(id)` → `Asset`.
 
-Additional APIs declared by **`@hology/core@0.0.232`** (not all are covered by the public loading guide):
+**Path methods** (`getModelAtPath`, `getGltfAtPath`, `getAudioAtPath`) load and parse on **every** call; nothing is cached or cloned. Cache one promise per path and clone per instance, with `SkeletonUtils.clone` for skinned models. Return types come from `three-stdlib`, not `@types/three`; type them as `Awaited<ReturnType<AssetLoader['getGltfAtPath']>>`. Paths are relative to the site base; a leading slash (`/assets/...`) works.
+
+Additional APIs declared by **`@hology/core@0.0.282`** (not all are covered by the public loading guide):
 - Animation: `getAnimationClipByAssetId`, `getAnimationClipByAssetName` → `Promise<THREE.AnimationClip | null>`; `getAnimationClipForTargetByAssetId(id, targetRigId?)` resolves an animation reference for a target rig and returns the same type.
 - Sequences: `getSequenceById`, `getSequenceByName` → `Promise<Sequence>`.
 - Data assets: `getDataAssetById(id, type?)`, `getDataAssetByName(name, type?)` → `Promise<DataAssetRef<T> | null>`; `getDataAssetsByType(type)` → `Promise<T[]>`.
@@ -101,10 +109,11 @@ This is not an exhaustive or cross-version-stable inventory. Inspect the project
 
 ## PointerEvents — clicks / hovers on 3D objects
 
-Inject `PointerEvents` and subscribe by `Object3D`, actor instance, or actor type.
+Inject `PointerEvents`, **start it** (the engine never does; nothing fires otherwise), and subscribe by `Object3D`, actor instance, or actor type.
 
 ```typescript
 private pointer = inject(PointerEvents)
+this.pointer.start()
 this.pointer.onClickObject3D(this.world.scene).subscribe(e => console.log(e.intersection.point))
 this.pointer.onClickActorType(Coin).subscribe(({ actor: coin, intersection }) => {
   console.log(coin, intersection.point)
@@ -113,9 +122,15 @@ this.pointer.onClickActorType(Coin).subscribe(({ actor: coin, intersection }) =>
 
 Event kinds (each has `Object3D` / `Actor` / `ActorType` variants): `onClick*`, `onPointerDown*`, `onPointerUp*`, `onPointerEnter*`, `onPointerLeave*`, `onPointerMove*`. Object3D variants emit an event with `object` and `intersection`; actor and actor-type variants emit an event with `actor` and `intersection`, rather than passing the actor directly. The intersection normally includes `point`, `distance`, `face`, `object`, `uv`, and `uv2`. **Exception:** in current Hology runtime versions, pointer-leave events emit `intersection: null` because the pointer is no longer intersecting the target, despite the public docs and TypeScript declarations typing it as always present. Do not access intersection fields in a leave handler without a null check. When rendering DOM UI over the game, add the overlay CSS from `ui-and-react.md` so canvas clicks still reach PointerEvents.
 
+Limits: it raycasts the whole scene with three.js and uses only the **first** hit, so grass, canopies or any mesh in front swallow clicks on units. It listens on the game view directly, bypassing `InputService`, rebinding and pause blocking. A click registers on pointer-up when pointer-down hit the same object. For click targeting in cluttered scenes, raycast yourself against invisible pick volumes.
+
 ## Sound
 
 Sound uses Three.js `THREE.Audio` / `PositionalAudio` with `view.audioListener`; load buffers via `AssetLoader`. One `Audio` instance per simultaneously-playing sound; stop before replaying.
+
+- **Wait for a user gesture.** Hology never resumes the browser's audio context, which starts suspended; sounds played earlier all fire at once on resume. Headless Chromium ignores autoplay rules, so tests won't catch it. Loading and decoding work while suspended, so preloading at boot is fine.
+- **The listener rides on the view camera**, which can be far from the player (18–32 m in an isometric game). Positional sounds then need an inverse distance model with a reference distance beyond the farthest zoom.
+- Pausing mutes the listener (see ViewController above).
 
 ```typescript
 private view = inject(ViewController)

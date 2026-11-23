@@ -33,7 +33,9 @@ Hology already wraps most of what a game needs. **Do not hand-roll from scratch 
 | Shared/global state & systems | `@Service()` singletons |
 | Per-frame logic | actor `onUpdate`/`onLateUpdate` or `ViewController.onLateUpdate` (not your own loop) |
 
-Raw Three.js is still fair game for **content details** — geometries, materials, `THREE.Vector3` math, `THREE.Audio` config — but the game's structure, lifecycle and systems should go through Hology. Asset loading should also use Hology's pipeline by default; direct Three.js loaders are narrow exceptions, not a replacement for `AssetLoader`.
+Raw Three.js is still fair game for **content details** — geometries, plain built-in materials (colour, map, standard params), `THREE.Vector3` math, `THREE.Audio` config — but the game's structure, lifecycle and systems should go through Hology. Asset loading should also use Hology's pipeline by default; direct Three.js loaders are narrow exceptions, not a replacement for `AssetLoader`.
+
+Hology renders every three.js material through its own node pipeline: `onBeforeCompile` and other shader patches are silently ignored (use `NodeShaderMaterial`), and flipping `transparent` on a live material has no effect (assign a fresh material). → `references/shaders-and-vfx.md`
 
 ## Reference index — open the file for your task
 
@@ -48,7 +50,8 @@ Raw Three.js is still fair game for **content details** — geometries, material
 | Playing clips, `CharacterAnimationComponent`, animation state machines | `references/animation.md` |
 | NPC AI, navmeshes, `Navigation`, behavior trees, `CharacterMoveToNode` | `references/ai-and-navigation.md` |
 | Custom shaders / materials, particle & visual effects | `references/shaders-and-vfx.md` |
-| HUD/menus, `HologyScene`, React hooks, signals, overlay CSS | `references/ui-and-react.md` |
+| HUD/menus, `HologyScene` (incl. `rendering` prop / backend), React hooks, signals, overlay CSS | `references/ui-and-react.md` |
+| Engine-created lights and fog, tone mapping, shadows/CSM, render stats | `references/rendering.md` |
 
 Starter files to copy from: `templates/actor.ts`, `templates/component.ts`, `templates/service.ts`.
 
@@ -77,7 +80,7 @@ my-game/
 ├── tsconfig.json
 ├── package.json
 ├── src/
-│   ├── main.tsx                    # React bootstrap: renders <App />
+│   ├── main.tsx                    # React bootstrap: renders <App /> (see below)
 │   ├── App.tsx                     # renders <HologyScene> with HUD / menu DOM layered over the game
 │   ├── App.css
 │   ├── actors/
@@ -92,19 +95,34 @@ my-game/
 │   └── shaders/
 │       └── index.ts                # default-exported shader registry object
 └── public/
-    ├── data/                       # engine data written by the editor — don't hand-edit
+    ├── data/                       # engine data written by the editor — don't hand-edit when an editor is in use
     │   ├── asset/
     │   ├── scene/
     │   └── scene-blob/
     └── assets/                     # raw model/texture/audio source files
 ```
 
-- The entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Pass the default-exported actor and shader registry objects to `HologyScene`, plus the component registry when the project defines custom components. These registries make registered classes available when loading editor-authored content. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here.
+- The entry point is a `@Service()` class extending **`GameInstance`** (conventionally `src/services/game.ts`), referenced by the UI via `<HologyScene gameClass={Game} .../>`. Pass the default-exported actor and shader registry objects to `HologyScene`, plus the component registry when the project defines custom components. These registries make registered classes available when loading editor-authored content. Its `async onStart()` runs when the game starts — spawn actors and wire up controllers/cameras here. Physics, ray casts, navmesh generation and rendering only start after `onStart` **resolves**, so never await frames or simulation inside it (deadlock); schedule that work afterwards.
 - Add actors that need editor placement or loading from serialized scene/prefab content to the default registry object in `actors/index.ts`. An actor used only through direct runtime spawning with its class does not need to be in that registry. Likewise, add custom components and shaders to their default registry objects when serialized or editor-authored content needs them; adding a class to a registry is distinct from a normal TypeScript import or named re-export.
 - Prefer the editor's "Add new → Actor class" to scaffold new actors (it wires up the file + export for you).
 - Run in dev with `npm run dev` (Vite, serves on http://localhost:5173).
 - Reference: no single "project structure" doc page exists — the canonical example is https://github.com/hologyengine/starter-third-person-shooter (described at https://docs.hology.app/getting-started/starter-project-third-person-shooter.md).
 - This React organization matches the official starter, but it is not an engine requirement. Equivalent composition is valid as long as `HologyScene` receives the required game class and registries.
+- Without the editor, `public/data` can be hand-written (scenes, texture and VFX assets load in dev and production); the schemas are in `@hology/core/dist/scene/model.d.ts`. Avoid `importProjectAsset` from `@hology/vite-plugin`: it writes random UUIDs and an absolute `sourceFile`, and refuses to re-import. (Medium confidence; from one code-only project.)
+
+`main.tsx` has two hard requirements:
+
+```tsx
+// src/main.tsx
+import '@hology/core/scene/materializer' // MUST be the first import: an engine import cycle otherwise crashes the production bundle
+import { createRoot } from 'react-dom/client'
+import App from './App'
+
+createRoot(document.getElementById('root')!).render(<App />) // no <StrictMode> around HologyScene
+```
+
+- **Materializer first.** Without it the built bundle throws `Cannot access 'AssetResourceLoader' before initialization` on load. `npm run build` succeeds either way, so smoke-test `vite preview` of the production build, not only `vite dev`. Keep `@hology/webgpu-renderer` as a dependency even under WebGL; `@hology/core` imports it at build time.
+- **No StrictMode around `HologyScene`.** Remove the Vite template's `<StrictMode>`; wrap only overlay children if you want it (see `references/ui-and-react.md`).
 
 Registry index files default-export an object of classes; do not replace this with named re-exports:
 
@@ -157,6 +175,8 @@ class ExampleActor extends BaseActor {
 - **`onInit`**: `@Parameter` values are now set — do setup here. Don't call `inject`/`attach` (use `this.attach` for dynamic components). `onInit`s run concurrently — don't depend on another's completion.
 - **`onUpdate` order between actors is NOT guaranteed** — communicate via events/services. Camera follow → `onLateUpdate`.
 - **Removal**: unsubscribe; RxJS `.pipe(takeUntil(this.disposed))` auto-unsubscribes.
+- **First physics step**: a collider added this frame is invisible to ray casts and navmesh generation until the next `physics.afterStep`; line of sight sees everything until the first step.
+- **Delta cap**: physics (and `CharacterMovementComponent`) advances at most 0.04 s per frame, while `onUpdate` and the animation mixer get the full delta. Anything that must stay in step with movement (facing, stride, displacement logic) uses `Math.min(dt, 0.04)` or runs in `physics.beforeStep`/`afterStep`.
 
 ### `@Parameter()` — editor-editable per-instance fields
 ```typescript
@@ -208,9 +228,9 @@ this.world.directionalLight.intensity = 0.2
 ### `ViewController` — camera / loop / pause
 ```typescript
 private view = inject(ViewController)
-const camera = this.view.getCamera()
+const camera = this.view.getBaseCamera()   // drive this one; getCamera() is the rendered (possibly shaken) camera — see reference
 this.view.onLateUpdate(target).subscribe(() => { /* camera follow */ })
-this.view.paused = true   // pauses render + input
+this.view.paused = true   // pauses render + input, and mutes audio
 ```
 → `references/services-world-assets.md`
 
@@ -244,7 +264,7 @@ this.physics.onBeginOverlapWithActorType(this, Coin)
   .subscribe(coin => this.world.removeActor(coin))
 this.physics.updateActorTransform(this)   // after manually setting position/rotation on a body
 ```
-The public docs describe `static` / `kinematic` / `dynamic`; `@hology/core@0.0.232` also declares `kinematicVelocityBased`. → `references/physics.md`
+The public docs describe `static` / `kinematic` / `dynamic`; `@hology/core@0.0.282` also declares `kinematicVelocityBased`. → `references/physics.md`
 
 ## Do's and Don'ts
 
@@ -252,7 +272,7 @@ The public docs describe `static` / `kinematic` / `dynamic`; `@hology/core@0.0.2
 - Structure the game around actors, components and services; wire everything up in `GameInstance.onStart`.
 - Add actors needed for editor placement or serialized scene/prefab content to the default registry object in `src/actors/index.ts`; add custom components and shaders to their default registry objects when editor-authored or serialized content uses them.
 - Call `inject(...)`/`attach(...)` only in the constructor / field initializers; read `@Parameter` values only from `onInit` onward.
-- Pre-allocate vectors/objects outside `onUpdate`/`beforeStep` and mutate them; use `deltaTime` to stay frame-rate independent.
+- Pre-allocate vectors/objects outside `onUpdate`/`beforeStep` and mutate them; use `deltaTime` to stay frame-rate independent (mind the 0.04 s physics cap above).
 - Put camera-follow code in `onLateUpdate`; build behavior trees in `onBeginPlay`.
 - Unsubscribe on removal (`takeUntil(this.disposed)`).
 - Use `@Parameter()` to make actors designer-tweakable instead of hard-coding.
@@ -268,6 +288,21 @@ The public docs describe `static` / `kinematic` / `dynamic`; `@hology/core@0.0.2
 - Don't set an actor's transform for a physics body without `physics.updateActorTransform(this)`.
 - Don't expect `onBeginPlay`/`onEndPlay` to run in the editor.
 - Don't invent or rely on networking/multiplayer APIs: the public docs do not document networking, so first confirm the installed `@hology/core` types/version and project requirements.
+
+## Known pitfalls (`@hology/core@0.0.282`)
+
+Each of these caused a shipped bug or a blocked boot. Open the reference before touching the area:
+
+- **VFX created during play** recompiles the whole scene, nulls `mesh.material` and crashes Firefox. Pre-create pools at load. → `references/shaders-and-vfx.md`
+- **Navmesh**: a volume that fits in one tile never answers `findPath`; tiles build on a starved main thread without a registered worker. → `references/ai-and-navigation.md`
+- **Mouse-button `Keybind`s** fire only under pointer lock; cursor games need pointer listeners. → `references/input.md`
+- **`InputService` keys get stuck** after focus loss or a swallowed keyup, and held keys re-send presses. → `references/input.md`
+- **`AnimationStateMachine`** resets playback rate every frame, and `transitionsOnComplete` fires 0.5 s before the clip ends. → `references/animation.md`
+- **`CharacterMovementComponent`**: slope options are radians and named differently from the docs; characters pass through each other; autostep is off. → `references/physics.md`
+
+## Testing
+
+`@hology/core/gameplay` does not import under Vitest/Node (ESM directory-import error from `@hology/nebula`). Keep testable logic in engine-free modules, and test the engine layer in the browser (e.g. Playwright) against both dev and a production build. Headless Chromium hides some engine bugs (missing `KHR_parallel_shader_compile`, ignored autoplay rules), so also test in Firefox and on a real GPU.
 
 ## Import cheat sheet
 

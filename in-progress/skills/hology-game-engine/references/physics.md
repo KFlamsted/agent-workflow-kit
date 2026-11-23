@@ -16,9 +16,14 @@ onInit() {
     friction: 1,
     continousCollisionDetection: false,  // pricier; better for fast objects
     type: PhysicsBodyType.dynamic,
+    ignoreForNavMesh: false,             // true for non-scenery bodies, see below
   })
 }
 ```
+
+- **`ignoreForNavMesh: true`** for anything that isn't scenery (projectiles, corpses, pickups, temporary walls); otherwise the body cuts a hole in the navmesh. `CharacterMovementComponent` sets it for its capsule.
+- Hology warns above 128 colliders per body. Collision shapes support `.withOffset()`/`.withRotation()` for compound bodies (e.g. tree trunks).
+- New bodies join the world on the next physics step, and physics advances at most 0.04 s per frame (see SKILL.md lifecycle).
 
 ## Body types (`PhysicsBodyType`)
 
@@ -26,11 +31,13 @@ onInit() {
 - **kinematic** — moved explicitly through position or velocity; unaffected by forces and impulses but can affect dynamic bodies through collisions (moving platforms, elevators, the built-in character controller).
 - **dynamic** — fully simulated: responds to forces, impulses, gravity, collisions (balls, crates, props).
 
-Those are the three types presented in the public Hology physics documentation. **`@hology/core@0.0.232` version note:** that package's enum also declares **`kinematicVelocityBased`**. In that package version, `kinematic` maps to Rapier's position-based kinematic body and `kinematicVelocityBased` maps to Rapier's velocity-based kinematic body. Both are explicitly controlled kinematic bodies rather than force-driven bodies. Before using the fourth value in an existing project, inspect that project's installed `PhysicsBodyType` enum; it is absent from the public three-type model and may vary by package version.
+Those are the three types presented in the public Hology physics documentation. **`@hology/core@0.0.282` version note:** that package's enum also declares **`kinematicVelocityBased`**. In that package version, `kinematic` maps to Rapier's position-based kinematic body and `kinematicVelocityBased` maps to Rapier's velocity-based kinematic body. Both are explicitly controlled kinematic bodies rather than force-driven bodies. Before using the fourth value in an existing project, inspect that project's installed `PhysicsBodyType` enum; it is absent from the public three-type model and may vary by package version.
 
 ## Collision shapes
 
-Physics uses primitive shapes, separate from render geometry. Imported models auto-generate a fitting shape; supply one manually via `PhysicalShapeMesh` (see `actors-and-components.md`) or `addActor`:
+Physics uses primitive shapes, separate from render geometry. Editor-managed model assets auto-generate a fitting shape; supply one manually via `PhysicalShapeMesh` (see `actors-and-components.md`) or `addActor`. A model loaded by path and given to `MeshComponent` silently gets **no body** (medium confidence; observed in a code-only project): call `this.physics.addActor(this, [shape], { type: PhysicsBodyType.static })` in `onInit` after setting the transform.
+
+
 
 `BoxCollisionShape`, `PlaneCollisionShape`, `SphereCollisionShape`, `CylinderCollisionShape`, `CapsuleCollisionShape`, `ConvexPolyhedronCollisionShape`, `TrimeshCollisionShape`, `MeshCollisionShape`. Multiple shapes per actor compose a complex body.
 
@@ -87,7 +94,13 @@ this.physics.rayTest(new Vector3(0,0,0), new Vector3(0,0,100), result, { exclude
 if (result.hasHit) { /* result.hitPoint, result.hitNormal, result.distance, result.actor */ }
 ```
 
-Reuse one `RayTestResult` when casting frequently. `RayTestOptions`: `excludeActor`, `debugColor`, `debugLifetime`. Use for line-of-sight, shooting, ground checks, etc.
+Reuse one `RayTestResult` when casting frequently. Use for line-of-sight, shooting, ground checks, etc. `rayTestFromCamera` also exists.
+
+`RayTestOptions`: `excludeActor`, `excludeTriggers` (triggers are hit unless set), `collisionFilter`, `resolveActor`, `debug` (defaults on: draws every ray whenever physics debug is enabled), `debugColor`, `debugLifetime`.
+
+- Only **one** actor can be excluded; the character controller's collision group is private.
+- Rays are non-solid: a collider yields separate entry and exit hits, and a ray starting inside a collider hits its far side. To see past a hit, re-cast from just beyond it.
+- Only physics colliders are hit; visual-only meshes are invisible to `rayTest`.
 
 ## Trigger volumes
 
@@ -112,14 +125,21 @@ class CharacterActor extends BaseActor {
   })
   public thirdPersonCamera = attach(ThirdPersonCameraComponent /* { fixedBehind: false } */)
   public movement = attach(CharacterMovementComponent, {
-    autoStepMaxHeight: 0, colliderHeight: 2, colliderRadius: .5,
-    maxWalkingSlopeAngle: 70, maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
+    colliderHeight: 2, colliderRadius: .5,
+    maxSlopeClimbAngle: MathUtils.degToRad(70),   // radians
+    autoStepMaxHeight: 0,                         // off (default); set a height to climb steps
+    maxSpeed: 3, maxSpeedBackwards: 3, maxSpeedSprint: 7,
     // rotateToMovementDirection: true,  // face movement dir instead of camera dir
   })
 }
 ```
 
-`maxWalkingSlopeAngle` is the option shown in the public character-movement documentation. When targeting a specific Hology release, verify the installed `CharacterMovementComponent` option declarations if that name is unavailable.
+Options that differ from the public docs (0.0.282):
+- `maxWalkingSlopeAngle` does not exist. Use `maxSlopeClimbAngle` and `minSlopeSlideAngle`, both in **radians** (default `degToRad(70)`); a copied `70` means ~4011°.
+- `characterCollision` defaults to `false`: characters pass through each other (live or dead), so melee enemies stack on one spot. `characterCollision: true` makes capsules block each other.
+- Autostep is off unless `autoStepMaxHeight` is set; a 0.5 m stair riser blocks the character.
+- `horizontalSpeed` reflects input, not actual displacement: a character pushing into a wall still reports speed. For animation, measure position change in `physics.afterStep` (fires after the body's position is copied onto the actor). Medium confidence.
+- To reposition a character, the project used `movement.teleport(position, yaw)` rather than setting `position` + `updateActorTransform`. Low confidence: no failure of the other path was observed.
 
 Control it by binding its inputs (see `input.md`):
 - **directionInput** — `togglePositiveY/negativeY/positiveX/negativeX` for WASD movement.
@@ -146,5 +166,5 @@ import { MeshComponent, CharacterMovementComponent, ThirdPersonCameraComponent,
          TriggerVolumeComponent, TriggerVolume } from '@hology/core/gameplay/actors'
 import { PhysicalShapeMesh, BoxCollisionShape, SphereCollisionShape } from '@hology/core'
 import { takeUntil } from 'rxjs'
-import { Vector3 } from 'three'
+import { MathUtils, Vector3 } from 'three'
 ```

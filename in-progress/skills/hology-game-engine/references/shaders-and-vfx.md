@@ -15,6 +15,15 @@ const ballMaterial = new NodeShaderMaterial({
 })
 ```
 
+## How Hology treats three.js materials
+
+Hology renders every material through its own node pipeline and keeps one internal render material per three.js material **instance**:
+
+- Plain built-in materials (colour, map, standard params) work as-is.
+- `onBeforeCompile` and other shader patches are silently ignored, even a forced solid-red output. Use `NodeShaderMaterial` (with `standardMaterial(...)` for lit surfaces).
+- Changing `transparent` (or another flag that selects a program) on a live material, even with `needsUpdate`, leaves it in the old pass; a dissolving mesh drew a white hole. Assign a fresh material created with the flag set instead.
+- Each new material variant (e.g. the first transparent copy of a skinned or double-sided material) compiles on first use, freezing the game 110–300 ms. Prewarm variants at load when a hitch matters.
+
 ## TypeScript (node) shaders
 
 Custom shaders are defined in project source as either a TypeScript `NodeShader` class or a GLSL-backed `Shader` class. Import the class in the configured shader registry—conventionally `src/shaders/index.ts`—and add it to that file's default-exported object to make it available to Hology and the editor. When you need a reusable editor-authored material, create or configure a material asset in the editor and select the registered custom shader.
@@ -62,6 +71,11 @@ const mesh = new Mesh(new SphereGeometry(5, 30, 15), material)
 
 `NodeShaderMaterial` takes node graphs for slots like `color` (fragment) and `transform` (vertex). Common building blocks: `rgb`/`rgba`, `float`, math ops (`.multiply`, `.add`, `sin`, ...), `select(condition, a, b)`, `varyingAttributes` (e.g. `.position`), `timeUniforms`, `standardMaterial`. See the shader sub-pages (types, math-functions, attributes, varying, uniforms, textures, lighting) for the full node catalog.
 
+Stage rules (0.0.282):
+- `color` (fragment) graphs read `varyingTransformed.*` and `varyingAttributes.*`; `transformed.*` is vertex-stage only and yields an invalid program in `color`.
+- `fresnelEffect()` produced an invalid program. Build it by hand: `pow(oneMinus(saturate(dot(normalize(varyingTransformed.viewDir), normalize(varyingTransformed.normal)))), k)`.
+- Compile errors surface poorly. When a node material renders nothing, bisect the graph.
+
 ## Uniforms
 
 Declare a named uniform in the node graph, give it a default in `uniforms`, and update it at runtime on the material (https://docs.hology.app/shaders/typescript-shaders/uniforms.md):
@@ -85,29 +99,38 @@ Other helpers: `uniformBool/Vec2/Vec3/Vec4/Mat2/Mat3/Mat4/Sampler2d`. Prefer `ti
 
 ## VFX
 
-VFX (particle systems, custom shaders, materials, animation, post-processing combined) has dedicated editor tooling. Create effect assets in the editor, then place them in scenes or spawn them dynamically from gameplay code. Use this tooling rather than assembling particle systems by hand in Three.js. See the [VFX asset documentation](https://docs.hology.app/visual-effects/vfx-assets.md) and emitter/flipbook/lens-flare tutorials for authoring specifics.
+VFX (particle systems, custom shaders, materials, animation, post-processing combined) has dedicated editor tooling. Create effect assets in the editor, then place them in scenes or create them from gameplay code. Use this tooling rather than assembling particle systems by hand in Three.js. See the [VFX asset documentation](https://docs.hology.app/visual-effects/vfx-assets.md) and emitter/flipbook/lens-flare tutorials for authoring specifics.
 
-### Spawn by asset ID
+### Create effects at load, never during play
 
-Inject `VfxService` during construction or field initialization, create the effect from an async lifecycle method, then start it:
+The first time a VFX instance or pool copy is materialised during play, Hology recompiles the whole scene in the background (`Compile in progress, skipping render`). Meanwhile the loop keeps ticking and `applyDepthMaterial()` sets `mesh.material` to `null` on non-shadow-casting meshes. On Firefox the particle renderer then throws `mesh.material is null` and the screen goes black; Chromium survives, so Chromium-only e2e misses it. Game code reading `mesh.material` crashes too (e.g. `CSM.setupMaterial`).
+
+- Create every effect while loading via `VfxService.createInstancePool(...)` and reuse it.
+- Size each pool for peak concurrency (a queued cast starting while the last one fades). Each new radius or variant is a separate pool; pre-create those too.
+- Keep your own reference to materials instead of reading `mesh.material` per frame, and null-guard material traversals.
+- Test in Firefox.
+
+### Runtime API (0.0.282)
+
+`VfxActor` is an authoring/compatibility adapter; gameplay can own `VfxInstance`s directly. `VfxService` provides `createInstance`, `createInstanceFromAssetId` and `createInstancePool`; `VfxInstancePool` is exported from `@hology/core/gameplay`.
 
 ```typescript
-import { Actor, BaseActor, VfxService, inject } from '@hology/core/gameplay'
+// while loading, before play starts (arguments: see the installed VfxService declarations)
+this.pool = await this.vfx.createInstancePool(/* … */)
 
-@Actor()
-class ImpactEffect extends BaseActor {
-  private vfx = inject(VfxService)
-
-  async onInit() {
-    const vfxActor = await this.vfx.createFromAssetId('your-asset-id')
-    vfxActor.play()
-  }
-}
+// on a gameplay event
+const fx = this.pool.get()   // restarted but paused
+fx.play()
+// when done: this.pool.release(fx)
 ```
+
+- `get()` restarts an instance but leaves it paused; call `play()` after every `get()`.
+- `release()` returns it and kills its particles; `stop()` only stops emission; `dispose()` frees it.
+- Under the WebGL backend every effect logs a harmless "GPU VFX requires the WebGPU renderer … Falling back to CPU" warning.
 
 ### Select the effect in the editor
 
-Use a `VisualEffect` parameter when designers should select the asset per actor instance:
+Use a `VisualEffect` parameter when designers should select the asset per actor instance. In 0.0.282 `create(parent)` requires a parent:
 
 ```typescript
 import { Actor, BaseActor, Parameter, VisualEffect } from '@hology/core/gameplay'
@@ -116,14 +139,20 @@ import { Actor, BaseActor, Parameter, VisualEffect } from '@hology/core/gameplay
 class ConfigurableEffect extends BaseActor {
   @Parameter()
   private visualEffect: VisualEffect
+  private effect: Awaited<ReturnType<VisualEffect['create']>>
 
   async onInit() {
-    const vfxActor = await this.visualEffect.create()
-    vfxActor.play()
+    this.effect = await this.visualEffect.create(parent) // parent type: see the installed declaration
+  }
+
+  trigger() {
+    this.effect.play()
   }
 }
 ```
 
-The public documentation defines `VisualEffect.create()` with no argument. A project's installed declarations may instead require a parent argument; when targeting such a version, follow those declarations.
+`create(parent)` materialises a new effect, so run it while loading (an actor placed in the scene or spawned before play), never from a gameplay event. The returned VFX actor provides `play()`, `stop()` and a writable `timescale` speed multiplier.
 
-The returned VFX actor provides the documented `play()` and `stop()` controls, plus a writable `timescale` speed multiplier (for example, `vfxActor.timescale = 0.5`). The parameter workflow preserves editor configuration; the service workflow is convenient for runtime spawning by known asset ID.
+### VFX without the editor
+
+A VFX asset is plain data: `{ id, name, type: 'vfx', vfx: { emitters } }`. Pass it to `new VisualEffect(asset)` or `VfxService.createFromAsset(asset)`, or write it as JSON under `public/data/asset/` and load it by id. `EmitterDataConstructor()` comes from `@hology/core/effects/vfx/vfx-asset`; param values are `{ type: SerializedParamType, value }`; `output.texture` is a texture **asset id**.

@@ -6,10 +6,11 @@ Hology runs in the browser, so the UI is a normal web app layered over the game 
 
 ## HologyScene
 
-Mount the engine with the `HologyScene` component and pass the config (the defaults below match the React project template).
+Mount the engine with the `HologyScene` component and pass the config (the props below match the React project template, plus `rendering`).
 
 ```tsx
 import { HologyScene } from '@hology/react'   // provided by the React template
+import { StrictMode } from 'react'
 import Game from './services/game'
 import actors from './actors'
 import components from './components'
@@ -18,19 +19,25 @@ import shaders from './shaders'
 function App() {
   return (
     <HologyScene gameClass={Game} sceneName="demo" dataDir="data"
-      shaders={shaders} actors={actors} components={components}>
+      shaders={shaders} actors={actors} components={components}
+      rendering={{ backend: 'webgl' }}>
       {/* DOM overlay UI goes here, rendered on top of the game */}
-      <PlayerHealthDisplay />
+      <StrictMode>
+        <PlayerHealthDisplay />
+      </StrictMode>
     </HologyScene>
   )
 }
 ```
+
+**Never wrap `HologyScene` in `React.StrictMode`** (remove the Vite template's wrapper in `main.tsx`; wrapping overlay children, as above, is fine). StrictMode's dev double mount starts two Hology runtimes sharing one `WebGLRenderer` (`window.renderer`); the first one's shutdown disposes it mid-`compileAsync`, and with `KHR_parallel_shader_compile` (every real GPU) boot dies with `Cannot read properties of undefined (reading 'isReady')` in `checkMaterialsReady`. Headless SwiftShader lacks the extension, so e2e stays green; fake the extension in e2e to catch it.
 
 - **gameClass** — your `GameInstance` subclass.
 - **sceneName** — scene to load (e.g. `'demo'`).
 - **dataDir** — path to game data (`'data'`).
 - **xr** — `xr={{ enabled: true }}` enables VR (https://docs.hology.app/user-interfaces/vr.md).
 - **shaders / actors / components** — the objects re-exported from their `src/*/index.ts` registries. Pass `components` when the project defines serialized custom actor components; projects without custom components do not need a non-empty component registry.
+- **rendering** — `RenderingConfig` from `@hology/core/gameplay` (not `RenderingViewOptions`, which fails with TS2322): `backend`, shadows, bloom, pixel ratio, MSAA, FPS cap. The default backend is **WebGPU**; pass `{ backend: 'webgl' }` to force WebGL (VFX then falls back to CPU, see `shaders-and-vfx.md`). The renderer is built once on mount, so later prop changes are ignored.
 
 ## Required overlay CSS
 
@@ -39,20 +46,22 @@ So pointer events reach the canvas (for the `PointerEvents` service) while still
 ```css
 .hology-overlay { pointer-events: none }
 .hology-overlay * { pointer-events: auto }
+.hology-overlay .hud, .hology-overlay .screen-fade { pointer-events: none } /* full-screen wrappers */
 ```
+
+`.hology-overlay *` outranks a plain class selector, so a full-screen or layout wrapper (HUD root, fade layer) with `.screen-fade { pointer-events: none }` still swallows every canvas click. Give such wrappers `none` with a selector at least as specific as `.hology-overlay .x`; only interactive panels get `auto`.
 
 ## Hooks (inside `HologyScene`)
 
 - **`useService(ServiceClass)`** — get a gameplay service instance (read global state to display).
 - **`useActorQuery(...)`** — query actors in the world; re-renders when matching actors are added/removed.
 - **`useRenderUpdate(fn)`** — run `fn` before every frame.
-- **`useRenderLaterUpdate(fn)`** / **`useRenderLateUpdate(fn)`** — like above but after other update functions.
-
-The docs use both spellings: the hook list in `using-react` says `useRenderLaterUpdate`, while the `getScreenPosition` overlay tutorial imports `useRenderLateUpdate` from `@hology/react`. Check the installed `@hology/react` exports before using either.
+- **`useRenderLateUpdate(fn)`** — like above but after other update functions. (The docs' `useRenderLaterUpdate` spelling does not exist in `@hology/react` 0.0.26.)
+- **`useObservable(observable)`** — subscribe a component to an RxJS observable.
 
 ## Overlaying UI at a world position
 
-`ViewController.getScreenPosition(worldPos)` returns screen `{ x, y }`, or nothing when the position is off-screen. Update the element each frame in the late-update hook (spelling per the note above; the tutorial uses `useRenderLateUpdate`):
+`ViewController.getScreenPosition(worldPos, target?, viewportSize?)` returns a `THREE.Vector3 | null` (screen `x`, `y`; `null` off-screen). Project in the late-update hook: from `onUpdate` timing the marker drifts about 1 px behind the camera.
 
 ```tsx
 import { ViewController } from '@hology/core/gameplay'
@@ -80,7 +89,7 @@ function WorldMarker({ position }: { position: Vector3 }) {
 
 ## Reacting to state changes with signals
 
-React only re-renders when it knows state changed. The React template installs `@preact/signals-react`; expose gameplay state as signals and read `.value` in components.
+React only re-renders when it knows state changed. The React template installs `@preact/signals-react` and its Babel transform; nothing in `@hology/*` pulls them in, so check `package.json` and install them if missing. expose gameplay state as signals and read `.value` in components.
 
 ```typescript
 // service

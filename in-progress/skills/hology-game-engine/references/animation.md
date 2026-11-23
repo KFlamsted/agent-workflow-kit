@@ -41,11 +41,13 @@ async onInit() {
 }
 ```
 
-`play()` accepts optional options: `loop` and `priority` (a higher priority overrides lower-priority animation, including a state machine), and `inPlace` for root motion (see below).
+`play()` accepts optional options: `loop`, `fadeTime`, `priority` (a higher priority overrides lower-priority animation, including a state machine), and `inPlace` for root motion (see below). `getFullBodyAction()` is typed non-null but returns `null` until the first `play()`.
 
 It also supports masking animations to only affect the upper or lower body (e.g. aim/shoot on top while legs run).
 
 ## Animation state machines
+
+Prefer driving `CharacterAnimationComponent.play()` from your own state logic for one-shots shorter than about 1 s or speed-matched locomotion: the built-in machine calls `play()` every frame, resetting playback rate (`timeScale`), so a run clip can't be stride-matched through it, and completion transitions fire early (below).
 
 Model animation as a directed graph of `AnimationState`s connected by predicate-guarded transitions. Drive predicates from gameplay state (e.g. `ActionInput.activated`, movement direction, `falling`).
 
@@ -62,7 +64,7 @@ Transition methods on a state:
 - **`transitionsBetween(state, predicate)`** — bi-directional (back when predicate goes false).
 - **`transitionsOnComplete(state, predicate?)`** — for clips that naturally end (jump → fall). The public documentation presents the optional predicate as useful for selecting among multiple possible completion destinations.
 
-  **`@hology/core@0.0.232` version note:** in this runtime, a true predicate can trigger the transition early, but after the clip reaches its completion threshold the transition can succeed regardless of that predicate. Predicates therefore do not reliably gate or select completion destinations in this version. Inspect and test the installed package before designing multiple completion transitions around predicate selection.
+  **`@hology/core@0.0.282`:** the transition fires when the predicate is true **or** at `clip.duration − 0.5 s`, whichever comes first; the predicate cannot block it. A 0.67 s hit clip is cut after 0.17 s. Predicates therefore cannot select among completion destinations.
 
 ### Child states
 

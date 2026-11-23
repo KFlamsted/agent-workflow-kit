@@ -4,7 +4,7 @@ Covers the `Navigation` service + navmeshes and the behavior-tree system. Read t
 
 ## Navigation & navmeshes
 
-Add a **NavMesh** actor to the scene (asset browser → Actors → NavMesh). This actor is the bounding volume used for generation: position and scale its box to cover the intended walkable landscape and relevant obstacles. Once configured, the navmesh generates automatically; then inject the `Navigation` service to query it. See the [character AI tutorial](https://docs.hology.app/tutorials/character-ai-behavior.md) for the editor setup details.
+Add a **NavMesh** actor to the scene (asset browser → Actors → NavMesh). This actor is the bounding volume used for generation: position and scale its box to cover the intended walkable landscape and relevant obstacles. Once configured, the navmesh generates automatically, subject to the size, worker and timing rules in *Navmesh in practice* below; then inject the `Navigation` service to query it. See the [character AI tutorial](https://docs.hology.app/tutorials/character-ai-behavior.md) for the editor setup details.
 
 ```typescript
 private navigation = inject(Navigation)
@@ -23,6 +23,19 @@ Key methods:
 - **`findPath(from, to)`** → `{ success: boolean, path: Vector3[] }` — `path[0]` is normally the start, and `path[1]` is the next waypoint only when at least two points are returned.
 - **`findClosestPoint(point)`** → `Vector3 | null` — nearest point on the navmesh (may be `null` while the mesh is still generating — handle it).
 
+### Navmesh in practice (0.0.282)
+
+1. **Keep each side of the volume ≥ 70 m.** Tile size is `min(400, max(50, ceil(min(w, d) / 2)))` m with a hard-coded `maxTiles`; a volume that fits in one tile never answers `findPath`/`findClosestPoint` (while `findRandomPoint` still works). 40×40 m failed, 70×70 m works. Applies to editor-placed volumes too.
+2. **Register the task worker.** Call `registerWorker` with a worker module that calls `initWorker()` (both from `@hology/core/worker`). Without it, tiles build on the main thread in `requestIdleCallback` with no timeout; a busy page starved it to 43 s, 151 s or never. With the worker: 2.9 s under 4× CPU throttling. If Vite then answers with a one-time "Outdated Optimize Dep" 504, restart the dev server.
+3. **Spawn the navmesh after the first physics step.** Colliders join the world on the next step; a navmesh generated earlier misses every prop until the engine's 4 s refresh. Wait for one `physics.afterStep`.
+4. **Gate AI on readiness.** `findPath` fails silently (log only) until generation finishes, typically 0.3–0.8 s after spawn. Poll `findPath` until it succeeds before starting AI.
+5. **Exclude non-scenery bodies** with `ignoreForNavMesh: true` on `addActor` (see `physics.md`).
+6. **Paths float** 0.2–0.6 m above the collider top; move in XZ.
+7. **Step height.** The default `walkableClimb` (≈0.3 m effective) dropped a 31° ramp despite the 45° slope limit; raise it (0.4 m worked).
+8. **Only the most recently added navmesh is used.** Debug drawing is on by default.
+
+**Without the editor**, the `NavMesh` actor class is not exported and registry ids are minified. Find it in `getRegisteredActorClasses()` via `'initDynamic' in cls.prototype`, spawn it with `world.spawnActor`, then set `actor.object.position/scale` to the volume (bounds are re-checked every 2 s). Runtime-spawned static colliders, including trimesh terrain, are included.
+
 ## Behavior trees
 
 A behavior tree is a hierarchy of `Node`s that each return a `NodeState`: `SUCCESS`, `FAILURE`, or `RUNNING`. Build the tree in `onBeginPlay` (gameplay only, not the editor) and `tick(deltaTime)` the root every frame.
@@ -34,9 +47,7 @@ onUpdate(dt: number) { this.behaviorTree?.tick(dt) }
 
 ### Built-in nodes
 
-**Composite** (manage children): `SequenceNode` (runs children in order, stops on the first failure, and conceptually succeeds after all children succeed), `SelectorNode` (first success wins, tries next on failure), `ParallelSequenceNode`, `ParallelSelectorNode`, `WeightedRandomSelectorNode`.
-
-> **Version note (`@hology/core@0.0.232`):** `SequenceNode.tick()` returns `SUCCESS` while retaining its position when the active child returns `RUNNING`. This differs from conventional behavior and the public documentation. If a sequence is nested under a node that relies on propagated `RUNNING` state, inspect and test the behavior of the installed package.
+**Composite** (manage children): `SequenceNode` (runs children in order, stops on the first failure, propagates `RUNNING`, and succeeds after all children succeed), `SelectorNode` (first success wins, tries next on failure), `ParallelSequenceNode`, `ParallelSelectorNode`, `WeightedRandomSelectorNode`.
 
 **Decorator** (wrap one child): `InverterNode`, `RepeatNode` (loop forever — typical root), `RepeatTimesNode`, `RepeatUntilNode`, `RepeatUntilFailNode`, `GuardNode`, `CooldownNode`, `TimerNode`, `DelayNode`, `ThrottleNode`.
 
