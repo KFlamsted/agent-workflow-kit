@@ -25,7 +25,7 @@ Most GDScript online is Godot 3, so models drift into it. Never write the left s
 | `connect("hit", self, "_on_hit")` | `hit.connect(_on_hit)` |
 | `emit_signal("hit")` | `hit.emit()` |
 | `scene.instance()` | `scene.instantiate()` |
-| `TileMap` layers | `TileMapLayer` nodes (+) |
+| `TileMap` layers | `TileMapLayer` nodes |
 
 ## Script layout
 Order: `class_name`/`extends` → `signal` (past tense) → `enum`/`const` → `@export` (with `@export_group`, `@export_range`) → public vars → `_private` vars → `@onready` refs → built-ins → public methods → `_private` methods.
@@ -49,7 +49,7 @@ func _physics_process(_delta: float) -> void:
 Type vars, params and returns (`-> void`); use `:=` when the type is obvious. Use typed arrays (`Array[Node]`), typed helpers (`maxf`, `mini`, `clampi`) and `StringName` for identifiers. Typing catches errors at parse time and runs faster.
 
 ## Communication between nodes
-- Call down, signal up: parents call children's methods; children emit signals. (+) Keeps scenes reusable.
+- Call down, signal up: parents call children's methods; children emit signals. Keeps scenes reusable.
 - No hard references between sibling scenes. Use signals, or an `@export var target: SomeType` assigned in the Inspector.
 - An EventBus Autoload containing only `signal` lines is for events many unrelated systems need. Don't route everything through it.
 - Emit change signals from property setters so every write is covered:
@@ -66,13 +66,13 @@ var current_health: int:
 ## Autoloads
 - Only for truly global systems: GameManager, EventBus, SceneManager, SaveManager, audio.
 - Managers that must run while the tree is paused need `process_mode = PROCESS_MODE_ALWAYS`.
-- Don't make Autoloads depend on each other in `_ready()`; load order is fragile. (+)
+- Don't make Autoloads depend on each other in `_ready()`; load order is fragile.
 
 ## Resources (data)
 - Put static data in `class_name X extends Resource` with `@export` fields. Keep them data-only.
 - Resources are shared by every node using them. Copy before mutating at runtime: `stats = base_stats.duplicate()`.
-- `duplicate()` is shallow; use `duplicate(true)` for nested sub-resources you will modify. (+)
-- Don't read exported values in a Resource's `_init()`; they aren't applied yet when loading `.tres`. Initialize runtime state in a separate method. (+)
+- `duplicate()` is shallow; use `duplicate(true)` for nested sub-resources you will modify.
+- Don't read exported values in a Resource's `_init()`; they aren't applied yet when loading `.tres`. Initialize runtime state in a separate method.
 
 ## State machines
 Node-based: a `StateMachine` node with `State` children. Disable inactive states via `process_mode`; the machine forwards `_process`, `_physics_process` and `_unhandled_input` to the active state. For simple game-wide state, `enum` + `match` is enough.
@@ -126,12 +126,12 @@ while true:
 Swap: `queue_free()` the old scene, `add_child` the new one to `get_tree().root`, set `get_tree().current_scene`. Await transitions around the swap.
 
 ## Saving
-- Save under `user://`; `res://` is read-only in exported games. (+)
+- Save under `user://`; `res://` is read-only in exported games.
 - Save plain data via JSON, never Node references.
 - Check `FileAccess.open(...)` for `null` and report via `FileAccess.get_open_error()`.
-- `JSON.parse_string` returns `null` on failure and all numbers as `float`; validate the type and cast to `int`. (+)
+- `JSON.parse_string` returns `null` on failure and all numbers as `float`; validate the type and cast to `int`.
 - Give saveable nodes an explicit stable ID; `get_path()` breaks when the tree changes.
-- `open_encrypted_with_pass` with a key in source only deters casual editing. (+)
+- `open_encrypted_with_pass` with a key in source only deters casual editing.
 
 ```gdscript
 var data = JSON.parse_string(file.get_as_text())
@@ -150,5 +150,5 @@ var level := int(data.get("level", 1))
 
 ## Errors and await
 - `push_error` for invalid state, `push_warning` for recoverable issues. Never fail silently.
-- After `await`, the node or its target may be freed. Check `is_instance_valid(node)` before using it. (+)
-- Prefer `get_tree().create_timer(t).timeout` for one-off delays; use a `Timer` node for repeating or cancellable ones. (+)
+- After `await`, the node or its target may be freed. Check `is_instance_valid(node)` before using it.
+- Prefer `get_tree().create_timer(t).timeout` for one-off delays; use a `Timer` node for repeating or cancellable ones.
