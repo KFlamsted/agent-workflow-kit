@@ -5,6 +5,8 @@ description: Conventions, patterns and pitfalls for writing Godot 4 GDScript. Us
 
 # Godot 4 GDScript Conventions
 
+This document contains rules for writing correct, idiomatic Godot 4 GDScript: workflow, Godot 3 syntax to avoid, script layout, and common pitfalls.
+
 ## Workflow for every script change
 1. Check the Godot version in `project.godot` (`config/features`). Write Godot 4 syntax only.
 2. Read the scripts and scenes the change touches before editing. Existing project conventions win over these rules.
