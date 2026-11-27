@@ -1,7 +1,7 @@
 ---
 name: clean-solid-review-loop
-description: Runs a Clean/SOLID quality review/fix loop until a 10/10 score, with a required behavior code-reviewer after each implementer. Scope may be a diff/change or the full repository. Human-stopped or stall also ends the loop.
-disable-model-invocation: true
+description: Use when the user asks you to do a "clean code review loop". Runs a Clean/SOLID quality review/fix loop until a 10/10 score, with a required behavior code-reviewer after each implementer.
+disable-model-invocation: false
 ---
 
 # Clean Solid Review Loop
