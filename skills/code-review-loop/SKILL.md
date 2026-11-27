@@ -1,7 +1,7 @@
 ---
 name: code-review-loop
-description: Runs a reviewer-first code review/fix loop by delegating review and implementation to dedicated subagents.
-disable-model-invocation: true
+description: Use when the user asks you to do a "code review loop". Runs a reviewer-first code review/fix loop by delegating review and implementation to dedicated subagents.
+disable-model-invocation: false
 ---
 
 # Code Review Loop
