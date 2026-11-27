@@ -278,7 +278,7 @@ test('copy-agents injects matching prompts into copied harness configurations', 
     'utf8'
   );
   assert.match(opencodeCleanSolidSource, /mode: subagent/);
-  assert.match(opencodeCleanSolidSource, /openai\/gpt-6\.1-sol/);
+  assert.match(opencodeCleanSolidSource, /openrouter\/openai\/gpt-6\.2-sol/);
   assert.match(opencodeCleanSolidSource, /variant: medium/);
   assert.match(opencodeCleanSolidSource, /edit: deny/);
   assert.match(opencodeCleanSolidSource, /task: deny/);
