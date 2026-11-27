@@ -1,8 +1,8 @@
 ---
 description: Clarifies remaining technical decisions and writes an INVEST-sized implementation plan with progress checkboxes. Use for the implementation-planning phase of end-to-end-orchestrator-detailed.
 mode: subagent
-model: openai/gpt-6.1-sol
-variant: high
+model: openrouter/google/gemini-4-neon
+variant: medium
 permission:
   read: allow
   glob: allow

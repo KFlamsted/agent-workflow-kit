@@ -1,8 +1,8 @@
 ---
 description: Clarifies architectural choices or records Status: SKIPPED when none are needed, then writes architectural.md. Use for the architecture phase of end-to-end-orchestrator-detailed.
 mode: subagent
-model: openai/gpt-6.1-sol
-variant: high
+model: openrouter/google/gemini-4-neon
+variant: medium
 permission:
   read: allow
   glob: allow

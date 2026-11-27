@@ -1,8 +1,8 @@
 ---
 description: Analyzes coding tasks and creates actionable implementation plans with clear steps, affected files, and validation guidance.
 mode: subagent
-model: openai/gpt-6.1-sol
-variant: high
+model: openrouter/google/gemini-4-neon
+variant: medium
 permission:
   read: allow
   glob: allow

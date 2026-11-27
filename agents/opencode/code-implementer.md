@@ -1,7 +1,7 @@
 ---
 description: Implements an assigned scope or reviewer-requested fixes as one step in an implementation loop. Use for a focused implementation round.
 mode: subagent
-model: openai/gpt-6.1-sol
+model: openrouter/google/gemini-4-neon
 variant: medium
 permission:
   read: allow

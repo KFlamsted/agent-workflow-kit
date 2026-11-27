@@ -1,7 +1,7 @@
 ---
 description: Reviews loop-produced implementation work and either approves it or returns required fixes. Use after an implementation round.
 mode: subagent
-model: openai/gpt-6.1-sol
+model: openrouter/openai/gpt-6.2-sol
 variant: medium
 permission:
   read: allow
